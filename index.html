@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Circle of Fifths Player</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background:
+        repeating-linear-gradient(90deg, #c89a62 0px, #c89a62 42px, #c4925a 42px, #c4925a 84px),
+        linear-gradient(180deg, #d1a46d 0%, #ba8450 100%);
+    }
+    .wrap { min-height: 100vh; padding: 8px; }
+    .panel {
+      width: min(100vw - 16px, 460px);
+      margin: 0 auto;
+      background: rgba(255,255,255,0.9);
+      border-radius: 22px;
+      padding: 8px;
+    }
+    svg { width: 100%; height: auto; display: block; }
+    .label { pointer-events: none; user-select: none; }
+    .clickable { cursor: pointer; }
+    .controls { display: flex; gap: 8px; align-items: center; margin: 10px 4px 0 4px; }
+    .controls + .controls { margin-top: 8px; }
+    .controls select, .controls button {
+      font: inherit; font-size: 16px; border-radius: 10px; border: 1px solid #cbd5e1;
+      background: white; padding: 10px 12px;
+    }
+    .controls select { flex: 1; min-width: 0; }
+    .controls button { min-width: 78px; font-weight: 700; cursor: pointer; }
+    .controls label {
+      display: inline-flex; align-items: center; gap: 6px; font-size: 15px;
+      background: white; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 12px;
+      color: #111827;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="panel">
+      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle of fifths player"></svg>
+      <div class="controls">
+        <select id="progressionSelect">
+          <option value="I-V-vi-IV|4,4,4,4">I–V–vi–IV</option>
+          <option value="vi-IV-I-V|4,4,4,4">vi–IV–I–V</option>
+          <option value="I-IV-V|4,4,4">I–IV–V</option>
+          <option value="I-vi-IV-V|4,4,4,4">I–vi–IV–V</option>
+          <option value="ii-V-I|4,4,4">ii–V–I</option>
+          <option value="I-IV-vi-V|4,4,4,4">I–IV–vi–V</option>
+          <option value="I-V-IV-V|4,4,4,4">I–V–IV–V</option>
+          <option value="vi-V-IV-V|4,4,4,4">vi–V–IV–V</option>
+          <option value="I-vi-ii-V|4,4,4,4">I–vi–ii–V</option>
+          <option value="I-bVII-IV-I|4,4,4,4">I–♭VII–IV–I</option>
+        </select>
+        <button id="playProgressionBtn">Play</button>
+      </div>
+      <div class="controls">
+        <select id="rhythmSelect">
+          <option value="groove1|1,0.75,0.25,1">Pop groove (push)</option>
+          <option value="groove2|0.75,0.25,0.75,0.25,1">Syncopated pop</option>
+          <option value="groove3|1,0.5,0.5,1">Anticipation groove</option>
+          <option value="groove4|0.5,1,0.5,1">Offbeat drive</option>
+          <option value="groove5|0.75,0.75,0.5,1">Tresillo feel</option>
+          <option value="groove6|1.5,0.5,1,1">Bossa-style groove</option>
+          <option value="groove7|1,0.5,0.5,0.5,0.5">Funk subdivision</option>
+          <option value="quarter|1,1,1,1">Simple (reference)</option>
+        </select>
+      </div>
+      <div class="controls">
+        <label><input type="checkbox" id="metronomeToggle" /> Metronome</label>
+        <select id="tempoSelect">
+          <option value="60">60 BPM</option>
+          <option value="72">72 BPM</option>
+          <option value="80">80 BPM</option>
+          <option value="90">90 BPM</option>
+          <option value="100" selected>100 BPM</option>
+          <option value="110">110 BPM</option>
+          <option value="120">120 BPM</option>
+          <option value="132">132 BPM</option>
+          <option value="144">144 BPM</option>
+          <option value="160">160 BPM</option>
+        </select>
+      </div>
+
+      <div class="controls">
+        <label><input type="checkbox" id="bassToggle" checked /> Bass</label>
+        <label><input type="checkbox" id="chordToggle" checked /> Chords</label>
+        <label><input type="checkbox" id="percussionToggle" /> Percussion</label>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var MAJOR_KEYS = ["C","G","D","A","E","B","F#","Db","Ab","Eb","Bb","F"];
+    var REL_MINOR = { C:"Am", G:"Em", D:"Bm", A:"F#m", E:"C#m", B:"G#m", "F#":"D#m", Db:"Bbm", Ab:"Fm", Eb:"Cm", Bb:"Gm", F:"Dm" };
+    var REL_MAJOR = { Am:"C", Em:"G", Bm:"D", "F#m":"A", "C#m":"E", "G#m":"B", "D#m":"F#", Bbm:"Db", Fm:"Ab", Cm:"Eb", Gm:"Bb", Dm:"F" };
+    var KEY_NOTES = {
+      C:["C","D","E","F","G","A","B"], G:["G","A","B","C","D","E","F#"], D:["D","E","F#","G","A","B","C#"],
+      A:["A","B","C#","D","E","F#","G#"], E:["E","F#","G#","A","B","C#","D#"], B:["B","C#","D#","E","F#","G#","A#"],
+      "F#":["F#","G#","A#","B","C#","D#","E#"], Db:["Db","Eb","F","Gb","Ab","Bb","C"], Ab:["Ab","Bb","C","Db","Eb","F","G"],
+      Eb:["Eb","F","G","Ab","Bb","C","D"], Bb:["Bb","C","D","Eb","F","G","A"], F:["F","G","A","Bb","C","D","E"]
+    };
+
+    var audioCtx = null, masterGain = null;
+    var activeOscillators = [], progressionOscillators = [];
+    var arpIntervalId = null, progressionTimeouts = [], metronomeTimeouts = [], percussionTimeouts = [];
+    var progressionPlaying = false;
+    var selectedMajor = "C";
+    var activeRoman = null, activeChordKey = null, activeChordRing = null;
+    var currentBeatSeconds = 0.6;
+
+    function enhMajor(note) { if (note === "Gb") return "F#"; if (note === "C#") return "Db"; return note; }
+    function enhMinor(note) { if (note === "A#m") return "Bbm"; if (note === "Ebm") return "D#m"; return note; }
+    function displayMinorFromNote(note) { return enhMinor(note + "m"); }
+    function parseKey(value) {
+      var raw = (value || "C").replace(/♯/g, "#").replace(/♭/g, "b").trim();
+      var normalized = raw ? raw.charAt(0).toUpperCase() + raw.slice(1) : "C";
+      if (MAJOR_KEYS.indexOf(normalized) !== -1) return normalized;
+      if (normalized.slice(-1) !== "m") normalized += "m";
+      return REL_MAJOR[normalized] || "C";
+    }
+    function getAudioCtx() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        masterGain = audioCtx.createGain();
+        masterGain.gain.value = 0.9;
+        masterGain.connect(audioCtx.destination);
+      }
+      return audioCtx;
+    }
+    function ensureAudioReady(callback) {
+      var ctx = getAudioCtx();
+      try {
+        if (ctx.state === "suspended") {
+          var resumed = ctx.resume();
+          if (resumed && typeof resumed.then === "function") { resumed.then(function(){ if (callback) callback(ctx); }); return; }
+        }
+      } catch (e) {}
+      if (callback) callback(ctx);
+    }
+    function midiToFreq(midi) { return 440 * Math.pow(2, (midi - 69) / 12); }
+    function text(svg, x, y, str, opts) {
+      opts = opts || {};
+      var el = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      el.setAttribute("x", x); el.setAttribute("y", y); el.setAttribute("text-anchor", opts.anchor || "middle");
+      el.setAttribute("font-size", opts.size || 16); el.setAttribute("font-weight", opts.weight || 700); el.setAttribute("fill", opts.fill || "#111827");
+      el.setAttribute("class", "label"); el.textContent = str; svg.appendChild(el); return el;
+    }
+    function circle(svg, cx, cy, r, fill, stroke, sw) {
+      var el = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      el.setAttribute("cx", cx); el.setAttribute("cy", cy); el.setAttribute("r", r); el.setAttribute("fill", fill);
+      el.setAttribute("stroke", stroke || "none"); el.setAttribute("stroke-width", sw || 0); svg.appendChild(el); return el;
+    }
+    function wedgePath(cx, cy, rInner, rOuter, startAngle, endAngle) {
+      var x1o = cx + Math.cos(startAngle) * rOuter, y1o = cy + Math.sin(startAngle) * rOuter;
+      var x2o = cx + Math.cos(endAngle) * rOuter, y2o = cy + Math.sin(endAngle) * rOuter;
+      var x2i = cx + Math.cos(endAngle) * rInner, y2i = cy + Math.sin(endAngle) * rInner;
+      var x1i = cx + Math.cos(startAngle) * rInner, y1i = cy + Math.sin(startAngle) * rInner;
+      return "M " + x1o + " " + y1o + " A " + rOuter + " " + rOuter + " 0 0 1 " + x2o + " " + y2o + " L " + x2i + " " + y2i + " A " + rInner + " " + rInner + " 0 0 0 " + x1i + " " + y1i + " Z";
+    }
+    function wedge(svg, cx, cy, rInner, rOuter, startAngle, endAngle, fill, stroke, sw) {
+      var el = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      el.setAttribute("d", wedgePath(cx, cy, rInner, rOuter, startAngle, endAngle));
+      el.setAttribute("fill", fill); el.setAttribute("stroke", stroke || "none"); el.setAttribute("stroke-width", sw || 0); el.setAttribute("class", "clickable");
+      svg.appendChild(el); return el;
+    }
+
+    function playSingleTone(ctx, midi, duration, targetArray, startWhen, role) {
+      var now = startWhen || ctx.currentTime;
+      var noteRole = role || "arp";
+
+      var fundamental = ctx.createOscillator(), overtone1 = ctx.createOscillator(), overtone2 = ctx.createOscillator();
+      var gain = ctx.createGain(), filter = ctx.createBiquadFilter();
+      var pickFilter = ctx.createBiquadFilter(), pickGain = ctx.createGain();
+      var mix1 = ctx.createGain(), mix2 = ctx.createGain(), mix3 = ctx.createGain();
+
+      fundamental.type = "triangle";
+      overtone1.type = "sawtooth";
+      overtone2.type = "triangle";
+      filter.type = noteRole === "bass" ? "lowpass" : "bandpass";
+      filter.frequency.setValueAtTime(noteRole === "bass" ? 900 : 1850, now);
+      filter.Q.value = noteRole === "bass" ? 0.7 : 1.15;
+
+      var freq = midiToFreq(midi);
+      fundamental.frequency.value = freq;
+      overtone1.frequency.value = freq * 2;
+      overtone2.frequency.value = freq * 3;
+
+      var peak = 0.12;
+      var sustain = 0.035;
+      if (noteRole === "chord") { peak = 0.17; sustain = 0.02; }
+      if (noteRole === "bass") { peak = 0.14; sustain = 0.045; }
+      if (noteRole === "metro") { peak = 0.05; sustain = 0.015; }
+
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.linearRampToValueAtTime(peak, now + 0.004);
+      gain.gain.exponentialRampToValueAtTime(Math.max(0.001, peak * 0.28), now + sustain);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + Math.max(0.08, duration));
+
+      pickFilter.type = "highpass";
+      pickFilter.frequency.setValueAtTime(2800, now);
+      pickGain.gain.setValueAtTime(0.0001, now);
+      pickGain.gain.linearRampToValueAtTime(noteRole === "bass" ? 0.008 : 0.018, now + 0.002);
+      pickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.018);
+
+      mix1.gain.value = noteRole === "bass" ? 0.95 : 0.72;
+      mix2.gain.value = noteRole === "bass" ? 0.12 : 0.22;
+      mix3.gain.value = noteRole === "bass" ? 0.05 : 0.10;
+
+      fundamental.connect(mix1);
+      overtone1.connect(mix2);
+      overtone2.connect(mix3);
+      mix1.connect(filter);
+      mix2.connect(filter);
+      mix3.connect(filter);
+      filter.connect(gain);
+      gain.connect(masterGain || ctx.destination);
+
+      overtone1.connect(pickFilter);
+      pickFilter.connect(pickGain);
+      pickGain.connect(masterGain || ctx.destination);
+
+      fundamental.start(now);
+      overtone1.start(now);
+      overtone2.start(now);
+      fundamental.stop(now + Math.max(0.09, duration) + 0.03);
+      overtone1.stop(now + Math.max(0.09, duration) + 0.03);
+      overtone2.stop(now + Math.max(0.09, duration) + 0.03);
+
+      targetArray.push({ osc: fundamental, gain: gain, ctx: ctx });
+      targetArray.push({ osc: overtone1, gain: gain, ctx: ctx });
+      targetArray.push({ osc: overtone2, gain: gain, ctx: ctx });
+    }
+    function playChordAtTime(ctx, midiNotes, when, duration, options) {
+      options = options || {};
+      var bassToggle = document.getElementById("bassToggle");
+      var chordToggle = document.getElementById("chordToggle");
+      var includeBass = (bassToggle ? bassToggle.checked : true) && options.includeBass !== false;
+      var includeChords = chordToggle ? chordToggle.checked : true;
+      var chordDelay = options.chordDelay || 0;
+
+      if (includeChords) {
+        var chordWhen = when + chordDelay;
+        var spread = 0.02;
+        for (var j = 0; j < midiNotes.length; j++) {
+          var t = chordWhen + j * spread;
+          var dur = duration * (0.85 + Math.random() * 0.1);
+          playSingleTone(ctx, midiNotes[j], dur, progressionOscillators, t, "chord");
+        }
+      }
+    }
+
+    function playBassPattern(ctx, midiNotes, when, beatsForChord, beatSeconds) {
+      var root = midiNotes[0] - 12;
+      var fifth = root + 7;
+      var approach = root - 1;
+
+      var totalDur = beatsForChord * beatSeconds;
+      var pattern;
+
+      if (beatsForChord >= 4) {
+        pattern = [
+          { note: root, offsetBeats: 0, durBeats: 1.5 },
+          { note: fifth, offsetBeats: 1.5, durBeats: 1.0 },
+          { note: approach, offsetBeats: Math.max(0, beatsForChord - 0.5), durBeats: 0.45 }
+        ];
+      } else {
+        pattern = [
+          { note: root, offsetBeats: 0, durBeats: Math.max(0.9, beatsForChord * 0.5) },
+          { note: fifth, offsetBeats: Math.max(0.75, beatsForChord - 1), durBeats: 0.6 }
+        ];
+      }
+
+      for (var i = 0; i < pattern.length; i++) {
+        playSingleTone(
+          ctx,
+          pattern[i].note,
+          Math.min(pattern[i].durBeats * beatSeconds, totalDur),
+          progressionOscillators,
+          when + pattern[i].offsetBeats * beatSeconds,
+          "bass"
+        );
+      }
+    }
+
+    function stopArpeggioOnly() {
+      if (arpIntervalId) { clearInterval(arpIntervalId); arpIntervalId = null; }
+      for (var i = 0; i < activeOscillators.length; i++) {
+        try {
+          activeOscillators[i].gain.gain.cancelScheduledValues(0);
+          activeOscillators[i].gain.gain.setTargetAtTime(0.0001, activeOscillators[i].ctx.currentTime, 0.03);
+          activeOscillators[i].osc.stop(activeOscillators[i].ctx.currentTime + 0.08);
+        } catch (e) {}
+      }
+      activeOscillators = [];
+      activeRoman = null; activeChordKey = null; activeChordRing = null;
+    }
+    function stopProgressionPlayback() {
+      for (var i = 0; i < progressionTimeouts.length; i++) clearTimeout(progressionTimeouts[i]);
+      for (var j = 0; j < metronomeTimeouts.length; j++) clearTimeout(metronomeTimeouts[j]);
+      for (var p = 0; p < percussionTimeouts.length; p++) clearTimeout(percussionTimeouts[p]);
+      progressionTimeouts = []; metronomeTimeouts = []; percussionTimeouts = [];
+      for (var k = 0; k < progressionOscillators.length; k++) {
+        try {
+          progressionOscillators[k].gain.gain.cancelScheduledValues(0);
+          progressionOscillators[k].gain.gain.setTargetAtTime(0.0001, progressionOscillators[k].ctx.currentTime, 0.03);
+          progressionOscillators[k].osc.stop(progressionOscillators[k].ctx.currentTime + 0.08);
+        } catch (e) {}
+      }
+      progressionOscillators = []; progressionPlaying = false;
+      var btn = document.getElementById("playProgressionBtn"); if (btn) btn.textContent = "Play";
+      activeRoman = null; activeChordKey = null; activeChordRing = null;
+      render(selectedMajor);
+    }
+    function stopAllAudio() { stopArpeggioOnly(); stopProgressionPlayback(); render(selectedMajor); }
+
+    function triadMidiNotes(root, quality) {
+      var map = {C:0, "C#":1, Db:1, D:2, "D#":3, Eb:3, E:4, F:5, "F#":6, Gb:6, G:7, "G#":8, Ab:8, A:9, "A#":10, Bb:10, B:11};
+      var intervals = [0,4,7]; if (quality === "minor") intervals = [0,3,7]; if (quality === "dim") intervals = [0,3,6];
+      var rootMidi = 60 + map[root]; return [rootMidi + intervals[0], rootMidi + intervals[1], rootMidi + intervals[2]];
+    }
+    function romanInfoForWedge(currentKey, keyName, ring) {
+      var notes = KEY_NOTES[currentKey];
+      var outer1 = currentKey, outer4 = enhMajor(notes[3]), outer5 = enhMajor(notes[4]);
+      var inner2 = displayMinorFromNote(notes[1]);
+      var inner3 = displayMinorFromNote(notes[2]);
+      var inner6 = REL_MINOR[currentKey];
+      if (ring === "outer") {
+        if (keyName === outer1) return { roman: "I", root: notes[0], quality: "major", playable: true };
+        if (keyName === outer4) return { roman: "IV", root: notes[3], quality: "major", playable: true };
+        if (keyName === outer5) return { roman: "V", root: notes[4], quality: "major", playable: true };
+      } else {
+        if (keyName === inner2) return { roman: "ii", root: notes[1], quality: "minor", playable: true };
+        if (keyName === inner3) return { roman: "iii", root: notes[2], quality: "minor", playable: true };
+        if (keyName === inner6) return { roman: "vi", root: notes[5], quality: "minor", playable: true };
+      }
+      return { playable: false };
+    }
+
+    function startChordLoop(root, quality, roman, chordKey, chordRing) {
+      ensureAudioReady(function(ctx){
+        var notes = triadMidiNotes(root, quality), pattern = [notes[0], notes[1], notes[2], notes[1]], step = 0;
+        function tick() { playSingleTone(ctx, pattern[step], 0.33, activeOscillators, undefined, "arp"); step = (step + 1) % pattern.length; }
+        tick(); arpIntervalId = setInterval(tick, 360); activeRoman = roman; activeChordKey = chordKey; activeChordRing = chordRing; render(selectedMajor);
+      });
+    }
+    function handleChordClick(root, quality, roman, chordKey, chordRing) {
+      if (activeRoman === roman && activeChordKey === chordKey && activeChordRing === chordRing && arpIntervalId) { stopArpeggioOnly(); render(selectedMajor); return; }
+      stopProgressionPlayback(); stopArpeggioOnly(); startChordLoop(root, quality, roman, chordKey, chordRing);
+    }
+
+    function getRhythmPattern() {
+      var select = document.getElementById("rhythmSelect");
+      if (!select) return { name: "quarter", values: [1,1,1,1], offset: 0 };
+      var raw = select.value.split("|");
+      var name = raw[0];
+      var values = raw[1].split(",").map(function(v){ return parseFloat(v); });
+      var offset = (name === "offbeats" || name === "reggaeish") ? 0.5 : 0;
+      return { name: name, values: values, offset: offset };
+    }
+    function playMetronomeClick(ctx, when, accent) {
+      var osc = ctx.createOscillator(), gain = ctx.createGain();
+      osc.type = "square"; osc.frequency.setValueAtTime(accent ? 1600 : 1100, when);
+      gain.gain.setValueAtTime(0.0001, when); gain.gain.linearRampToValueAtTime(accent ? 0.12 : 0.08, when + 0.002); gain.gain.exponentialRampToValueAtTime(0.001, when + 0.06);
+      osc.connect(gain); gain.connect(masterGain || ctx.destination); gain.gain.value = accent ? 0.035 : 0.025; osc.start(when); osc.stop(when + 0.07);
+      progressionOscillators.push({ osc: osc, gain: gain, ctx: ctx });
+    }
+
+    function playPercussionHit(ctx, when, kind) {
+      if (kind === "kick") {
+        var osc = ctx.createOscillator(), gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(110, when);
+        osc.frequency.exponentialRampToValueAtTime(55, when + 0.08);
+        gain.gain.setValueAtTime(0.0001, when);
+        gain.gain.linearRampToValueAtTime(0.18, when + 0.002);
+        gain.gain.exponentialRampToValueAtTime(0.001, when + 0.12);
+        osc.connect(gain); gain.connect(masterGain || ctx.destination);
+        osc.start(when); osc.stop(when + 0.13);
+        progressionOscillators.push({ osc: osc, gain: gain, ctx: ctx });
+        return;
+      }
+      if (kind === "snare") {
+        var bufferSize = Math.floor(ctx.sampleRate * 0.12);
+        var buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        var data = buffer.getChannelData(0);
+        for (var i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+        var noise = ctx.createBufferSource();
+        noise.buffer = buffer;
+        var filter = ctx.createBiquadFilter();
+        filter.type = "highpass";
+        filter.frequency.setValueAtTime(1400, when);
+        var gainN = ctx.createGain();
+        gainN.gain.setValueAtTime(0.0001, when);
+        gainN.gain.linearRampToValueAtTime(0.12, when + 0.001);
+        gainN.gain.exponentialRampToValueAtTime(0.001, when + 0.09);
+        noise.connect(filter); filter.connect(gainN); gainN.connect(masterGain || ctx.destination);
+        noise.start(when); noise.stop(when + 0.1);
+        progressionOscillators.push({ osc: noise, gain: gainN, ctx: ctx });
+        return;
+      }
+      var noiseSize = Math.floor(ctx.sampleRate * 0.05);
+      var hbuf = ctx.createBuffer(1, noiseSize, ctx.sampleRate);
+      var hdata = hbuf.getChannelData(0);
+      for (var j = 0; j < noiseSize; j++) hdata[j] = (Math.random() * 2 - 1) * (1 - j / noiseSize);
+      var hsrc = ctx.createBufferSource();
+      hsrc.buffer = hbuf;
+      var hpf = ctx.createBiquadFilter();
+      hpf.type = "highpass";
+      hpf.frequency.setValueAtTime(5000, when);
+      var hgain = ctx.createGain();
+      hgain.gain.setValueAtTime(0.0001, when);
+      hgain.gain.linearRampToValueAtTime(0.05, when + 0.001);
+      hgain.gain.exponentialRampToValueAtTime(0.001, when + 0.04);
+      hsrc.connect(hpf); hpf.connect(hgain); hgain.connect(masterGain || ctx.destination);
+      hsrc.start(when); hsrc.stop(when + 0.05);
+      progressionOscillators.push({ osc: hsrc, gain: hgain, ctx: ctx });
+    }
+
+    function schedulePercussion(startMs, totalBeats, beatSeconds, ctx) {
+      var toggle = document.getElementById("percussionToggle");
+      if (!toggle || !toggle.checked) return;
+      for (var b = 0; b < totalBeats; b++) {
+        (function(beatIndex){
+          var baseMs = startMs + beatIndex * beatSeconds * 1000;
+          var kickTimer = setTimeout(function(){
+            if (!progressionPlaying) return;
+            var beatInBar = beatIndex % 4;
+            if (beatInBar === 0 || beatInBar === 2) playPercussionHit(ctx, ctx.currentTime + 0.01, "kick");
+          }, baseMs);
+          percussionTimeouts.push(kickTimer);
+
+          var snareTimer = setTimeout(function(){
+            if (!progressionPlaying) return;
+            var beatInBar = beatIndex % 4;
+            if (beatInBar === 1 || beatInBar === 3) playPercussionHit(ctx, ctx.currentTime + 0.01, "snare");
+          }, baseMs);
+          percussionTimeouts.push(snareTimer);
+
+          var hatTimer = setTimeout(function(){
+            if (!progressionPlaying) return;
+            playPercussionHit(ctx, ctx.currentTime + 0.01, "hat");
+          }, baseMs);
+          percussionTimeouts.push(hatTimer);
+
+          var hatOffTimer = setTimeout(function(){
+            if (!progressionPlaying) return;
+            playPercussionHit(ctx, ctx.currentTime + 0.01, "hat");
+          }, baseMs + beatSeconds * 500);
+          percussionTimeouts.push(hatOffTimer);
+        })(b);
+      }
+    }
+    function scheduleMetronome(startMs, totalBeats, beatSeconds, ctx) {
+      var toggle = document.getElementById("metronomeToggle"); if (!toggle || !toggle.checked) return;
+      for (var b = 0; b < totalBeats; b++) {
+        (function(beatIndex){
+          var timer = setTimeout(function(){ if (!progressionPlaying) return; playMetronomeClick(ctx, ctx.currentTime + 0.01, beatIndex % 4 === 0); }, startMs + beatIndex * beatSeconds * 1000);
+          metronomeTimeouts.push(timer);
+        })(b);
+      }
+    }
+    function scheduleRhythmForChord(ctx, midiNotes, startMs, beatsForChord, beatSeconds, rhythm, degreeRoman, chordKey, chordRing) {
+      var beatMs = beatSeconds * 1000;
+      var totalMs = beatsForChord * beatMs;
+      var swingOffset = 0;
+
+      (function(){
+        var timer = setTimeout(function(){
+          if (!progressionPlaying) return;
+          var bassToggle = document.getElementById("bassToggle");
+          var includeBass = bassToggle ? bassToggle.checked : true;
+          if (includeBass) {
+            playBassPattern(ctx, midiNotes, ctx.currentTime + 0.01, beatsForChord, beatSeconds);
+          }
+        }, startMs);
+        progressionTimeouts.push(timer);
+      })();
+
+      function scheduleHit(ms, chordDur, options) {
+        var timer = setTimeout(function(){
+          if (!progressionPlaying) return;
+          activeRoman = degreeRoman;
+          activeChordKey = chordKey;
+          activeChordRing = chordRing;
+          render(selectedMajor);
+          var jitter = (Math.random() - 0.5) * 0.015;
+          playChordAtTime(ctx, midiNotes, ctx.currentTime + 0.01 + swingOffset + jitter, chordDur, options || {});
+        }, ms);
+        progressionTimeouts.push(timer);
+      }
+
+      if (rhythm.name === "quarter" || rhythm.name === "four_on_floor" || rhythm.name === "backbeat_hits") {
+        for (var q = 0; q < beatsForChord; q++) {
+          scheduleHit(startMs + q * beatMs, Math.min(beatSeconds * 0.98, 0.58), { chordDelay: 0.03 });
+        }
+        return;
+      }
+
+      if (rhythm.name === "ballad") {
+        for (var hb = 0; hb < beatsForChord; hb += 2) {
+          scheduleHit(startMs + hb * beatMs, Math.min(beatSeconds * 1.9, 1.1), { chordDelay: 0.08 });
+        }
+        return;
+      }
+
+      if (rhythm.name === "reggae" || rhythm.name === "reggaeish") {
+        for (var rb = 0; rb < beatsForChord; rb++) {
+          scheduleHit(startMs + rb * beatMs + beatMs * 0.5, 0.18, {});
+        }
+        return;
+      }
+
+      if (rhythm.name === "bossa") {
+        for (var bb = 0; bb < beatsForChord; bb += 2) {
+          scheduleHit(startMs + bb * beatMs + beatMs * 0.75, 0.24, {});
+          if (bb + 1 < beatsForChord) {
+            scheduleHit(startMs + (bb + 1) * beatMs + beatMs * 0.5, 0.2, {});
+          }
+        }
+        return;
+      }
+
+      if (rhythm.name === "tango") {
+        for (var tb = 0; tb < beatsForChord; tb += 4) {
+          scheduleHit(startMs + tb * beatMs + beatMs * 0.5, 0.16, {});
+          if (tb + 1.5 < beatsForChord) scheduleHit(startMs + (tb + 1) * beatMs + beatMs * 0.5, 0.16, {});
+          if (tb + 2 < beatsForChord) scheduleHit(startMs + (tb + 2) * beatMs, 0.24, { chordDelay: 0.05 });
+          if (tb + 3 < beatsForChord) scheduleHit(startMs + (tb + 3) * beatMs, 0.22, {});
+        }
+        return;
+      }
+
+      for (var cycleStart = rhythm.offset * beatMs; cycleStart < totalMs; cycleStart += 4 * beatMs) {
+        var pos = 0;
+        for (var i = 0; i < rhythm.values.length; i++) {
+          var hitMs = startMs + cycleStart + pos * beatMs;
+          if (hitMs < startMs + totalMs - 5) {
+            scheduleHit(hitMs, Math.max(0.16, Math.min(rhythm.values[i] * beatSeconds * 0.9, 0.52)), { chordDelay: (i % 2 === 0 ? 0.035 : 0) });
+          }
+          pos += rhythm.values[i];
+        }
+      }
+    }
+
+    function chordInfoForDegree(selectedMajorKey, degreeRoman) {
+      var notes = KEY_NOTES[selectedMajorKey];
+      if (degreeRoman === "I") return { midiNotes: triadMidiNotes(notes[0], "major"), chordKey: selectedMajorKey, chordRing: "outer" };
+      if (degreeRoman === "ii") return { midiNotes: triadMidiNotes(notes[1], "minor"), chordKey: displayMinorFromNote(notes[1]), chordRing: "inner" };
+      if (degreeRoman === "iii") return { midiNotes: triadMidiNotes(notes[2], "minor"), chordKey: displayMinorFromNote(notes[2]), chordRing: "inner" };
+      if (degreeRoman === "IV") return { midiNotes: triadMidiNotes(notes[3], "major"), chordKey: enhMajor(notes[3]), chordRing: "outer" };
+      if (degreeRoman === "V") return { midiNotes: triadMidiNotes(notes[4], "major"), chordKey: enhMajor(notes[4]), chordRing: "outer" };
+      if (degreeRoman === "vi") return { midiNotes: triadMidiNotes(notes[5], "minor"), chordKey: REL_MINOR[selectedMajorKey], chordRing: "inner" };
+      if (degreeRoman === "bVII") {
+        var chroma = {C:0, "C#":1, Db:1, D:2, "D#":3, Eb:3, E:4, F:5, "F#":6, Gb:6, G:7, "G#":8, Ab:8, A:9, "A#":10, Bb:10, B:11};
+        var tonic = notes[0], rootMidi = 60 + chroma[tonic] + 10;
+        return { midiNotes: [rootMidi, rootMidi + 4, rootMidi + 7], chordKey: null, chordRing: null };
+      }
+      return { midiNotes: triadMidiNotes(notes[0], "major"), chordKey: null, chordRing: null };
+    }
+    function startProgressionLoop() {
+      stopArpeggioOnly(); stopProgressionPlayback();
+      ensureAudioReady(function(ctx){
+        progressionPlaying = true; var btn = document.getElementById("playProgressionBtn"); if (btn) btn.textContent = "Stop";
+        var bpm = parseInt(document.getElementById("tempoSelect").value, 10) || 100; currentBeatSeconds = 60 / bpm;
+        var select = document.getElementById("progressionSelect"), parts = select.value.split("|"), degrees = parts[0].split("-"), beats = parts[1].split(",");
+        var beatSeconds = currentBeatSeconds, rhythm = getRhythmPattern();
+        function scheduleCycle() {
+          var offsetMs = 0, totalBeats = 0;
+          for (var i = 0; i < degrees.length; i++) {
+            var beatCount = parseInt(beats[i], 10); totalBeats += beatCount;
+            var info = chordInfoForDegree(selectedMajor, degrees[i]);
+            scheduleRhythmForChord(ctx, info.midiNotes, offsetMs, beatCount, beatSeconds, rhythm, degrees[i], info.chordKey, info.chordRing);
+            offsetMs += beatCount * beatSeconds * 1000;
+          }
+          scheduleMetronome(0, totalBeats, beatSeconds, ctx);
+          schedulePercussion(0, totalBeats, beatSeconds, ctx);
+          var loopTimer = setTimeout(function(){ if (progressionPlaying) scheduleCycle(); }, offsetMs); progressionTimeouts.push(loopTimer);
+        }
+        scheduleCycle();
+      });
+    }
+
+    function render(currentKey) {
+      selectedMajor = parseKey(currentKey);
+      var svg = document.getElementById("wheel"); svg.innerHTML = "";
+      var cx = 215, cy = 215, outerInnerR = 128, outerOuterR = 203, innerInnerR = 64, innerOuterR = 128;
+      var notes = KEY_NOTES[selectedMajor], selectedMinor = REL_MINOR[selectedMajor];
+      var IV = enhMajor(notes[3]), V = enhMajor(notes[4]);
+      var iiMinor = displayMinorFromNote(notes[1]);
+      var iiiMinor = displayMinorFromNote(notes[2]);
+
+      circle(svg, cx, cy, outerOuterR, "#ffffff", "#dbe1ea", 2);
+      circle(svg, cx, cy, innerOuterR, "#fafafa", "#dbe1ea", 2);
+      circle(svg, cx, cy, innerInnerR, "rgba(255,255,255,0.65)", "#e5e7eb", 1.5);
+
+      if (activeRoman) {
+        text(svg, cx, 215, activeRoman, { size: 62, weight: 800, fill: "#111827" });
+      }
+
+      for (var i = 0; i < MAJOR_KEYS.length; i++) {
+        var major = MAJOR_KEYS[i], minor = REL_MINOR[major];
+        var centerAngle = (-90 + i * 30) * Math.PI / 180, startAngle = centerAngle - (Math.PI / 12), endAngle = centerAngle + (Math.PI / 12);
+        var majorFill = "#e5e7eb", majorText = "#374151", majorStroke = "#cbd5e1", majorSW = 2, majorSize = 22;
+        if (major === selectedMajor) { majorFill = "#2563eb"; majorText = "#ffffff"; }
+        else if (major === IV || major === V) { majorFill = "#111827"; majorText = "#ffffff"; }
+        if (activeChordKey === major && activeChordRing === "outer") { majorStroke = "#111827"; majorSW = 8; }
+        var minorFill = "#e5e7eb", minorText = "#374151", minorStroke = "#cbd5e1", minorSW = 2, minorSize = 18;
+        if (minor === selectedMinor) { minorFill = "#2563eb"; minorText = "#ffffff"; }
+        else if (minor === iiMinor || minor === iiiMinor) { minorFill = "#111827"; minorText = "#ffffff"; }
+        if (activeChordKey === minor && activeChordRing === "inner") { minorStroke = "#111827"; minorSW = 8; }
+
+        var outer = wedge(svg, cx, cy, outerInnerR, outerOuterR, startAngle, endAngle, majorFill, majorStroke, majorSW);
+        var majorTextR = 165, majorX = cx + Math.cos(centerAngle) * majorTextR, majorY = cy + Math.sin(centerAngle) * majorTextR + 8, majorDx = major === "F#" ? -6 : (major === "Db" ? 6 : 0);
+        text(svg, majorX + majorDx, majorY, major, { size: majorSize, weight: 800, fill: majorText });
+        (function(m){ outer.addEventListener("click", function(){ var info = romanInfoForWedge(selectedMajor, m, "outer"); if (info.playable) handleChordClick(info.root, info.quality, info.roman, m, "outer"); else { stopAllAudio(); render(m); } }); })(major);
+
+        var inner = wedge(svg, cx, cy, innerInnerR, innerOuterR, startAngle, endAngle, minorFill, minorStroke, minorSW);
+        var minorTextR = 98, minorX = cx + Math.cos(centerAngle) * minorTextR, minorY = cy + Math.sin(centerAngle) * minorTextR + 7, minorDx = minor === "D#m" ? -4 : (minor === "Bbm" ? 4 : 0);
+        text(svg, minorX + minorDx, minorY, minor, { size: minorSize, weight: 800, fill: minorText });
+        (function(mn, relMaj){ inner.addEventListener("click", function(){ var info = romanInfoForWedge(selectedMajor, mn, "inner"); if (info.playable) handleChordClick(info.root, info.quality, info.roman, mn, "inner"); else { stopAllAudio(); render(relMaj); } }); })(minor, major);
+      }
+    }
+
+    document.getElementById("playProgressionBtn").addEventListener("click", function(){ if (progressionPlaying) stopProgressionPlayback(); else startProgressionLoop(); });
+    document.getElementById("tempoSelect").addEventListener("change", function(){ currentBeatSeconds = 60 / parseInt(this.value, 10); });
+    document.addEventListener("touchstart", function bootAudio(){ ensureAudioReady(); document.removeEventListener("touchstart", bootAudio); }, { once: true });
+    document.addEventListener("mousedown", function bootAudioMouse(){ ensureAudioReady(); document.removeEventListener("mousedown", bootAudioMouse); }, { once: true });
+
+    render("C");
+  </script>
+</body>
+</html>
