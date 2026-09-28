@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Circle v1.37</title>
+  <title>Circle v1.39</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -368,12 +368,195 @@
     }
     .sample-status.fallback::before { color: #5f666c; }
 
+  
+    /* v1.38 compact control layout */
+    .section-heading {
+      margin: 13px 5px 3px;
+      font-size: 10px;
+      line-height: 1;
+      letter-spacing: .11em;
+      text-transform: uppercase;
+      font-weight: 850;
+      color: #8f979e;
+    }
+    .tempo-row {
+      margin: 8px 4px 0;
+      display: grid;
+      grid-template-columns: 74px minmax(0,1fr);
+      gap: 8px;
+      align-items: center;
+    }
+
+    .row-heading {
+      font-size: 11px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      font-weight: 850;
+      color: #9aa1a7;
+      padding-left: 2px;
+    }
+    .tempo-row #tempoSelect {
+      position: static !important;
+      width: 100% !important;
+      height: 36px !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+      overflow: visible !important;
+      min-width: 0;
+      border-radius: 8px;
+      padding: 5px 10px;
+      font: inherit;
+      font-size: 14px;
+      background: #202428 !important;
+      color: #f2f4f5 !important;
+      border: 1px solid #4a5056 !important;
+      color-scheme: dark;
+    }
+
+    .audio-status {
+      margin: 7px 6px 2px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px 11px;
+      min-height: 20px;
+      color: #aeb5ba;
+      font-size: 11px;
+      line-height: 1;
+    }
+
+    .audio-heading {
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      font-weight: 850;
+      color: #8f979e;
+    }
+
+    .audio-status-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+      font-weight: 750;
+      color: #b7bdc2;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      flex: 0 0 7px;
+      border-radius: 50%;
+      background: #6e757b;
+      box-shadow: 0 0 0 1px #777f85;
+    }
+
+    .audio-status-item.ready .status-dot {
+      background: #cbd0d4;
+      box-shadow: 0 0 0 1px #cbd0d4;
+    }
+
+    .audio-status-item.fallback {
+      color: #d2d5d7;
+    }
+
+    .audio-status-item.fallback .status-dot {
+      background: transparent;
+      box-shadow: 0 0 0 1.5px #b8bec3;
+    }
+
+    .audio-status-item.waiting .status-dot {
+      background: #555d63;
+      box-shadow: 0 0 0 1px #6d747a;
+    }
+
+    .accompaniment-control {
+      margin-top: 5px !important;
+    }
+
+    .accompaniment-control .browser-trigger {
+      min-height: 40px;
+      padding: 6px 10px !important;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 10px;
+      border-radius: 8px;
+    }
+
+    .accompaniment-control .trigger-label {
+      flex: 0 0 82px;
+      font-size: 9.5px;
+      line-height: 1;
+    }
+
+    .accompaniment-control .trigger-value {
+      flex: 1 1 auto;
+      min-width: 0;
+      font-size: 14px;
+      line-height: 1.1;
+    }
+
+    .mix-heading {
+      margin-top: 12px;
+    }
+
+    .mix-row {
+      margin: 5px 4px 0;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 5px;
+    }
+
+    .mix-row label {
+      min-width: 0;
+      min-height: 36px;
+      padding: 6px 5px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      background: #202428;
+      border: 1px solid #4a5056;
+      color: #f2f4f5;
+      font-size: 12px;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .mix-row input[type="checkbox"] {
+      margin: 0;
+      width: 14px;
+      height: 14px;
+      accent-color: #d8dcdf;
+    }
+
+    .tempo-row {
+      margin-top: 6px;
+      margin-bottom: 3px;
+    }
+
+    @media (max-width: 390px) {
+      .mix-row label {
+        font-size: 11px;
+        gap: 3px;
+        padding-left: 3px;
+        padding-right: 3px;
+      }
+      .accompaniment-control .trigger-label {
+        flex-basis: 76px;
+      }
+      .tempo-row {
+        grid-template-columns: 68px minmax(0,1fr);
+      }
+    }
+
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="panel">
-      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.37"></svg>
+      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.39"></svg>
       <div id="progressionStrip" class="progression-strip" aria-label="Progression map"></div>
       <div class="controls">
         <select id="progressionSelect" class="source-select">
@@ -467,16 +650,21 @@
         </select>
         <button id="playProgressionBtn">Play</button>
       </div>
-      <div class="controls">
-        <select id="instrumentSelect" aria-label="Instrument sound">
-          <option value="synthetic">Synthetic guitar</option>
-          <option value="sampled" selected>Sampled acoustic guitar</option>
-        </select>
+<div id="audioStatus" class="audio-status" aria-label="Audio sample status">
+        <span class="audio-heading">Audio</span>
+        <span id="guitarSampleStatus" class="audio-status-item waiting" data-label="Guitar">
+          <span class="status-dot" aria-hidden="true"></span><span class="status-name">Guitar</span>
+        </span>
+        <span id="bassSampleStatus" class="audio-status-item waiting" data-label="Bass">
+          <span class="status-dot" aria-hidden="true"></span><span class="status-name">Bass</span>
+        </span>
+        <span id="sampleStatus" class="audio-status-item waiting" data-label="Drums">
+          <span class="status-dot" aria-hidden="true"></span><span class="status-name">Drums</span>
+        </span>
       </div>
-      <div id="sampleStatus" class="sample-status">Drums: waiting for first tap</div>
-      <div id="bassSampleStatus" class="sample-status">Bass: waiting for first tap</div>
-      <div id="guitarSampleStatus" class="sample-status">Guitar: waiting for first tap</div>
-      <div class="controls">
+
+      <div class="section-heading">Accompaniment</div>
+      <div class="controls accompaniment-control">
         <select id="rhythmSelect" class="source-select">
           <optgroup label="Straight / Basic">
             <option value="quarter|1,1,1,1">Simple quarters</option>
@@ -544,7 +732,7 @@
           </optgroup>
         </select>
       </div>
-<div class="controls"><select id="guitarPatternSelect" class="source-select" aria-label="Guitar pattern"><optgroup label="Straight / Foundation">
+<div class="controls accompaniment-control"><select id="guitarPatternSelect" class="source-select" aria-label="Guitar pattern"><optgroup label="Straight / Foundation">
 <option value="C@0,C@1,C@2,C@3">Quarter chords</option>
 <option value="C@0,C@2">Half-note chords</option>
 <option value="C@1,C@3">Backbeat chords</option>
@@ -609,7 +797,7 @@
 <option value="A2@0.5,A1@1,A2@1.5,A2@2.5,A1@3,A2@3.5">Fingerpick 2</option>
 </optgroup></select></div>
 
-<div class="controls">
+<div class="controls accompaniment-control">
 <select id="bassPatternSelect" class="source-select" aria-label="Bass pattern">
   <optgroup label="Straight / Foundation">
     <option value="R@0">Root on 1</option>
@@ -643,8 +831,16 @@
   </optgroup>
 </select>
 </div>
-      <div class="controls">
-        <label><input type="checkbox" id="metronomeToggle" checked /> Metronome</label>
+      <div class="section-heading mix-heading">Mix</div>
+      <div class="mix-row">
+        <label><input type="checkbox" id="bassToggle" checked /><span>Bass</span></label>
+        <label><input type="checkbox" id="chordToggle" checked /><span>Chords</span></label>
+        <label><input type="checkbox" id="percussionToggle" checked /><span>Drums</span></label>
+        <label><input type="checkbox" id="metronomeToggle" checked /><span>Click</span></label>
+      </div>
+
+      <div class="tempo-row">
+        <span class="row-heading">Tempo</span>
         <select id="tempoSelect">
           <option value="60">60 BPM</option>
           <option value="72">72 BPM</option>
@@ -657,12 +853,6 @@
           <option value="144">144 BPM</option>
           <option value="160">160 BPM</option>
         </select>
-      </div>
-
-      <div class="controls">
-        <label><input type="checkbox" id="bassToggle" checked /> Bass</label>
-        <label><input type="checkbox" id="chordToggle" checked /> Chords</label>
-        <label><input type="checkbox" id="percussionToggle" checked /> Percussion</label>
       </div>
     </div>
   </div>
@@ -769,15 +959,11 @@
     var guitarSamplesPromise = null;
 
     function selectedInstrument() {
-      var s = document.getElementById("instrumentSelect");
-      return s ? s.value : "synthetic";
+      return "sampled";
     }
 
     function setGuitarSampleStatus(text, stateClass) {
-      var el = document.getElementById("guitarSampleStatus");
-      if (!el) return;
-      el.textContent = text;
-      el.className = "sample-status" + (stateClass ? " " + stateClass : "");
+      updateCompactAudioStatus(document.getElementById("guitarSampleStatus"), text, stateClass);
     }
 
     function loadGuitarSamples(ctx) {
@@ -825,10 +1011,7 @@
     var bassSamplesPromise = null;
 
     function setBassSampleStatus(text, stateClass) {
-      var el = document.getElementById("bassSampleStatus");
-      if (!el) return;
-      el.textContent = text;
-      el.className = "sample-status" + (stateClass ? " " + stateClass : "");
+      updateCompactAudioStatus(document.getElementById("bassSampleStatus"), text, stateClass);
     }
 
     function loadBassSamples(ctx) {
@@ -921,11 +1104,29 @@
     var percussionSampleBuffers = new Map();
     var percussionSamplesPromise = null;
 
-    function setPercussionSampleStatus(text, stateClass) {
-      var el = document.getElementById("sampleStatus");
+    function updateCompactAudioStatus(el, text, stateClass) {
       if (!el) return;
-      el.textContent = text;
-      el.className = "sample-status" + (stateClass ? " " + stateClass : "");
+      var label = el.getAttribute("data-label") || "";
+      var state = stateClass || "waiting";
+      el.className = "audio-status-item " + state;
+      el.title = text;
+
+      var name = el.querySelector(".status-name");
+      if (name) {
+        name.textContent = (state === "fallback") ? label + " synth" : label;
+      }
+
+      var audio = document.getElementById("audioStatus");
+      if (audio) {
+        var items = Array.prototype.slice.call(audio.querySelectorAll(".audio-status-item"));
+        audio.setAttribute("aria-label", "Audio: " + items.map(function(item){
+          return item.title || ((item.getAttribute("data-label") || "") + " waiting");
+        }).join("; "));
+      }
+    }
+
+    function setPercussionSampleStatus(text, stateClass) {
+      updateCompactAudioStatus(document.getElementById("sampleStatus"), text, stateClass);
     }
 
     function loadPercussionSamples(ctx) {
@@ -1866,7 +2067,14 @@
       var main = btn.querySelector(".main-value");
       var cat = optionCategory(opt);
       var label = opt.textContent.trim();
-      main.textContent = cat + " · " + label;
+
+      // Keep category context for Progression, but keep the three
+      // accompaniment controls visually compact.
+      if (select.id === "progressionSelect") {
+        main.textContent = cat + " · " + label;
+      } else {
+        main.textContent = label;
+      }
     }
 
     function optionDetail(select, opt) {
@@ -2596,13 +2804,7 @@
       if (progressionPlaying) stopProgressionPlayback();
       updateTrigger(this);
     });
-    document.getElementById("instrumentSelect").addEventListener("change", function(){
-      if (progressionPlaying) stopProgressionPlayback();
-      if (this.value === "sampled") {
-        ensureAudioReady(function(ctx){ loadGuitarSamples(ctx); });
-      }
-    });
-    function primeAudioSamples(){
+function primeAudioSamples(){
       ensureAudioReady(function(ctx){
         loadPercussionSamples(ctx);
         loadBassSamples(ctx);
@@ -2615,7 +2817,6 @@
     }
 
     function handleInstrumentSelectionChange() {
-      var inst = document.getElementById("instrumentSelect");
       if (!inst) return;
       if (inst.value !== "sampled") {
         setGuitarSampleStatus("Guitar: synthetic selected", "fallback");
@@ -2646,7 +2847,6 @@
     }
   
     document.addEventListener("DOMContentLoaded", function(){
-      var inst = document.getElementById("instrumentSelect");
       if (inst) inst.addEventListener("change", handleInstrumentSelectionChange);
     });
 
