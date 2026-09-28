@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Circle v1.34</title>
+  <title>Circle v1.36</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -373,7 +373,7 @@
 <body>
   <div class="wrap">
     <div class="panel">
-      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.34"></svg>
+      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.36"></svg>
       <div id="progressionStrip" class="progression-strip" aria-label="Progression map"></div>
       <div class="controls">
         <select id="progressionSelect" class="source-select">
@@ -475,6 +475,7 @@
       </div>
       <div id="sampleStatus" class="sample-status">Drums: waiting for first tap</div>
       <div id="bassSampleStatus" class="sample-status">Bass: waiting for first tap</div>
+      <div id="guitarSampleStatus" class="sample-status">Guitar: waiting for first tap</div>
       <div class="controls">
         <select id="rhythmSelect" class="source-select">
           <optgroup label="Straight / Basic">
@@ -546,11 +547,11 @@
 <div class="controls"><select id="guitarPatternSelect" class="source-select" aria-label="Guitar pattern"><optgroup label="Straight / Foundation">
 <option value="C@0,C@1,C@2,C@3">Quarter chords</option>
 <option value="C@0,C@2">Half-note chords</option>
-<option value="B@0,C@1,B@2,C@3">Chord + bass</option>
-<option value="B@0,C@0.5,B@2,C@2.5">Bass + chord</option>
-<option value="B@0,C@1,C@2,C@3">Bass on 1, chords 2-4</option>
-<option value="C@0,B@2">Chord on 1, bass on 3</option>
-<option value="B@0,C@1,B@2,C@3">Alternating bass/chord</option>
+<option value="C@1,C@3">Backbeat chords</option>
+<option value="C@0.5,C@2.5">Offbeat chords</option>
+<option value="C@1,C@2,C@3">Chords 2–4</option>
+<option value="C@0">Chord on 1</option>
+<option value="C@1,C@3">Alternating chord spaces</option>
 <option value="C@0,C@0.5,C@1,C@1.5,C@2,C@2.5,C@3,C@3.5">Eighth-note chords</option>
 </optgroup>
 <optgroup label="Arpeggio">
@@ -558,55 +559,90 @@
 <option value="A0@0,A1@1,A2@2,A0@3">Up 1-3-5-1</option>
 <option value="A2@0,A1@1,A0@2,A1@3">Down 5-3-1-3</option>
 <option value="A0@0,A1@0.5,A2@1,A1@1.5,A0@2,A1@2.5,A2@3,A1@3.5">Rolling eighths</option>
-<option value="B@0,A1@1,A2@2,A1@3">Bass + rising arp</option>
-<option value="B@0,A1@0.5,A2@1,A1@1.5,B@2,A1@2.5,A2@3,A1@3.5">Bass + eighth arp</option>
+<option value="A1@1,A2@2,A1@3">Delayed rising arp</option>
+<option value="A1@0.5,A2@1,A1@1.5,A1@2.5,A2@3,A1@3.5">Eighth-note arp</option>
 <option value="A0@0,A1@1,A2@2,C@3">Arp then chord</option>
 <option value="C@0,A0@1,A1@2,A2@3">Chord then arp</option>
 </optgroup>
 <optgroup label="Pop / Rock">
-<option value="B@0,C@0.75,C@1.5,B@2,C@2.75,C@3.5">Pop push</option>
-<option value="B@0,C@1,C@1.5,B@2,C@3,C@3.5">Pop bass/chord</option>
-<option value="B@0,C@0.5,C@1,C@1.5,B@2,C@2.5,C@3,C@3.5">Driving eighths</option>
-<option value="B@0,C@1,B@2,C@3">Rock backbeat</option>
-<option value="C@0,C@1.5,B@2,C@3">Anthem</option>
-<option value="B@0,A1@1,A2@2,C@3">Ballad roll</option>
-<option value="B@0,C@0,C@1,B@2,C@2,C@3">Power pulse</option>
-<option value="B@0,C@0.5,C@1.5,B@2,C@2.5,C@3.5">Syncopated rock</option>
+<option value="C@0.75,C@1.5,C@2.75,C@3.5">Pop push</option>
+<option value="C@1,C@1.5,C@3,C@3.5">Pop chord pocket</option>
+<option value="C@0.5,C@1,C@1.5,C@2.5,C@3,C@3.5">Driving eighths</option>
+<option value="C@1,C@3">Rock backbeat</option>
+<option value="C@0,C@1.5,C@3">Anthem</option>
+<option value="A1@1,A2@2,C@3">Ballad roll</option>
+<option value="C@0,C@1,C@2,C@3">Power pulse</option>
+<option value="C@0.5,C@1.5,C@2.5,C@3.5">Syncopated rock</option>
 </optgroup>
 <optgroup label="Brazilian / Latin">
-<option value="B@0,C@0.5,C@1.5,B@2,C@2.5,C@3.5">Bossa basic</option>
-<option value="B@0,C@1.5,B@2,C@3.5">Bossa sparse</option>
-<option value="B@0,A1@0.5,C@1.5,B@2,A2@2.5,C@3.5">Bossa arp</option>
-<option value="B@0,A1@0.5,A2@1,C@1.5,B@2,A1@2.5,A2@3,C@3.5">Bossa rolling</option>
-<option value="B@0,C@0.5,C@1,B@1.5,C@2,C@2.5,B@3,C@3.5">Samba pulse</option>
-<option value="B@0,A1@0.5,C@1,A2@1.5,B@2,A1@2.5,C@3,A2@3.5">Samba arp</option>
-<option value="B@0,C@0.75,C@1.5,B@2,C@2.75,C@3.5">Latin tresillo</option>
-<option value="B@0,C@1,C@2,C@3">Tango guitar</option>
+<option value="C@0.5,C@1.5,C@2.5,C@3.5">Bossa basic</option>
+<option value="C@1.5,C@3.5">Bossa sparse</option>
+<option value="A1@0.5,C@1.5,A2@2.5,C@3.5">Bossa arp</option>
+<option value="A1@0.5,A2@1,C@1.5,A1@2.5,A2@3,C@3.5">Bossa rolling</option>
+<option value="C@0.5,C@1,C@2,C@2.5,C@3.5">Samba pulse</option>
+<option value="A1@0.5,C@1,A2@1.5,A1@2.5,C@3,A2@3.5">Samba arp</option>
+<option value="C@0.75,C@1.5,C@2.75,C@3.5">Latin tresillo</option>
+<option value="C@1,C@2,C@3">Tango guitar</option>
 </optgroup>
 <optgroup label="Jazz / Swing">
-<option value="B@0,C@0.67,C@2,C@2.67">Swing comp</option>
+<option value="C@0.67,C@2,C@2.67">Swing comp</option>
 <option value="C@0,C@1.5,C@3">Charleston</option>
 <option value="C@0.5,C@2,C@3.5">Reverse Charleston</option>
-<option value="B@0,C@0.67,B@2,C@2.67">Jazz bass/chord</option>
-<option value="B@0,C@1,B@2,C@3">Walking shell feel</option>
-<option value="B@0,A1@0.67,A2@2,A1@2.67">Swing arp</option>
-<option value="B@0,A1@1,A2@2,C@3">Jazz ballad</option>
+<option value="C@0.67,C@2.67">Jazz chord pocket</option>
+<option value="C@1,C@3">Shell comp feel</option>
+<option value="A1@0.67,A2@2,A1@2.67">Swing arp</option>
+<option value="A1@1,A2@2,C@3">Jazz ballad</option>
 <option value="C@0,C@1,C@2,C@3">Four-to-bar comp</option>
 </optgroup>
 <optgroup label="Funk / Soul / R&B">
-<option value="B@0,C@0.5,C@1.5,B@2,C@2.5,C@3.5">Funk stabs</option>
+<option value="C@0.5,C@1.5,C@2.5,C@3.5">Funk stabs</option>
 <option value="C@0.5,C@1.5,C@2.5,C@3.5">Funk offbeats</option>
-<option value="B@0,C@1,C@1.5,B@2,C@3">Soul pocket</option>
-<option value="B@0,A1@0.5,A2@1.5,C@2.5,C@3.5">R&B roll</option>
-<option value="B@0,C@0.75,A1@1.5,B@2.5,C@3.25">Neo-soul space</option>
-<option value="B@0,C@0.5,C@1.5,B@2,C@2.5,C@3.5">Motown guitar</option>
+<option value="C@1,C@1.5,C@3">Soul pocket</option>
+<option value="A1@0.5,A2@1.5,C@2.5,C@3.5">R&B roll</option>
+<option value="C@0.75,A1@1.5,C@3.25">Neo-soul space</option>
+<option value="C@0.5,C@1.5,C@2.5,C@3.5">Motown guitar</option>
 </optgroup>
 <optgroup label="Folk / Country / Other">
-<option value="B@0,C@1,B@2,C@3">Folk bass-strum</option>
-<option value="B@0,C@1,B@2,C@3">Country boom-chuck</option>
-<option value="B@0,A1@0.5,A2@1,A1@1.5,B@2,A1@2.5,A2@3,A1@3.5">Fingerpick 1</option>
-<option value="B@0,A2@0.5,A1@1,A2@1.5,B@2,A2@2.5,A1@3,A2@3.5">Fingerpick 2</option>
+<option value="C@1,C@3">Folk strum</option>
+<option value="C@1,C@3">Country chord pulse</option>
+<option value="A1@0.5,A2@1,A1@1.5,A1@2.5,A2@3,A1@3.5">Fingerpick 1</option>
+<option value="A2@0.5,A1@1,A2@1.5,A2@2.5,A1@3,A2@3.5">Fingerpick 2</option>
 </optgroup></select></div>
+
+<div class="controls">
+<select id="bassPatternSelect" class="source-select" aria-label="Bass pattern">
+  <optgroup label="Straight / Foundation">
+    <option value="R@0">Root on 1</option>
+    <option value="R@0,R@2" selected>Two-feel roots</option>
+    <option value="R@0,5@2">Root–fifth</option>
+    <option value="R@0,R@1,R@2,R@3">Four roots</option>
+    <option value="R@0,5@1,R@2,5@3">Alternating root–fifth</option>
+  </optgroup>
+  <optgroup label="Brazilian / Latin">
+    <option value="R@0,5@1.5,R@2,5@3.5">Bossa basic</option>
+    <option value="R@0,5@2.5">Bossa sparse</option>
+    <option value="R@0,5@0.75,R@1.5,5@2,R@2.75,5@3.5">Samba pulse</option>
+    <option value="R@0,5@1.5,R@2.5">Latin tresillo</option>
+  </optgroup>
+  <optgroup label="Jazz / Swing">
+    <option value="R@0,5@2">Jazz two-feel</option>
+    <option value="R@0,3@1,5@2,3@3">Walking chord tones</option>
+    <option value="R@0,5@1.5,R@3">Charleston bass</option>
+  </optgroup>
+  <optgroup label="Funk / Soul / R&amp;B">
+    <option value="R@0,R@0.75,5@1.5,R@2.5,5@3.25">Funk syncopated</option>
+    <option value="R@0,5@2,R@3">Soul pocket</option>
+    <option value="R@0,5@1,R@2,3@3">Motown movement</option>
+    <option value="R@0,5@2.5">Neo-soul sparse</option>
+  </optgroup>
+  <optgroup label="Folk / Country / Other">
+    <option value="R@0,5@2">Country boom-chuck</option>
+    <option value="R@0,3@1,5@2,3@3">Country walk</option>
+    <option value="R@0,R@2">Folk two-feel</option>
+    <option value="R@0,5@2.5">Reggae sparse</option>
+  </optgroup>
+</select>
+</div>
       <div class="controls">
         <label><input type="checkbox" id="metronomeToggle" checked /> Metronome</label>
         <select id="tempoSelect">
@@ -718,11 +754,16 @@
     }
     // Optional sampled acoustic guitar. Synthetic remains the default and fallback.
     // Same Karoryfer Shinyguitar sample set used by Voicing Navigator.
+    // Local Shinyguitar acoustic/microphone samples, covering Circle's
+    // actual guitar range (MIDI 60-78) at three-semitone centers.
     var GUITAR_SAMPLE_DEFS = [
-      {midi:48,url:"https://raw.githubusercontent.com/sfzinstruments/karoryfer.shinyguitar/master/Samples/acoustic/c3_vl3_rr1_1.wav"},
-      {midi:51,url:"https://raw.githubusercontent.com/sfzinstruments/karoryfer.shinyguitar/master/Samples/acoustic/eb3_vl3_rr1_1.wav"},
-      {midi:54,url:"https://raw.githubusercontent.com/sfzinstruments/karoryfer.shinyguitar/master/Samples/acoustic/gb3_vl3_rr1_1.wav"},
-      {midi:57,url:"https://raw.githubusercontent.com/sfzinstruments/karoryfer.shinyguitar/master/Samples/acoustic/a3_vl3_rr1_1.wav"}
+      {midi:60,url:"samples/guitar/guitar_C4.wav"},
+      {midi:63,url:"samples/guitar/guitar_Eb4.wav"},
+      {midi:66,url:"samples/guitar/guitar_Gb4.wav"},
+      {midi:69,url:"samples/guitar/guitar_A4.wav"},
+      {midi:72,url:"samples/guitar/guitar_C5.wav"},
+      {midi:75,url:"samples/guitar/guitar_Eb5.wav"},
+      {midi:78,url:"samples/guitar/guitar_Gb5.wav"}
     ];
     var guitarSampleBuffers = new Map();
     var guitarSamplesPromise = null;
@@ -732,18 +773,42 @@
       return s ? s.value : "synthetic";
     }
 
+    function setGuitarSampleStatus(text, stateClass) {
+      var el = document.getElementById("guitarSampleStatus");
+      if (!el) return;
+      el.textContent = text;
+      el.className = "sample-status" + (stateClass ? " " + stateClass : "");
+    }
+
     function loadGuitarSamples(ctx) {
-      if (guitarSampleBuffers.size === GUITAR_SAMPLE_DEFS.length) return Promise.resolve(true);
+      if (guitarSampleBuffers.size === GUITAR_SAMPLE_DEFS.length) {
+        setGuitarSampleStatus("Guitar: samples ready", "ready");
+        return Promise.resolve(true);
+      }
       if (guitarSamplesPromise) return guitarSamplesPromise;
+
+      setGuitarSampleStatus("Guitar: loading samples…", "");
+
       guitarSamplesPromise = Promise.all(GUITAR_SAMPLE_DEFS.map(function(def){
-        return fetch(def.url,{mode:"cors",cache:"force-cache"})
-          .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.arrayBuffer(); })
+        return fetch(def.url, {cache:"force-cache"})
+          .then(function(r){
+            if (!r.ok) throw new Error(def.url + " HTTP " + r.status);
+            return r.arrayBuffer();
+          })
           .then(function(ab){ return ctx.decodeAudioData(ab.slice(0)); })
           .then(function(buf){ guitarSampleBuffers.set(def.midi,buf); });
-      })).then(function(){ return true; }).catch(function(err){
-        console.warn("Sampled guitar unavailable; using synthetic fallback.",err);
+      })).then(function(){
+        setGuitarSampleStatus("Guitar: samples ready", "ready");
+        return true;
+      }).catch(function(err){
+        console.warn("Local guitar samples unavailable; using synthetic fallback.", err);
+        guitarSampleBuffers.clear();
+        setGuitarSampleStatus("Guitar: synth fallback", "fallback");
         return false;
-      }).finally(function(){ guitarSamplesPromise=null; });
+      }).finally(function(){
+        guitarSamplesPromise = null;
+      });
+
       return guitarSamplesPromise;
     }
 
@@ -992,8 +1057,8 @@
       var now = startWhen || ctx.currentTime;
       var noteRole = role || "arp";
 
-      // Bass and metronome always remain synthetic.
-      // Only chord/arp guitar voices use the recorded guitar samples.
+      // Bass is rendered separately; the metronome remains synthetic.
+      // Chord/arp guitar voices use the local recorded guitar samples when selected.
       if (selectedInstrument() === "sampled" && noteRole !== "metro" && noteRole !== "bass") {
         var sampleVol = noteRole === "chord" ? 0.16 : 0.18;
         if (playSampledTone(ctx,midi,now,sampleVol,targetArray,duration)) return;
@@ -1240,7 +1305,32 @@
 
     function selectedGuitarPatternEvents(){
       var s=document.getElementById("guitarPatternSelect");
-      return (!s?[]:s.value.split(",").map(function(x){var p=x.split("@");return {kind:p[0],beat:+p[1]};}));
+      return (!s?[]:s.value.split(",").filter(Boolean).map(function(x){
+        var p=x.split("@");
+        return {kind:p[0],beat:+p[1]};
+      }));
+    }
+
+    function selectedBassPatternEvents(){
+      var s=document.getElementById("bassPatternSelect");
+      return (!s?[]:s.value.split(",").filter(Boolean).map(function(x){
+        var p=x.split("@");
+        return {kind:p[0],beat:+p[1]};
+      }));
+    }
+
+    function bassMidiForKind(info, kind) {
+      if (!info || !info.midiNotes || !info.midiNotes.length) return 48;
+
+      var midi;
+      if (kind === "3" && info.midiNotes.length > 1) midi = info.midiNotes[1] - 12;
+      else if (kind === "5" && info.midiNotes.length > 2) midi = info.midiNotes[2] - 12;
+      else midi = info.midiNotes[0] - 12;
+
+      // Keep chord-tone motion in a practical bass register.
+      while (midi > 59) midi -= 12;
+      while (midi < 43) midi += 12;
+      return midi;
     }
 
 
@@ -1399,10 +1489,17 @@
           btn.textContent = "Loading…";
         }
 
-        Promise.all([
+        var startupLoads = [
           loadPercussionSamples(ctx),
           loadBassSamples(ctx)
-        ]).then(function(){
+        ];
+        if (selectedInstrument() === "sampled") {
+          startupLoads.push(loadGuitarSamples(ctx));
+        } else {
+          setGuitarSampleStatus("Guitar: synthetic selected", "fallback");
+        }
+
+        Promise.all(startupLoads).then(function(){
           progressionPlaying = true;
           if (btn) {
             btn.disabled = false;
@@ -1531,6 +1628,7 @@
     var selectorBrowserConfig = {
       progressionSelect: { label:"Progression", title:"Choose Progression", recentKey:"circle_recent_progressions" },
       guitarPatternSelect: { label:"Guitar", title:"Choose Guitar Pattern", recentKey:"circle_recent_guitar" },
+      bassPatternSelect: { label:"Bass", title:"Choose Bass Pattern", recentKey:"circle_recent_bass" },
       rhythmSelect: { label:"Percussion", title:"Choose Percussion Rhythm", recentKey:"circle_recent_percussion" }
     };
     var activeBrowserSelect = null;
@@ -1595,17 +1693,22 @@
       }
       if (select.id === "guitarPatternSelect") {
         var tokens = opt.value.split(",");
-        var b=0,c=0,a=0;
+        var c=0,a=0;
         tokens.forEach(function(tok){
-          if(tok.indexOf("B@")===0) b++;
-          else if(tok.indexOf("C@")===0) c++;
+          if(tok.indexOf("C@")===0) c++;
           else if(tok.indexOf("A")===0) a++;
         });
         var bits=[];
-        if(b) bits.push(b+" bass");
         if(c) bits.push(c+" chord");
         if(a) bits.push(a+" arp");
         return bits.join(" · ");
+      }
+      if (select.id === "bassPatternSelect") {
+        var bassTokens = opt.value.split(",");
+        var has3 = bassTokens.some(function(tok){ return tok.indexOf("3@")===0; });
+        var has5 = bassTokens.some(function(tok){ return tok.indexOf("5@")===0; });
+        var movement = has3 ? "root · 3rd · 5th" : (has5 ? "root · 5th" : "root");
+        return bassTokens.length + " attacks · " + movement;
       }
       var p = opt.value.split("|");
       return p[0].replace(/_/g," ");
@@ -1730,7 +1833,7 @@
     }
 
     function initChoiceBrowsers() {
-      ["progressionSelect","guitarPatternSelect","rhythmSelect"].forEach(function(id){
+      ["progressionSelect","guitarPatternSelect","bassPatternSelect","rhythmSelect"].forEach(function(id){
         var s=document.getElementById(id);
         if(s && !document.getElementById(id+"Trigger")) makeTrigger(s);
       });
@@ -1991,18 +2094,15 @@
       var position = transportProgressionPosition(beatNumber);
       if (!position) return;
 
-      var events = selectedGuitarPatternEvents();
+      var events = selectedBassPatternEvents();
       if (!events.length) return;
 
       var info = chordInfoForDegree(selectedMajor, position.degree);
       if (!info || !info.midiNotes || !info.midiNotes.length) return;
 
-      // Guitar patterns repeat every four beats WITHIN each chord. For the
-      // current transport beat, schedule any B@... attack whose absolute
-      // pattern position falls inside this beat, including half-beat attacks.
+      // Bass now has its own four-beat pattern, independent of Guitar.
+      // R = root, 3 = chord third, 5 = chord fifth.
       for (var i=0; i<events.length; i++) {
-        if (events[i].kind !== "B") continue;
-
         for (var base=0; base<position.beatsForChord; base+=4) {
           var pos = base + events[i].beat;
           if (pos >= position.beatsForChord) continue;
@@ -2011,11 +2111,14 @@
           var fraction = pos - position.beatInChord;
           var noteWhen = when + fraction * beatSeconds;
           var remaining = (position.beatsForChord - pos) * beatSeconds;
-          var bassDur = Math.max(0.07, Math.min(beatSeconds * 0.68, remaining - 0.025));
+          var bassDur = Math.max(
+            0.07,
+            Math.min(beatSeconds * 0.72, remaining - 0.025)
+          );
 
           renderBassEvent(
             ctx,
-            info.midiNotes[0] - 12,
+            bassMidiForKind(info, events[i].kind),
             bassDur,
             noteWhen
           );
@@ -2041,7 +2144,6 @@
       // against this transport beat's exact AudioContext time.
       for (var i=0; i<events.length; i++) {
         var kind = events[i].kind;
-        if (kind === "B") continue;
 
         for (var base=0; base<position.beatsForChord; base+=4) {
           var pos = base + events[i].beat;
@@ -2243,9 +2345,32 @@
       return false;
     }
 
+    function associatedBassPatternFor(percussionName) {
+      var s=(percussionName || "").toLowerCase();
+      if (s.indexOf("bossa") !== -1) return "Bossa basic";
+      if (s.indexOf("samba") !== -1) return "Samba pulse";
+      if (s.indexOf("tresillo") !== -1 || s.indexOf("latin") !== -1 || s.indexOf("tango") !== -1) return "Latin tresillo";
+
+      if (s.indexOf("swing") !== -1 || s.indexOf("charleston") !== -1 || s.indexOf("four to the bar") !== -1) return "Walking chord tones";
+      if (s.indexOf("jazz ballad") !== -1 || s.indexOf("two feel") !== -1) return "Jazz two-feel";
+
+      if (s.indexOf("funk") !== -1) return "Funk syncopated";
+      if (s.indexOf("motown") !== -1) return "Motown movement";
+      if (s.indexOf("neo-soul") !== -1) return "Neo-soul sparse";
+      if (s.indexOf("soul") !== -1 || s.indexOf("r&b") !== -1) return "Soul pocket";
+
+      if (s.indexOf("country") !== -1 || s.indexOf("train") !== -1) return "Country boom-chuck";
+      if (s.indexOf("folk") !== -1) return "Folk two-feel";
+      if (s.indexOf("reggae") !== -1) return "Reggae sparse";
+
+      if (s.indexOf("eighth") !== -1 || s.indexOf("driving") !== -1 || s.indexOf("rock") !== -1) return "Alternating root–fifth";
+      return "Two-feel roots";
+    }
+
     function applyAssociatedAccompanimentForProgression() {
       var progressionSelect=document.getElementById("progressionSelect");
       var guitarSelect=document.getElementById("guitarPatternSelect");
+      var bassSelect=document.getElementById("bassPatternSelect");
       var percussionSelect=document.getElementById("rhythmSelect");
       var opt=selectedOptionFor(progressionSelect);
       if(!opt) return;
@@ -2256,8 +2381,10 @@
 
       selectOptionByVisibleText(guitarSelect,pairing.guitar);
       selectOptionByVisibleText(percussionSelect,pairing.percussion);
+      selectOptionByVisibleText(bassSelect,associatedBassPatternFor(pairing.percussion));
 
       updateTrigger(guitarSelect);
+      updateTrigger(bassSelect);
       updateTrigger(percussionSelect);
     }
 
@@ -2270,6 +2397,10 @@
       updateTrigger(this);
     });
     document.getElementById("guitarPatternSelect").addEventListener("change", function(){
+      if (progressionPlaying) stopProgressionPlayback();
+      updateTrigger(this);
+    });
+    document.getElementById("bassPatternSelect").addEventListener("change", function(){
       if (progressionPlaying) stopProgressionPlayback();
       updateTrigger(this);
     });
@@ -2287,9 +2418,24 @@
       ensureAudioReady(function(ctx){
         loadPercussionSamples(ctx);
         loadBassSamples(ctx);
-        if (selectedInstrument() === "sampled") loadGuitarSamples(ctx);
+        if (selectedInstrument() === "sampled") {
+          loadGuitarSamples(ctx);
+        } else {
+          setGuitarSampleStatus("Guitar: synthetic selected", "fallback");
+        }
       });
     }
+
+    function handleInstrumentSelectionChange() {
+      var inst = document.getElementById("instrumentSelect");
+      if (!inst) return;
+      if (inst.value !== "sampled") {
+        setGuitarSampleStatus("Guitar: synthetic selected", "fallback");
+        return;
+      }
+      ensureAudioReady(function(ctx){ loadGuitarSamples(ctx); });
+    }
+
     document.addEventListener("touchstart", function bootAudio(){
       primeAudioSamples();
       document.removeEventListener("touchstart", bootAudio);
@@ -2310,7 +2456,13 @@
     } else {
       initChoiceBrowsers();
     }
-  </script>
+  
+    document.addEventListener("DOMContentLoaded", function(){
+      var inst = document.getElementById("instrumentSelect");
+      if (inst) inst.addEventListener("change", handleInstrumentSelectionChange);
+    });
+
+</script>
 
   <div id="choiceOverlay" class="choice-overlay" aria-hidden="true">
     <div class="choice-sheet" role="dialog" aria-modal="true" aria-labelledby="choiceTitle">
