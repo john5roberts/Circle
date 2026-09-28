@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Circle v1.36</title>
+  <title>Circle v1.37</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -373,7 +373,7 @@
 <body>
   <div class="wrap">
     <div class="panel">
-      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.36"></svg>
+      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.37"></svg>
       <div id="progressionStrip" class="progression-strip" aria-label="Progression map"></div>
       <div class="controls">
         <select id="progressionSelect" class="source-select">
@@ -1233,6 +1233,190 @@
       if (!select || !select.value) return "quarter";
       return select.value.split("|")[0];
     }
+
+    function selectedPercussionLabel() {
+      var select = document.getElementById("rhythmSelect");
+      var opt = selectedOptionFor(select);
+      return opt ? opt.textContent.trim() : "Simple quarters";
+    }
+
+    // Each named Percussion choice now has an actual four-beat groove.
+    // Values are beat positions within a 4/4 bar. Fractions are scheduled
+    // directly on the AudioContext clock, so offbeats do not depend on JS timers.
+    var PERCUSSION_GROOVES = {
+      "Simple quarters": {
+        kick:[0,2], snare:[1,3], hat:[0,1,2,3]
+      },
+      "Eighth pulse": {
+        kick:[0,2], snare:[1,3], hat:[0,0.5,1,1.5,2,2.5,3,3.5]
+      },
+      "Half-note pulse": {
+        kick:[0], snare:[2], hat:[0,2]
+      },
+      "Whole-bar sustain": {
+        kick:[0], snare:[], hat:[0]
+      },
+      "Quarter push": {
+        kick:[0,1.75,2.75], snare:[1,3], hat:[0,0.75,1.5,2,2.75,3.5]
+      },
+      "Anticipation": {
+        kick:[0,1.5,2.5], snare:[1,3], hat:[0,0.5,1.5,2,2.5,3.5]
+      },
+      "Offbeat drive": {
+        kick:[0,2], snare:[1.5,3.5], hat:[0.5,1.5,2.5,3.5]
+      },
+      "Sparse quarters": {
+        kick:[0], snare:[3], hat:[0,2]
+      },
+
+      "Pop groove (push)": {
+        kick:[0,1.75,2.5], snare:[1,3], hat:[0,0.5,1,1.5,2,2.5,3,3.5]
+      },
+      "Syncopated pop": {
+        kick:[0,0.75,2,2.75], snare:[1.5,3.5], hat:[0,0.5,1,1.5,2,2.5,3,3.5]
+      },
+      "Driving pop": {
+        kick:[0,1.5,2,3.5], snare:[1,3], hat:[0,0.5,1,1.5,2,2.5,3,3.5]
+      },
+      "Rock quarters": {
+        kick:[0,1,2,3], snare:[1,3], hat:[0,1,2,3]
+      },
+      "Rock eighths": {
+        kick:[0,1.5,2,2.5], snare:[1,3], hat:[0,0.5,1,1.5,2,2.5,3,3.5]
+      },
+      "Backbeat hits": {
+        kick:[0,2], snare:[1,3], hat:[0,2]
+      },
+      "Power ballad": {
+        kick:[0,2.5], snare:[1,3], hat:[0,1,2,3]
+      },
+      "Arena sustain": {
+        kick:[0], snare:[2], hat:[0,1,2,3]
+      },
+
+      "Bossa-style groove": {
+        kick:[0,1.5,2,3.5], snare:[0.5,1.5,2.5,3.5], hat:[0,1,2,3]
+      },
+      "Bossa sparse": {
+        kick:[0,2], snare:[1.5,3.5], hat:[0,1,2,3]
+      },
+      "Bossa syncopated": {
+        kick:[0,1.5,2.75], snare:[0.75,2,3.5], hat:[0,0.5,1,1.5,2,2.5,3,3.5]
+      },
+      "Samba light": {
+        kick:[0,1.5,2,3.5], snare:[0.5,1.5,2.5,3.5], hat:[0,0.5,1,1.5,2,2.5,3,3.5]
+      },
+      "Samba drive": {
+        kick:[0,0.75,1.5,2.5,3.25], snare:[1,2,3], hat:[0,0.5,1,1.5,2,2.5,3,3.5]
+      },
+      "Tresillo": {
+        kick:[0,1.5,2.5], snare:[3], hat:[0,1,2,3]
+      },
+      "Tango": {
+        kick:[0,1,2.5,3], snare:[1.5,3.5], hat:[0,1,2,3]
+      },
+      "Latin offbeat": {
+        kick:[0,2], snare:[0.5,1.5,2.5,3.5], hat:[0.5,1.5,2.5,3.5]
+      },
+
+      "Swing comp": {
+        kick:[0,2], snare:[1.67,3.67], hat:[0,0.67,1,1.67,2,2.67,3,3.67]
+      },
+      "Swing sparse": {
+        kick:[0,2], snare:[3.67], hat:[0,0.67,2,2.67]
+      },
+      "Swing push": {
+        kick:[0,2.67], snare:[1.67,3.67], hat:[0,0.67,1,1.67,2,2.67,3,3.67]
+      },
+      "Charleston": {
+        kick:[0], snare:[1.5,3], hat:[0,1.5,3]
+      },
+      "Reverse Charleston": {
+        kick:[0.5,2], snare:[1.5,3.5], hat:[0.5,2,3.5]
+      },
+      "Jazz ballad": {
+        kick:[0,2], snare:[3], hat:[0,1,2,3]
+      },
+      "Two feel": {
+        kick:[0,2], snare:[1.67,3.67], hat:[0,0.67,2,2.67]
+      },
+      "Four to the bar": {
+        kick:[0,1,2,3], snare:[1.67,3.67], hat:[0,0.67,1,1.67,2,2.67,3,3.67]
+      },
+
+      "Funk subdivision": {
+        kick:[0,0.75,2,2.5], snare:[1,3], hat:[0,0.5,1,1.5,2,2.5,3,3.5]
+      },
+      "Funk push": {
+        kick:[0,0.75,1.75,2.5,3.25], snare:[1,3], hat:[0.5,1.5,2.5,3.5]
+      },
+      "Funk sparse": {
+        kick:[0,2.5], snare:[1.5,3], hat:[0,0.5,1.5,2,3.5]
+      },
+      "Soul backbeat": {
+        kick:[0,2.5], snare:[1,3], hat:[0,0.5,1,1.5,2,2.5,3,3.5]
+      },
+      "R&B pocket": {
+        kick:[0,1.5,2.75], snare:[1,3], hat:[0,0.5,1.5,2,2.5,3.5]
+      },
+      "Neo-soul space": {
+        kick:[0,2.75], snare:[1.5,3.5], hat:[0.5,2,3]
+      },
+
+      "Folk quarters": {
+        kick:[0,2], snare:[1,3], hat:[0,1,2,3]
+      },
+      "Folk eighths": {
+        kick:[0,2], snare:[1,3], hat:[0,0.5,1,1.5,2,2.5,3,3.5]
+      },
+      "Country two-step": {
+        kick:[0,2], snare:[1,3], hat:[0.5,1.5,2.5,3.5]
+      },
+      "Country drive": {
+        kick:[0,1.5,2,3.5], snare:[1,3], hat:[0,0.5,1,1.5,2,2.5,3,3.5]
+      },
+      "Ballad strum": {
+        kick:[0,2], snare:[3], hat:[0,1,2,3]
+      },
+      "Train pulse": {
+        kick:[0,1.5,2,3.5], snare:[0.5,1.5,2.5,3.5], hat:[0,0.5,1,1.5,2,2.5,3,3.5]
+      },
+
+      "Reggae skank": {
+        kick:[2], snare:[2], hat:[0.5,1.5,2.5,3.5]
+      },
+      "Reggae-ish push": {
+        kick:[0,2.5], snare:[2,3.5], hat:[0.5,1.5,2.5,3.5]
+      },
+      "Long-short practice": {
+        kick:[0,1.5,2.5], snare:[1,3], hat:[0,1.5,2,3.5]
+      },
+      "Short-long practice": {
+        kick:[0,0.5,2,2.5], snare:[1.5,3.5], hat:[0,0.5,2,2.5]
+      },
+      "Triplet-like push": {
+        kick:[0,2.67], snare:[1.33,3.33], hat:[0,0.67,1,1.67,2,2.67,3,3.67]
+      },
+      "Space and push": {
+        kick:[0,2.5], snare:[2,3.5], hat:[0,0.5,2,3]
+      }
+    };
+
+    function selectedPercussionGroove() {
+      var label = selectedPercussionLabel();
+      return PERCUSSION_GROOVES[label] || PERCUSSION_GROOVES["Simple quarters"];
+    }
+
+    function schedulePercussionPositions(ctx, when, beatSeconds, beatInBar, positions, kind) {
+      if (!positions || !positions.length) return;
+      for (var i=0; i<positions.length; i++) {
+        var pos = positions[i];
+        var whole = Math.floor(pos + 1e-9);
+        if (whole !== beatInBar) continue;
+        var fraction = pos - whole;
+        renderPercussionEvent(ctx, when + fraction * beatSeconds, kind);
+      }
+    }
     function playMetronomeClick(ctx, when, accent) {
       var osc = ctx.createOscillator(), gain = ctx.createGain();
       osc.type = "square"; osc.frequency.setValueAtTime(accent ? 1600 : 1100, when);
@@ -1730,11 +1914,18 @@
       if (category === "Recent") {
         var cfg=selectorBrowserConfig[select.id], vals=readRecentValues(cfg.recentKey), out=[];
         vals.forEach(function(v){
+          // v1.37 stores exact option indices ("i:12"), so duplicate-valued
+          // choices remain distinct. Older saved values are still accepted.
+          if (typeof v === "string" && v.indexOf("i:") === 0) {
+            var ix = parseInt(v.slice(2),10);
+            if (!isNaN(ix) && select.options[ix]) out.push(select.options[ix]);
+            return;
+          }
           for(var i=0;i<select.options.length;i++){
             if(select.options[i].value===v){ out.push(select.options[i]); break; }
           }
         });
-        return out;
+        return out.filter(function(opt,idx,arr){ return arr.indexOf(opt)===idx; });
       }
       return Array.prototype.filter.call(select.options,function(opt){
         return optionCategory(opt) === category;
@@ -1765,8 +1956,14 @@
 
     function applyBrowserSelection(opt) {
       if(!activeBrowserSelect || !opt) return;
-      activeBrowserSelect.value=opt.value;
-      rememberRecent(activeBrowserSelect,opt.value);
+
+      // Use the exact option index. Several menus intentionally contain
+      // duplicate values with different labels, so assigning .value alone
+      // can select the wrong duplicate and make multiple tiles appear active.
+      var exactIndex = optionIndexInSelect(activeBrowserSelect,opt);
+      if (exactIndex < 0) return;
+      activeBrowserSelect.selectedIndex = exactIndex;
+      rememberRecent(activeBrowserSelect,optionRecentKey(activeBrowserSelect,opt));
       updateTrigger(activeBrowserSelect);
 
       // Reuse each source select's normal change behavior.
@@ -1780,6 +1977,19 @@
       renderBrowserGrid();
     }
 
+    function optionIndexInSelect(select, opt) {
+      if (!select || !opt) return -1;
+      for (var i=0; i<select.options.length; i++) {
+        if (select.options[i] === opt) return i;
+      }
+      return -1;
+    }
+
+    function optionRecentKey(select, opt) {
+      var ix = optionIndexInSelect(select, opt);
+      return ix >= 0 ? "i:" + ix : "";
+    }
+
     function renderBrowserGrid() {
       var host=document.getElementById("choiceGrid");
       host.innerHTML="";
@@ -1787,7 +1997,8 @@
       opts.forEach(function(opt){
         var b=document.createElement("button");
         b.type="button";
-        b.className="choice-item"+(opt.value===activeBrowserSelect.value?" selected":"");
+        var exactIndex = optionIndexInSelect(activeBrowserSelect,opt);
+        b.className="choice-item"+(exactIndex===activeBrowserSelect.selectedIndex?" selected":"");
         var nm=document.createElement("div"); nm.className="choice-name"; nm.textContent=opt.textContent.trim();
         var detail=document.createElement("div"); detail.className="choice-detail"; detail.textContent=optionDetail(activeBrowserSelect,opt);
         b.appendChild(nm);
@@ -2019,38 +2230,15 @@
       var toggle = document.getElementById("percussionToggle");
       if (!toggle || !toggle.checked) return;
 
-      var percussionPattern = selectedPercussionPatternName();
       var beatInBar = beatNumber % 4;
+      var groove = selectedPercussionGroove();
 
-      // Preserve the existing percussion behavior while moving its timing
-      // completely onto the AudioContext transport.
-      if (percussionPattern === "bossa") {
-        if (beatInBar === 0 || beatInBar === 2) {
-          renderPercussionEvent(ctx, when, "kick");
-        }
-        if (beatInBar === 1 || beatInBar === 3) {
-          renderPercussionEvent(ctx, when, "snare");
-        }
-      } else if (percussionPattern === "reggae" || percussionPattern === "reggaeish") {
-        if (beatInBar === 2) {
-          renderPercussionEvent(ctx, when, "kick");
-          renderPercussionEvent(ctx, when, "snare");
-        }
-      } else {
-        if (beatInBar === 0 || beatInBar === 2) {
-          renderPercussionEvent(ctx, when, "kick");
-        }
-        if (beatInBar === 1 || beatInBar === 3) {
-          renderPercussionEvent(ctx, when, "snare");
-        }
-      }
+      schedulePercussionPositions(ctx,when,beatSeconds,beatInBar,groove.kick,"kick");
+      schedulePercussionPositions(ctx,when,beatSeconds,beatInBar,groove.snare,"snare");
+      schedulePercussionPositions(ctx,when,beatSeconds,beatInBar,groove.hat,"hat");
 
-      // Existing eighth-note hi-hat pulse, now scheduled directly on the
-      // audio clock rather than by two JavaScript timers per beat.
-      renderPercussionEvent(ctx, when, "hat");
-      renderPercussionEvent(ctx, when + beatSeconds * 0.5, "hat");
-
-      // Phrase-ending fill, synchronized to the same master transport.
+      // Phrase-ending fills remain synchronized to the same master transport
+      // and are layered over the selected groove without changing phrase time.
       scheduleTransportTurnaroundBeat(ctx, when, beatNumber, beatSeconds);
     }
 
