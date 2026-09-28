@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Circle v1.32</title>
+  <title>Circle v1.33</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -337,21 +337,43 @@
 
 
     .sample-status {
-      margin: -2px 2px 8px;
-      font-size: 11px;
-      font-weight: 700;
-      color: #aeb4b9;
+      margin: 6px 4px 8px;
+      padding: 7px 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12px;
+      font-weight: 800;
+      color: #202428;
+      background: #e7e9eb;
+      border: 1px solid #aeb4b9;
+      border-radius: 9px;
       letter-spacing: .01em;
     }
-    .sample-status.ready { color: #d9dde0; }
-    .sample-status.fallback { color: #c7cbd0; }
+    .sample-status::before {
+      content: "●";
+      font-size: 9px;
+      color: #7a8187;
+    }
+    .sample-status.ready {
+      color: #202428;
+      background: #f2f3f4;
+      border-color: #6f767c;
+    }
+    .sample-status.ready::before { color: #4f565c; }
+    .sample-status.fallback {
+      color: #202428;
+      background: #dedfe1;
+      border-color: #8e9499;
+    }
+    .sample-status.fallback::before { color: #5f666c; }
 
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="panel">
-      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.32"></svg>
+      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.33"></svg>
       <div id="progressionStrip" class="progression-strip" aria-label="Progression map"></div>
       <div class="controls">
         <select id="progressionSelect" class="source-select">
@@ -451,7 +473,7 @@
           <option value="sampled" selected>Sampled acoustic guitar</option>
         </select>
       </div>
-      <div id="sampleStatus" class="sample-status">Percussion samples: load on first tap</div>
+      <div id="sampleStatus" class="sample-status">Drums: waiting for first tap</div>
       <div class="controls">
         <select id="rhythmSelect" class="source-select">
           <optgroup label="Straight / Basic">
@@ -747,12 +769,12 @@
 
     function loadPercussionSamples(ctx) {
       if (percussionSampleBuffers.size === 3) {
-        setPercussionSampleStatus("Percussion samples: ready", "ready");
+        setPercussionSampleStatus("Drums: samples ready", "ready");
         return Promise.resolve(true);
       }
       if (percussionSamplesPromise) return percussionSamplesPromise;
 
-      setPercussionSampleStatus("Percussion samples: loading…", "");
+      setPercussionSampleStatus("Drums: loading samples…", "");
 
       var entries = Object.keys(PERCUSSION_SAMPLE_DEFS);
       percussionSamplesPromise = Promise.all(entries.map(function(kind){
@@ -765,12 +787,12 @@
           .then(function(ab){ return ctx.decodeAudioData(ab.slice(0)); })
           .then(function(buf){ percussionSampleBuffers.set(kind, buf); });
       })).then(function(){
-        setPercussionSampleStatus("Percussion samples: ready", "ready");
+        setPercussionSampleStatus("Drums: samples ready", "ready");
         return true;
       }).catch(function(err){
         console.warn("Local percussion samples unavailable; using synth fallback.", err);
         percussionSampleBuffers.clear();
-        setPercussionSampleStatus("Percussion samples unavailable — synth fallback", "fallback");
+        setPercussionSampleStatus("Drums: synth fallback", "fallback");
         return false;
       }).finally(function(){
         percussionSamplesPromise = null;
