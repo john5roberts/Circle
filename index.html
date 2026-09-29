@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Circle v1.46</title>
+  <title>Circle v1.48</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -652,7 +652,7 @@
 <body>
   <div class="wrap">
     <div class="panel">
-      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.46"></svg>
+      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.48"></svg>
       <div id="progressionStrip" class="progression-strip" aria-label="Progression map"></div>
       <div class="controls">
         <select id="progressionSelect" class="source-select">
@@ -1055,13 +1055,41 @@
     // Local Shinyguitar acoustic/microphone samples, covering Circle's
     // actual guitar range (MIDI 60-78) at three-semitone centers.
     var GUITAR_SAMPLE_DEFS = [
-      {midi:60,url:"samples/guitar/guitar_C4.wav"},
-      {midi:63,url:"samples/guitar/guitar_Eb4.wav"},
-      {midi:66,url:"samples/guitar/guitar_Gb4.wav"},
-      {midi:69,url:"samples/guitar/guitar_A4.wav"},
-      {midi:72,url:"samples/guitar/guitar_C5.wav"},
-      {midi:75,url:"samples/guitar/guitar_Eb5.wav"},
-      {midi:78,url:"samples/guitar/guitar_Gb5.wav"}
+      {
+        midi:60,
+        local:"samples/guitar/guitar_C4.wav",
+        remote:"https://raw.githubusercontent.com/sfzinstruments/karoryfer.shinyguitar/master/Samples/acoustic/c4_vl3_rr1_1.wav"
+      },
+      {
+        midi:63,
+        local:"samples/guitar/guitar_Eb4.wav",
+        remote:"https://raw.githubusercontent.com/sfzinstruments/karoryfer.shinyguitar/master/Samples/acoustic/eb4_vl3_rr1_1.wav"
+      },
+      {
+        midi:66,
+        local:"samples/guitar/guitar_Gb4.wav",
+        remote:"https://raw.githubusercontent.com/sfzinstruments/karoryfer.shinyguitar/master/Samples/acoustic/gb4_vl3_rr1_1.wav"
+      },
+      {
+        midi:69,
+        local:"samples/guitar/guitar_A4.wav",
+        remote:"https://raw.githubusercontent.com/sfzinstruments/karoryfer.shinyguitar/master/Samples/acoustic/a4_vl3_rr1_1.wav"
+      },
+      {
+        midi:72,
+        local:"samples/guitar/guitar_C5.wav",
+        remote:"https://raw.githubusercontent.com/sfzinstruments/karoryfer.shinyguitar/master/Samples/acoustic/c5_vl3_rr1_1.wav"
+      },
+      {
+        midi:75,
+        local:"samples/guitar/guitar_Eb5.wav",
+        remote:"https://raw.githubusercontent.com/sfzinstruments/karoryfer.shinyguitar/master/Samples/acoustic/eb5_vl3_rr1_1.wav"
+      },
+      {
+        midi:78,
+        local:"samples/guitar/guitar_Gb5.wav",
+        remote:"https://raw.githubusercontent.com/sfzinstruments/karoryfer.shinyguitar/master/Samples/acoustic/gb5_vl3_rr1_1.wav"
+      }
     ];
     var guitarSampleBuffers = new Map();
     var guitarSamplesPromise = null;
@@ -1076,7 +1104,7 @@
 
     function loadGuitarSamples(ctx) {
       if (guitarSampleBuffers.size === GUITAR_SAMPLE_DEFS.length) {
-        setGuitarSampleStatus("Guitar: samples ready", "ready");
+        setGuitarSampleStatus("Guitar: 7/7 samples", "ready");
         return Promise.resolve(true);
       }
       if (guitarSamplesPromise) return guitarSamplesPromise;
@@ -1084,19 +1112,31 @@
       setGuitarSampleStatus("Guitar: loading samples…", "");
 
       guitarSamplesPromise = Promise.all(GUITAR_SAMPLE_DEFS.map(function(def){
-        return fetch(def.url, {cache:"force-cache"})
-          .then(function(r){
-            if (!r.ok) throw new Error(def.url + " HTTP " + r.status);
-            return r.arrayBuffer();
+        return fetchAndDecodePercussionSample(ctx, [def.local, def.remote])
+          .then(function(buf){
+            guitarSampleBuffers.set(def.midi, buf);
+            return true;
           })
-          .then(function(ab){ return ctx.decodeAudioData(ab.slice(0)); })
-          .then(function(buf){ guitarSampleBuffers.set(def.midi,buf); });
-      })).then(function(){
-        setGuitarSampleStatus("Guitar: samples ready", "ready");
-        return true;
-      }).catch(function(err){
-        console.warn("Local guitar samples unavailable; using synthetic fallback.", err);
-        guitarSampleBuffers.clear();
+          .catch(function(err){
+            console.warn("Guitar sample unavailable at MIDI " + def.midi + "; nearest loaded sample or synth will be used.", err);
+            guitarSampleBuffers.delete(def.midi);
+            return false;
+          });
+      })).then(function(results){
+        var loaded = results.filter(Boolean).length;
+
+        if (loaded === GUITAR_SAMPLE_DEFS.length) {
+          setGuitarSampleStatus("Guitar: 7/7 samples", "ready");
+          return true;
+        }
+
+        if (loaded > 0) {
+          // Partial loading is still useful because nearestGuitarSample()
+          // pitch-shifts the closest successfully loaded recording.
+          setGuitarSampleStatus("Guitar: " + loaded + "/7 samples", "ready");
+          return true;
+        }
+
         setGuitarSampleStatus("Guitar: synth fallback", "fallback");
         return false;
       }).finally(function(){
@@ -1205,9 +1245,38 @@
     // samples/drums/snare.wav
     // samples/drums/hihat.wav
     var PERCUSSION_SAMPLE_DEFS = {
-      kick: "samples/drums/kick.wav",
-      snare: "samples/drums/snare.wav",
-      hat: "samples/drums/hihat.wav"
+      kick: {
+        local: "samples/drums/kick.wav"
+      },
+      snare: {
+        local: "samples/drums/snare.wav"
+      },
+      hat: {
+        local: "samples/drums/hihat.wav"
+      },
+
+      // Pass 3: additional CC0 percussion colors.
+      // Circle tries the local repo path first, then the public CC0 source.
+      tomHigh: {
+        local: "samples/drums/tom-high.wav",
+        remote: "https://raw.githubusercontent.com/averagenative/0x808/main/samples/909/tom-h.wav"
+      },
+      tomLow: {
+        local: "samples/drums/tom-low.wav",
+        remote: "https://raw.githubusercontent.com/averagenative/0x808/main/samples/909/tom-l.wav"
+      },
+      rim: {
+        local: "samples/drums/rim.wav",
+        remote: "https://raw.githubusercontent.com/averagenative/0x808/main/samples/909/rim.wav"
+      },
+      openHat: {
+        local: "samples/drums/hihat-open.wav",
+        remote: "https://raw.githubusercontent.com/averagenative/0x808/main/samples/909/hihat-open-1.wav"
+      },
+      ride: {
+        local: "samples/drums/ride.wav",
+        remote: "https://raw.githubusercontent.com/averagenative/0x808/main/samples/909/ride.wav"
+      }
     };
     var percussionSampleBuffers = new Map();
     var percussionSamplesPromise = null;
@@ -1237,8 +1306,35 @@
       updateCompactAudioStatus(document.getElementById("sampleStatus"), text, stateClass);
     }
 
+    function fetchAndDecodePercussionSample(ctx, urls) {
+      var list = Array.isArray(urls) ? urls.slice() : [urls];
+
+      function tryNext(index) {
+        if (index >= list.length) return Promise.reject(new Error("No sample source available"));
+
+        var url = list[index];
+        if (!url) return tryNext(index + 1);
+
+        return fetch(url, {cache:"force-cache"})
+          .then(function(r){
+            if (!r.ok) throw new Error(url + " HTTP " + r.status);
+            return r.arrayBuffer();
+          })
+          .then(function(ab){
+            return ctx.decodeAudioData(ab.slice(0));
+          })
+          .catch(function(){
+            return tryNext(index + 1);
+          });
+      }
+
+      return tryNext(0);
+    }
+
     function loadPercussionSamples(ctx) {
-      if (percussionSampleBuffers.size === 3) {
+      var entries = Object.keys(PERCUSSION_SAMPLE_DEFS);
+
+      if (percussionSampleBuffers.size === entries.length) {
         setPercussionSampleStatus("Drums: samples ready", "ready");
         return Promise.resolve(true);
       }
@@ -1246,22 +1342,37 @@
 
       setPercussionSampleStatus("Drums: loading samples…", "");
 
-      var entries = Object.keys(PERCUSSION_SAMPLE_DEFS);
       percussionSamplesPromise = Promise.all(entries.map(function(kind){
-        var url = PERCUSSION_SAMPLE_DEFS[kind];
-        return fetch(url, {cache:"force-cache"})
-          .then(function(r){
-            if (!r.ok) throw new Error(url + " HTTP " + r.status);
-            return r.arrayBuffer();
+        var def = PERCUSSION_SAMPLE_DEFS[kind];
+        var urls = [];
+
+        if (typeof def === "string") {
+          urls.push(def);
+        } else {
+          if (def.local) urls.push(def.local);
+          if (def.remote) urls.push(def.remote);
+        }
+
+        return fetchAndDecodePercussionSample(ctx, urls)
+          .then(function(buf){
+            percussionSampleBuffers.set(kind, buf);
+            return true;
           })
-          .then(function(ab){ return ctx.decodeAudioData(ab.slice(0)); })
-          .then(function(buf){ percussionSampleBuffers.set(kind, buf); });
-      })).then(function(){
-        setPercussionSampleStatus("Drums: samples ready", "ready");
-        return true;
-      }).catch(function(err){
-        console.warn("Local percussion samples unavailable; using synth fallback.", err);
-        percussionSampleBuffers.clear();
+          .catch(function(err){
+            console.warn("Percussion sample unavailable for " + kind + "; using synth fallback.", err);
+            percussionSampleBuffers.delete(kind);
+            return false;
+          });
+      })).then(function(results){
+        var loaded = results.filter(Boolean).length;
+        if (loaded === entries.length) {
+          setPercussionSampleStatus("Drums: samples ready", "ready");
+          return true;
+        }
+        if (loaded > 0) {
+          setPercussionSampleStatus("Drums: " + loaded + "/" + entries.length + " samples", "ready");
+          return true;
+        }
         setPercussionSampleStatus("Drums: synth fallback", "fallback");
         return false;
       }).finally(function(){
@@ -1279,7 +1390,17 @@
       var gain = ctx.createGain();
       src.buffer = buf;
 
-      var level = kind === "kick" ? 0.72 : (kind === "snare" ? 0.52 : 0.30);
+      var levels = {
+        kick:0.72,
+        snare:0.52,
+        hat:0.30,
+        tomHigh:0.46,
+        tomLow:0.50,
+        rim:0.40,
+        openHat:0.28,
+        ride:0.25
+      };
+      var level = levels[kind] !== undefined ? levels[kind] : 0.35;
       gain.gain.setValueAtTime(level, when);
 
       src.connect(gain);
@@ -1367,7 +1488,7 @@
       var noteRole = role || "arp";
 
       // Bass is rendered separately; the metronome remains synthetic.
-      // Chord/arp guitar voices use the local recorded guitar samples when selected.
+      // Chord/arp guitar voices use recorded guitar samples when available (local first, web fallback second).
       if (selectedInstrument() === "sampled" && noteRole !== "metro" && noteRole !== "bass") {
         var sampleVol = noteRole === "chord" ? 0.16 : 0.18;
         if (playSampledTone(ctx,midi,now,sampleVol,targetArray,duration)) return;
@@ -1746,54 +1867,98 @@
     }
 
     function playPercussionHit(ctx, when, kind) {
-      if (kind === "kick") {
-        var osc = ctx.createOscillator(), gain = ctx.createGain();
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(110, when);
-        osc.frequency.exponentialRampToValueAtTime(55, when + 0.08);
-        gain.gain.setValueAtTime(0.0001, when);
-        gain.gain.linearRampToValueAtTime(0.18, when + 0.002);
-        gain.gain.exponentialRampToValueAtTime(0.001, when + 0.12);
-        osc.connect(gain); gain.connect(masterGain || ctx.destination);
-        osc.start(when); osc.stop(when + 0.13);
-        progressionOscillators.push({ osc: osc, gain: gain, ctx: ctx });
-        return;
-      }
-      if (kind === "snare") {
-        var bufferSize = Math.floor(ctx.sampleRate * 0.12);
-        var buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      function noiseBurst(duration, hpFreq, level, decay) {
+        var size = Math.max(1, Math.floor(ctx.sampleRate * duration));
+        var buffer = ctx.createBuffer(1, size, ctx.sampleRate);
         var data = buffer.getChannelData(0);
-        for (var i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
-        var noise = ctx.createBufferSource();
-        noise.buffer = buffer;
+        for (var i=0;i<size;i++) data[i] = (Math.random()*2-1) * (1-i/size);
+
+        var src = ctx.createBufferSource();
+        src.buffer = buffer;
+
         var filter = ctx.createBiquadFilter();
         filter.type = "highpass";
-        filter.frequency.setValueAtTime(1400, when);
-        var gainN = ctx.createGain();
-        gainN.gain.setValueAtTime(0.0001, when);
-        gainN.gain.linearRampToValueAtTime(0.12, when + 0.001);
-        gainN.gain.exponentialRampToValueAtTime(0.001, when + 0.09);
-        noise.connect(filter); filter.connect(gainN); gainN.connect(masterGain || ctx.destination);
-        noise.start(when); noise.stop(when + 0.1);
-        trackPercussionSource(noise, gainN, ctx);
+        filter.frequency.setValueAtTime(hpFreq, when);
+
+        var gain = ctx.createGain();
+        gain.gain.setValueAtTime(0.0001, when);
+        gain.gain.linearRampToValueAtTime(level, when + 0.001);
+        gain.gain.exponentialRampToValueAtTime(0.001, when + decay);
+
+        src.connect(filter);
+        filter.connect(gain);
+        gain.connect(masterGain || ctx.destination);
+        src.start(when);
+        src.stop(when + duration);
+        trackPercussionSource(src, gain, ctx);
+      }
+
+      function pitchedDrum(startFreq, endFreq, duration, level) {
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(startFreq, when);
+        osc.frequency.exponentialRampToValueAtTime(endFreq, when + duration * .62);
+
+        gain.gain.setValueAtTime(0.0001, when);
+        gain.gain.linearRampToValueAtTime(level, when + 0.002);
+        gain.gain.exponentialRampToValueAtTime(0.001, when + duration);
+
+        osc.connect(gain);
+        gain.connect(masterGain || ctx.destination);
+        osc.start(when);
+        osc.stop(when + duration + .01);
+        progressionOscillators.push({osc:osc,gain:gain,ctx:ctx});
+      }
+
+      if (kind === "kick") {
+        pitchedDrum(110,55,.12,.18);
         return;
       }
-      var noiseSize = Math.floor(ctx.sampleRate * 0.05);
-      var hbuf = ctx.createBuffer(1, noiseSize, ctx.sampleRate);
-      var hdata = hbuf.getChannelData(0);
-      for (var j = 0; j < noiseSize; j++) hdata[j] = (Math.random() * 2 - 1) * (1 - j / noiseSize);
-      var hsrc = ctx.createBufferSource();
-      hsrc.buffer = hbuf;
-      var hpf = ctx.createBiquadFilter();
-      hpf.type = "highpass";
-      hpf.frequency.setValueAtTime(5000, when);
-      var hgain = ctx.createGain();
-      hgain.gain.setValueAtTime(0.0001, when);
-      hgain.gain.linearRampToValueAtTime(0.05, when + 0.001);
-      hgain.gain.exponentialRampToValueAtTime(0.001, when + 0.04);
-      hsrc.connect(hpf); hpf.connect(hgain); hgain.connect(masterGain || ctx.destination);
-      hsrc.start(when); hsrc.stop(when + 0.05);
-      trackPercussionSource(hsrc, hgain, ctx);
+
+      if (kind === "snare") {
+        noiseBurst(.12,1400,.12,.09);
+        return;
+      }
+
+      if (kind === "tomHigh") {
+        pitchedDrum(240,155,.20,.13);
+        return;
+      }
+
+      if (kind === "tomLow") {
+        pitchedDrum(150,88,.26,.15);
+        return;
+      }
+
+      if (kind === "rim") {
+        var osc = ctx.createOscillator();
+        var g = ctx.createGain();
+        osc.type = "square";
+        osc.frequency.setValueAtTime(1080,when);
+        g.gain.setValueAtTime(.055,when);
+        g.gain.exponentialRampToValueAtTime(.001,when+.035);
+        osc.connect(g);
+        g.connect(masterGain || ctx.destination);
+        osc.start(when);
+        osc.stop(when+.04);
+        progressionOscillators.push({osc:osc,gain:g,ctx:ctx});
+        return;
+      }
+
+      if (kind === "openHat") {
+        noiseBurst(.30,5200,.045,.26);
+        return;
+      }
+
+      if (kind === "ride") {
+        noiseBurst(.42,3600,.035,.36);
+        return;
+      }
+
+      // closed hi-hat and safe fallback
+      noiseBurst(.05,5000,.05,.04);
     }
 
     function selectedGuitarPatternEvents(){
@@ -2845,9 +3010,14 @@
         strength === "strong" ? 3 :
         strength === "medium" ? 2 : 1;
 
-      function kick(f)  { scheduleMeterFillHit(ctx,when,beatSeconds,f,"kick"); }
-      function snare(f) { scheduleMeterFillHit(ctx,when,beatSeconds,f,"snare"); }
-      function hat(f)   { scheduleMeterFillHit(ctx,when,beatSeconds,f,"hat"); }
+      function kick(f)    { scheduleMeterFillHit(ctx,when,beatSeconds,f,"kick"); }
+      function snare(f)   { scheduleMeterFillHit(ctx,when,beatSeconds,f,"snare"); }
+      function hat(f)     { scheduleMeterFillHit(ctx,when,beatSeconds,f,"hat"); }
+      function tomHi(f)   { scheduleMeterFillHit(ctx,when,beatSeconds,f,"tomHigh"); }
+      function tomLo(f)   { scheduleMeterFillHit(ctx,when,beatSeconds,f,"tomLow"); }
+      function rim(f)     { scheduleMeterFillHit(ctx,when,beatSeconds,f,"rim"); }
+      function openHat(f) { scheduleMeterFillHit(ctx,when,beatSeconds,f,"openHat"); }
+      function ride(f)    { scheduleMeterFillHit(ctx,when,beatSeconds,f,"ride"); }
 
       switch (type) {
         case "beat3Snare":
@@ -2855,7 +3025,7 @@
           if (level >= 1) snare(.75);
           if (level >= 2) snare(.50);
           if (level >= 3) {
-            hat(.25);
+            rim(.25);
             snare(.50);
             snare(.75);
           }
@@ -2866,66 +3036,77 @@
         case "tripletTom":
         case "fullTripletTom":
         case "descendingTom":
-          if (level >= 1) snare(.75);
+          if (level >= 1) tomLo(.75);
           if (level >= 2) {
-            kick(.50);
-            snare(.75);
+            tomHi(.50);
+            tomLo(.75);
           }
           if (level >= 3) {
-            kick(.00);
-            hat(.25);
-            snare(.50);
-            snare(.75);
+            tomHi(.00);
+            tomHi(.25);
+            tomLo(.50);
+            tomLo(.75);
           }
           break;
 
         case "eighthSnareTom":
         case "fastSnareTom":
         case "compoundSnareTom":
-          if (level >= 1) snare(.72);
+          if (level >= 1) tomLo(.72);
           if (level >= 2) {
-            hat(.45);
-            snare(.78);
+            snare(.45);
+            tomLo(.78);
           }
           if (level >= 3) {
-            kick(.18);
+            tomHi(.18);
             snare(.45);
-            hat(.68);
-            snare(.82);
+            tomHi(.68);
+            tomLo(.82);
           }
           break;
 
         case "tripletSnareTom":
-        case "tripletRideSnare":
-          if (level >= 1) snare(2/3);
+          if (level >= 1) tomLo(2/3);
           if (level >= 2) {
-            hat(1/3);
-            snare(2/3);
+            snare(1/3);
+            tomLo(2/3);
           }
           if (level >= 3) {
             snare(.00);
-            hat(1/3);
+            tomHi(1/3);
+            tomLo(2/3);
+          }
+          break;
+
+        case "tripletRideSnare":
+          if (level >= 1) ride(2/3);
+          if (level >= 2) {
+            ride(1/3);
+            snare(2/3);
+          }
+          if (level >= 3) {
+            ride(.00);
+            ride(1/3);
             snare(2/3);
           }
           break;
 
         case "broadTom":
-          if (level >= 1) snare(2/3);
+          if (level >= 1) tomLo(2/3);
           if (level >= 2) {
-            kick(1/3);
-            snare(2/3);
+            tomHi(1/3);
+            tomLo(2/3);
           }
           if (level >= 3) {
-            kick(.00);
-            hat(1/3);
-            snare(2/3);
+            tomHi(.00);
+            tomHi(1/3);
+            tomLo(2/3);
           }
           break;
 
         case "snareRoll":
         case "rapidSnare":
         case "accentedRoll":
-        case "rollingFill":
           if (level >= 1) snare(.75);
           if (level >= 2) {
             snare(.50);
@@ -2939,22 +3120,34 @@
           }
           break;
 
+        case "rollingFill":
+          if (level >= 1) tomLo(.75);
+          if (level >= 2) {
+            snare(.50);
+            tomLo(.75);
+          }
+          if (level >= 3) {
+            snare(.00);
+            tomHi(.25);
+            tomHi(.50);
+            tomLo(.75);
+          }
+          break;
+
         case "doubleStroke":
           if (level >= 1) {
-            snare(.50);
+            rim(.50);
             snare(.75);
           }
           if (level >= 2) kick(.25);
           if (level >= 3) {
-            snare(.125);
+            rim(.125);
             snare(.375);
           }
           break;
 
         case "syncKickSnare":
         case "compoundSync":
-        case "syncTom":
-        case "kickTomSync":
           if (level >= 1) snare(.72);
           if (level >= 2) {
             kick(.35);
@@ -2962,77 +3155,111 @@
           }
           if (level >= 3) {
             kick(.00);
-            snare(.38);
+            rim(.38);
             kick(.65);
             snare(.84);
           }
           break;
 
-        case "crossRhythm":
-        case "crossTom":
-          if (level >= 1) snare(2/3);
+        case "syncTom":
+        case "kickTomSync":
+          if (level >= 1) tomLo(.72);
           if (level >= 2) {
-            kick(.25);
-            snare(.72);
+            kick(.35);
+            tomHi(.72);
           }
           if (level >= 3) {
             kick(.00);
-            hat(.42);
-            snare(.72);
+            tomHi(.38);
+            kick(.65);
+            tomLo(.84);
+          }
+          break;
+
+        case "crossRhythm":
+        case "crossTom":
+          if (level >= 1) rim(2/3);
+          if (level >= 2) {
+            tomHi(.25);
+            rim(.72);
+          }
+          if (level >= 3) {
+            tomHi(.00);
+            rim(.42);
+            tomLo(.72);
           }
           break;
 
         case "trainPickup":
-          if (level >= 1) hat(.75);
+          if (level >= 1) openHat(.75);
           if (level >= 2) {
-            snare(.50);
-            hat(.75);
+            rim(.50);
+            openHat(.75);
           }
           if (level >= 3) {
             hat(.25);
-            snare(.50);
-            hat(.75);
+            rim(.50);
+            openHat(.75);
           }
           break;
 
         case "brushSweep":
-          if (level >= 1) hat(.75);
+          if (level >= 1) ride(.75);
           if (level >= 2) {
-            hat(.50);
-            hat(.75);
+            ride(.50);
+            ride(.75);
           }
           if (level >= 3) {
-            hat(.25);
-            hat(.50);
+            ride(.25);
+            ride(.50);
             snare(.75);
           }
           break;
 
         case "restrainedPickup":
-          if (level >= 1) hat(.75);
-          if (level >= 2) snare(.83);
+          if (level >= 1) rim(.75);
+          if (level >= 2) openHat(.83);
           if (level >= 3) {
-            hat(.50);
-            snare(.75);
+            rim(.50);
+            openHat(.75);
           }
           break;
 
         case "shortTriplet":
-          if (level >= 1) snare(2/3);
-          if (level >= 2) snare(1/3);
+          if (level >= 1) tomLo(2/3);
+          if (level >= 2) tomHi(1/3);
           if (level >= 3) {
-            kick(.00);
-            snare(1/3);
-            snare(2/3);
+            snare(.00);
+            tomHi(1/3);
+            tomLo(2/3);
+          }
+          break;
+
+        case "openHatPickup":
+          if (level >= 1) openHat(.75);
+          if (level >= 2) snare(.75);
+          if (level >= 3) {
+            openHat(.50);
+            snare(.75);
+          }
+          break;
+
+        case "rimTomPickup":
+          if (level >= 1) rim(.72);
+          if (level >= 2) tomLo(.78);
+          if (level >= 3) {
+            rim(.35);
+            tomHi(.60);
+            tomLo(.82);
           }
           break;
 
         default:
           if (level >= 1) snare(.75);
-          if (level >= 2) hat(.50);
+          if (level >= 2) tomHi(.50);
           if (level >= 3) {
-            kick(.25);
-            snare(.75);
+            rim(.25);
+            tomLo(.75);
           }
           break;
       }
