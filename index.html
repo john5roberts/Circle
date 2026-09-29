@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Circle v1.48</title>
+  <title>Circle v1.54</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -28,6 +28,71 @@
       filter:brightness(1.45) drop-shadow(0 0 7px rgba(255,255,255,.55));
     }
     .controls { display: flex; gap: 8px; align-items: center; margin: 10px 4px 0 4px; }
+    .top-arrangement {
+      margin: 10px 4px 0 4px;
+      display: grid;
+      grid-template-columns: minmax(0,1fr) 132px;
+      gap: 8px;
+      align-items: start;
+    }
+
+    .progression-stack, .play-stack {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .top-arrangement .controls {
+      margin: 0;
+    }
+
+    .top-arrangement .mix-row,
+    .top-arrangement .tempo-row,
+    .top-arrangement .meter-row {
+      margin: 0;
+    }
+
+    .play-stack #playProgressionBtn {
+      width: 100%;
+      min-width: 0;
+      min-height: 48px;
+      border-radius: 10px;
+      background: #202428 !important;
+      color: #f2f4f5 !important;
+      border: 1px solid #4a5056 !important;
+      font: inherit;
+      font-size: 17px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .play-stack .tempo-row {
+      display: block;
+    }
+
+    .play-stack #tempoSelect {
+      width: 100% !important;
+      height: 48px !important;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 15px;
+    }
+
+    .progression-stack .mix-row {
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 5px;
+    }
+
+    .progression-stack .mix-row label {
+      min-height: 36px;
+      padding: 6px 4px;
+      font-size: 11px;
+    }
+.mix-heading {
+      display: none !important;
+    }
+
     .controls + .controls { margin-top: 8px; }
     .controls select, .controls button {
       font: inherit; font-size: 16px; border-radius: 10px; border: 1px solid #cbd5e1;
@@ -604,26 +669,28 @@
       filter:none;
     }
 
-  
-    /* v1.44: compact meter selector, adapted from Metronomic */
-    .meter-row {
-      margin: 6px 4px 3px;
-      display: grid;
-      grid-template-columns: 74px minmax(0,1fr);
-      gap: 8px;
-      align-items: center;
-    }
-
-    .meter-choices {
-      display: grid;
-      grid-template-columns: repeat(5,minmax(0,1fr));
-      gap: 4px;
+    /* v1.52: full-width, equal meter buttons */
+    .top-arrangement > .meter-row {
+      grid-column: 1 / -1;
+      display: block;
+      width: 100%;
       min-width: 0;
+      margin: 0;
     }
 
-    .meter-choice {
+    .top-arrangement > .meter-row .meter-choices {
+      display: grid;
+      width: 100%;
+      min-width: 0;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .top-arrangement > .meter-row .meter-choice {
+      box-sizing: border-box;
+      width: 100% !important;
       min-width: 0 !important;
-      height: 34px;
+      height: 36px;
       padding: 0 3px !important;
       border-radius: 8px !important;
       font-size: 12px !important;
@@ -633,18 +700,92 @@
       border: 1px solid #454b51 !important;
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
+      white-space: nowrap;
     }
 
-    .meter-choice.selected {
+    .top-arrangement > .meter-row .meter-choice.selected {
       color: #f2f4f5 !important;
       border-color: #d5d9dc !important;
       background: #30353a !important;
       box-shadow: inset 0 0 0 1px rgba(255,255,255,.16);
     }
 
-    @media (max-width:390px) {
-      .meter-row { grid-template-columns: 68px minmax(0,1fr); }
-      .meter-choice { font-size: 11px !important; }
+
+    /* v1.53: playback-focus fade for controls below the top transport */
+    .lower-controls {
+      overflow: hidden;
+      max-height: 420px;
+      opacity: 1;
+      transform: translateY(0);
+      visibility: visible;
+      pointer-events: auto;
+      transition:
+        opacity 300ms ease,
+        transform 300ms ease,
+        max-height 360ms ease,
+        margin 360ms ease,
+        visibility 0s linear 0s;
+    }
+
+    .lower-controls.playback-hidden {
+      max-height: 0;
+      opacity: 0;
+      transform: translateY(-8px);
+      visibility: hidden;
+      pointer-events: none;
+      margin-top: 0 !important;
+      transition:
+        opacity 240ms ease,
+        transform 240ms ease,
+        max-height 340ms ease,
+        margin 340ms ease,
+        visibility 0s linear 340ms;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .lower-controls,
+      .lower-controls.playback-hidden {
+        transition-duration: 1ms !important;
+      }
+    }
+
+  
+    /* v1.54: meter row joins the playback-focus fade */
+    .top-arrangement > .meter-row {
+      max-height: 44px;
+      opacity: 1;
+      transform: translateY(0);
+      visibility: visible;
+      overflow: hidden;
+      pointer-events: auto;
+      transition:
+        opacity 300ms ease,
+        transform 300ms ease,
+        max-height 360ms ease,
+        margin 360ms ease,
+        visibility 0s linear 0s;
+    }
+
+    .top-arrangement > .meter-row.playback-hidden {
+      max-height: 0;
+      opacity: 0;
+      transform: translateY(-8px);
+      visibility: hidden;
+      pointer-events: none;
+      margin: 0 !important;
+      transition:
+        opacity 240ms ease,
+        transform 240ms ease,
+        max-height 340ms ease,
+        margin 340ms ease,
+        visibility 0s linear 340ms;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .top-arrangement > .meter-row,
+      .top-arrangement > .meter-row.playback-hidden {
+        transition-duration: 1ms !important;
+      }
     }
 
   </style>
@@ -652,10 +793,12 @@
 <body>
   <div class="wrap">
     <div class="panel">
-      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.48"></svg>
+      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.54"></svg>
       <div id="progressionStrip" class="progression-strip" aria-label="Progression map"></div>
-      <div class="controls">
-        <select id="progressionSelect" class="source-select">
+      <div class="top-arrangement">
+        <div class="progression-stack">
+          <div class="controls">
+            <select id="progressionSelect" class="source-select">
           
           
           <optgroup label="Diatonic — Cadences & Core">
@@ -744,9 +887,43 @@
           </optgroup>
 
         </select>
-        <button id="playProgressionBtn">Play</button>
+          </div>
+          <div class="mix-row">
+            <label><input type="checkbox" id="bassToggle" checked /><span>Bass</span></label>
+            <label><input type="checkbox" id="chordToggle" checked /><span>Chords</span></label>
+            <label><input type="checkbox" id="percussionToggle" checked /><span>Drums</span></label>
+            <label><input type="checkbox" id="metronomeToggle" checked /><span>Click</span></label>
+          </div>
+        </div>
+        <div class="play-stack">
+          <button id="playProgressionBtn">Play</button>
+          <div class="tempo-row">
+            <select id="tempoSelect">
+              <option value="60">60 BPM</option>
+              <option value="72">72 BPM</option>
+              <option value="80">80 BPM</option>
+              <option value="90">90 BPM</option>
+              <option value="100" selected>100 BPM</option>
+              <option value="110">110 BPM</option>
+              <option value="120">120 BPM</option>
+              <option value="132">132 BPM</option>
+              <option value="144">144 BPM</option>
+              <option value="160">160 BPM</option>
+            </select>
+          </div>
+        </div>
+        <div class="meter-row">
+            <div id="timeSignatureChoices" class="meter-choices" role="group" aria-label="Time signature">
+              <button type="button" class="meter-choice selected" data-signature="4/4">4/4</button>
+              <button type="button" class="meter-choice" data-signature="3/4">3/4</button>
+              <button type="button" class="meter-choice" data-signature="6/8">6/8</button>
+              <button type="button" class="meter-choice" data-signature="12/8"><span x-apple-data-detectors="false">12/8</span></button>
+              <button type="button" class="meter-choice" data-signature="2/4">2/4</button>
+            </div>
+          </div>
       </div>
-<div id="audioStatus" class="audio-status" aria-label="Audio sample status">
+<div id="lowerControls" class="lower-controls" aria-hidden="false">
+      <div id="audioStatus" class="audio-status" aria-label="Audio sample status">
         <span class="audio-heading">Audio</span>
         <span id="guitarSampleStatus" class="audio-status-item waiting" data-label="Guitar">
           <span class="status-dot" aria-hidden="true"></span><span class="status-name">Guitar</span>
@@ -927,39 +1104,7 @@
   </optgroup>
 </select>
 </div>
-      <div class="section-heading mix-heading">Mix</div>
-      <div class="mix-row">
-        <label><input type="checkbox" id="bassToggle" checked /><span>Bass</span></label>
-        <label><input type="checkbox" id="chordToggle" checked /><span>Chords</span></label>
-        <label><input type="checkbox" id="percussionToggle" checked /><span>Drums</span></label>
-        <label><input type="checkbox" id="metronomeToggle" checked /><span>Click</span></label>
       </div>
-
-      <div class="tempo-row">
-        <span class="row-heading">Tempo</span>
-        <select id="tempoSelect">
-          <option value="60">60 BPM</option>
-          <option value="72">72 BPM</option>
-          <option value="80">80 BPM</option>
-          <option value="90">90 BPM</option>
-          <option value="100" selected>100 BPM</option>
-          <option value="110">110 BPM</option>
-          <option value="120">120 BPM</option>
-          <option value="132">132 BPM</option>
-          <option value="144">144 BPM</option>
-          <option value="160">160 BPM</option>
-        </select>
-      </div>
-
-      <div class="meter-row">
-        <span class="row-heading">Meter</span>
-        <div id="timeSignatureChoices" class="meter-choices" role="group" aria-label="Time signature">
-          <button type="button" class="meter-choice selected" data-signature="4/4">4/4</button>
-          <button type="button" class="meter-choice" data-signature="3/4">3/4</button>
-          <button type="button" class="meter-choice" data-signature="6/8">6/8</button>
-          <button type="button" class="meter-choice" data-signature="12/8"><span x-apple-data-detectors="false">12/8</span></button>
-          <button type="button" class="meter-choice" data-signature="2/4">2/4</button>
-        </div>
       </div>
     </div>
   </div>
@@ -1597,6 +1742,7 @@
       }
       progressionOscillators = [];
       progressionPlaying = false;
+      setLowerControlsPlaybackHidden(false);
 
       var btn = document.getElementById("playProgressionBtn");
       if (btn) {
@@ -2211,9 +2357,25 @@
       return make(0,"major");
     }
 
+    function setLowerControlsPlaybackHidden(hidden) {
+      var lower = document.getElementById("lowerControls");
+      var meter = document.querySelector(".top-arrangement > .meter-row");
+
+      if (lower) {
+        lower.classList.toggle("playback-hidden", !!hidden);
+        lower.setAttribute("aria-hidden", hidden ? "true" : "false");
+      }
+
+      if (meter) {
+        meter.classList.toggle("playback-hidden", !!hidden);
+        meter.setAttribute("aria-hidden", hidden ? "true" : "false");
+      }
+    }
+
     function startProgressionLoop() {
       stopArpeggioOnly();
       stopProgressionPlayback();
+      setLowerControlsPlaybackHidden(true);
       ensureAudioReady(function(ctx){
         var btn = document.getElementById("playProgressionBtn");
         if (btn) {
@@ -2420,18 +2582,29 @@
       updateTrigger(select);
     }
 
+    function compactProgressionTriggerLabel(opt) {
+      var category = optionCategory(opt) || "";
+
+      // The first group is intentionally shortened to simply "Diatonic".
+      if (category.indexOf("Diatonic") === 0) return "Diatonic";
+
+      // For longer group names, show only the portion before an em dash.
+      // Groups without an em dash keep their full category name.
+      var emDash = category.indexOf(" — ");
+      return emDash >= 0 ? category.slice(0, emDash).trim() : category.trim();
+    }
+
     function updateTrigger(select) {
       var btn = document.getElementById(select.id + "Trigger");
       var opt = selectedOptionFor(select);
       if (!btn || !opt) return;
       var main = btn.querySelector(".main-value");
-      var cat = optionCategory(opt);
       var label = opt.textContent.trim();
 
-      // Keep category context for Progression, but keep the three
-      // accompaniment controls visually compact.
+      // Keep the full progression names inside the chooser, but make the
+      // closed control compact.
       if (select.id === "progressionSelect") {
-        main.textContent = cat + " · " + label;
+        main.textContent = compactProgressionTriggerLabel(opt);
       } else {
         main.textContent = label;
       }
@@ -4006,6 +4179,7 @@ function primeAudioSamples(){
     }, { once: true });
 
     selectedSpellingPreference = "conventional";
+    setLowerControlsPlaybackHidden(false);
     render("C");
     renderProgressionStrip(null, null, false);
 
