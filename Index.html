@@ -1,0 +1,3997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Circle v1.47</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background:
+        repeating-linear-gradient(90deg, #c89a62 0px, #c89a62 42px, #c4925a 42px, #c4925a 84px),
+        linear-gradient(180deg, #d1a46d 0%, #ba8450 100%);
+    }
+    .wrap { min-height: 100vh; padding: 8px; }
+    .panel {
+      width: min(100vw - 16px, 460px);
+      margin: 0 auto;
+      background: rgba(255,255,255,0.9);
+      border-radius: 22px;
+      padding: 8px;
+    }
+    svg { width: 100%; height: auto; display: block; }
+    .label { pointer-events: none; user-select: none; }
+    .clickable { cursor: pointer; }
+    .active-wedge {
+      filter:brightness(1.45) drop-shadow(0 0 7px rgba(255,255,255,.55));
+    }
+    .controls { display: flex; gap: 8px; align-items: center; margin: 10px 4px 0 4px; }
+    .controls + .controls { margin-top: 8px; }
+    .controls select, .controls button {
+      font: inherit; font-size: 16px; border-radius: 10px; border: 1px solid #cbd5e1;
+      background: white; padding: 10px 12px;
+    }
+    .controls select { flex: 1; min-width: 0; }
+    .controls button { min-width: 78px; font-weight: 700; cursor: pointer; }
+    .controls label {
+      display: inline-flex; align-items: center; gap: 6px; font-size: 15px;
+      background: white; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 12px;
+      color: #111827;
+    }
+
+    :root {
+      --board:#111315;
+      --panel:#181b1e;
+      --panel2:#202428;
+      --line:#454b51;
+      --text:#f2f4f5;
+      --muted:#9aa1a7;
+      --green:#27c96f;
+      --greenDark:#153d29;
+      --red:#ef4b4b;
+      --redDark:#492020;
+    }
+    body {
+      background:#0b0d0e !important;
+      color:var(--text);
+    }
+    .wrap { padding:8px; background:#0b0d0e; }
+    .panel {
+      background:var(--board) !important;
+      border:1px solid #30353a;
+      box-shadow:0 10px 28px rgba(0,0,0,.38);
+      color:var(--text);
+    }
+    #wheel { background:var(--board); border-radius:18px; }
+    .controls select, .controls button, .controls label {
+      background:var(--panel2) !important;
+      color:var(--text) !important;
+      border:1px solid var(--line) !important;
+    }
+    .controls select { color-scheme:dark; }
+    .controls button { font-weight:800; }
+    #playProgressionBtn {
+      border-color:#737b82 !important;
+    }
+    #playProgressionBtn.playing {
+      background:#e6e8ea !important;
+      color:#111315 !important;
+      border-color:#f5f6f7 !important;
+      box-shadow:inset 0 0 0 1px #ffffff;
+    }
+    .controls label:has(input:checked) {
+      background:#e6e8ea !important;
+      border-color:#f5f6f7 !important;
+      box-shadow:inset 0 0 0 1px #ffffff;
+      color:#111315 !important;
+    }
+    input[type="checkbox"] { accent-color:#d8dcdf; }
+
+    .progression-strip {
+      display:flex;
+      align-items:stretch;
+      gap:5px;
+      margin:8px 4px 2px 4px;
+      min-height:54px;
+    }
+    .prog-chip {
+      flex:1 1 0;
+      min-width:0;
+      border-radius:9px;
+      border:1px solid #3d4348;
+      background:#202428;
+      color:#d8dcdf;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:7px 3px;
+      font-size:16px;
+      font-weight:800;
+      line-height:1;
+      flex-direction:column;
+      gap:5px;
+      transition:filter .08s, box-shadow .08s, transform .08s;
+    }
+    /* Progression strip: all inactive chords stay neutral.
+       Green/red is reserved for the chord that is sounding now. */
+    .prog-chip.in-key,
+    .prog-chip.out-key {
+      color:#b7bdc2;
+      border-color:#3d4348;
+      background:#202428;
+    }
+    .prog-chip .alteration {
+      font-size:11px; font-weight:700; line-height:1; opacity:.78; white-space:nowrap;
+    }
+    .prog-chip.active.in-key {
+      color:var(--green);
+      border-color:#2b7d50;
+      background:#14251c;
+    }
+    .prog-chip.active.out-key {
+      color:var(--red);
+      border-color:#8d3939;
+      background:#291818;
+    }
+    .prog-chip.active {
+      filter:brightness(1.35);
+      box-shadow:0 0 0 2px currentColor, 0 0 8px currentColor;
+      transform:translateY(-1px);
+    }
+    .active-wedge {
+      filter:brightness(1.5) drop-shadow(0 0 8px currentColor) !important;
+    }
+
+
+    .source-select {
+      position:absolute !important;
+      width:1px !important;
+      height:1px !important;
+      opacity:0 !important;
+      pointer-events:none !important;
+      overflow:hidden !important;
+    }
+    .browser-trigger {
+      flex:1;
+      min-width:0;
+      min-height:48px;
+      text-align:left;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      gap:3px;
+      padding:8px 12px !important;
+      background:#202428 !important;
+      border:1px solid #4a5056 !important;
+      color:#f2f4f5 !important;
+      border-radius:10px;
+      cursor:pointer;
+    }
+    .browser-trigger .trigger-label {
+      font-size:10px;
+      letter-spacing:.08em;
+      color:#9aa1a7;
+      font-weight:800;
+      text-transform:uppercase;
+      line-height:1;
+    }
+    .browser-trigger .trigger-value {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      font-size:15px;
+      font-weight:800;
+      line-height:1.15;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .browser-trigger .trigger-value .main-value {
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .browser-trigger .trigger-arrow {
+      flex:0 0 auto;
+      color:#c7ccd0;
+      font-size:13px;
+    }
+
+    .choice-overlay {
+      position:fixed;
+      inset:0;
+      z-index:5000;
+      background:rgba(0,0,0,.68);
+      display:none;
+      align-items:flex-end;
+      justify-content:center;
+      padding:10px;
+    }
+    .choice-overlay.open { display:flex; }
+    .choice-sheet {
+      width:min(100%,520px);
+      max-height:min(82vh,760px);
+      background:#111315;
+      border:1px solid #454b51;
+      border-radius:18px;
+      box-shadow:0 16px 42px rgba(0,0,0,.55);
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+    }
+    .choice-head {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:13px 14px 10px;
+      border-bottom:1px solid #30353a;
+    }
+    .choice-title {
+      font-size:17px;
+      font-weight:900;
+      color:#f2f4f5;
+    }
+    .choice-close {
+      border:1px solid #565d63;
+      background:#202428;
+      color:#f2f4f5;
+      border-radius:9px;
+      padding:7px 11px;
+      font:inherit;
+      font-weight:800;
+    }
+    .choice-tabs {
+      display:flex;
+      gap:7px;
+      overflow-x:auto;
+      padding:10px 12px;
+      border-bottom:1px solid #30353a;
+      scrollbar-width:none;
+    }
+    .choice-tabs::-webkit-scrollbar { display:none; }
+    .choice-tab {
+      flex:0 0 auto;
+      border:1px solid #4b5258;
+      background:#1b1f22;
+      color:#c6cbd0;
+      border-radius:999px;
+      padding:8px 11px;
+      font:inherit;
+      font-size:12px;
+      font-weight:800;
+      white-space:nowrap;
+    }
+    .choice-tab.active {
+      background:#e6e8ea;
+      color:#111315;
+      border-color:#fff;
+    }
+    .choice-grid {
+      overflow-y:auto;
+      -webkit-overflow-scrolling:touch;
+      padding:12px;
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:9px;
+      min-height:180px;
+    }
+    .choice-item {
+      min-height:62px;
+      border:1px solid #454b51;
+      background:#1b1f22;
+      color:#f2f4f5;
+      border-radius:11px;
+      padding:9px 8px;
+      font:inherit;
+      text-align:center;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      gap:5px;
+      cursor:pointer;
+    }
+    .choice-item.selected {
+      border-color:#fff;
+      box-shadow:inset 0 0 0 1px #fff;
+      background:#2b3034;
+    }
+    .choice-item .choice-name {
+      font-size:13px;
+      line-height:1.15;
+      font-weight:850;
+    }
+    .choice-item .choice-detail {
+      font-size:10px;
+      line-height:1.1;
+      color:#aeb4b9;
+      font-weight:700;
+    }
+    .choice-foot {
+      display:flex;
+      gap:8px;
+      padding:10px 12px 12px;
+      border-top:1px solid #30353a;
+    }
+    .choice-foot button {
+      flex:1;
+      border-radius:10px;
+      padding:11px 12px;
+      font:inherit;
+      font-weight:850;
+      background:#202428;
+      color:#f2f4f5;
+      border:1px solid #565d63;
+    }
+    .choice-foot .done {
+      background:#e6e8ea;
+      color:#111315;
+      border-color:#fff;
+    }
+    @media (max-width:380px) {
+      .choice-grid { grid-template-columns:1fr; }
+    }
+
+
+    .sample-status {
+      margin: 6px 4px 8px;
+      padding: 7px 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12px;
+      font-weight: 800;
+      color: #202428;
+      background: #e7e9eb;
+      border: 1px solid #aeb4b9;
+      border-radius: 9px;
+      letter-spacing: .01em;
+    }
+    .sample-status::before {
+      content: "●";
+      font-size: 9px;
+      color: #7a8187;
+    }
+    .sample-status.ready {
+      color: #202428;
+      background: #f2f3f4;
+      border-color: #6f767c;
+    }
+    .sample-status.ready::before { color: #4f565c; }
+    .sample-status.fallback {
+      color: #202428;
+      background: #dedfe1;
+      border-color: #8e9499;
+    }
+    .sample-status.fallback::before { color: #5f666c; }
+
+  
+    /* v1.38 compact control layout */
+    .section-heading {
+      margin: 13px 5px 3px;
+      font-size: 10px;
+      line-height: 1;
+      letter-spacing: .11em;
+      text-transform: uppercase;
+      font-weight: 850;
+      color: #8f979e;
+    }
+    .tempo-row {
+      margin: 8px 4px 0;
+      display: grid;
+      grid-template-columns: 74px minmax(0,1fr);
+      gap: 8px;
+      align-items: center;
+    }
+
+    .row-heading {
+      font-size: 11px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      font-weight: 850;
+      color: #9aa1a7;
+      padding-left: 2px;
+    }
+    .tempo-row #tempoSelect {
+      position: static !important;
+      width: 100% !important;
+      height: 36px !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+      overflow: visible !important;
+      min-width: 0;
+      border-radius: 8px;
+      padding: 5px 10px;
+      font: inherit;
+      font-size: 14px;
+      background: #202428 !important;
+      color: #f2f4f5 !important;
+      border: 1px solid #4a5056 !important;
+      color-scheme: dark;
+    }
+
+    .audio-status {
+      margin: 7px 6px 2px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px 11px;
+      min-height: 20px;
+      color: #aeb5ba;
+      font-size: 11px;
+      line-height: 1;
+    }
+
+    .audio-heading {
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      font-weight: 850;
+      color: #8f979e;
+    }
+
+    .audio-status-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+      font-weight: 750;
+      color: #b7bdc2;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      flex: 0 0 7px;
+      border-radius: 50%;
+      background: #6e757b;
+      box-shadow: 0 0 0 1px #777f85;
+    }
+
+    .audio-status-item.ready .status-dot {
+      background: #cbd0d4;
+      box-shadow: 0 0 0 1px #cbd0d4;
+    }
+
+    .audio-status-item.fallback {
+      color: #d2d5d7;
+    }
+
+    .audio-status-item.fallback .status-dot {
+      background: transparent;
+      box-shadow: 0 0 0 1.5px #b8bec3;
+    }
+
+    .audio-status-item.waiting .status-dot {
+      background: #555d63;
+      box-shadow: 0 0 0 1px #6d747a;
+    }
+
+    .accompaniment-control {
+      margin-top: 5px !important;
+    }
+
+    .accompaniment-control .browser-trigger {
+      min-height: 40px;
+      padding: 6px 10px !important;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 10px;
+      border-radius: 8px;
+    }
+
+    .accompaniment-control .trigger-label {
+      flex: 0 0 82px;
+      font-size: 9.5px;
+      line-height: 1;
+    }
+
+    .accompaniment-control .trigger-value {
+      flex: 1 1 auto;
+      min-width: 0;
+      font-size: 14px;
+      line-height: 1.1;
+    }
+
+    .mix-heading {
+      margin-top: 12px;
+    }
+
+    .mix-row {
+      margin: 5px 4px 0;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 5px;
+    }
+
+    .mix-row label {
+      min-width: 0;
+      min-height: 36px;
+      padding: 6px 5px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      background: #202428;
+      border: 1px solid #4a5056;
+      color: #f2f4f5;
+      font-size: 12px;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .mix-row input[type="checkbox"] {
+      margin: 0;
+      width: 14px;
+      height: 14px;
+      accent-color: #d8dcdf;
+    }
+
+    .tempo-row {
+      margin-top: 6px;
+      margin-bottom: 3px;
+    }
+
+    @media (max-width: 390px) {
+      .mix-row label {
+        font-size: 11px;
+        gap: 3px;
+        padding-left: 3px;
+        padding-right: 3px;
+      }
+      .accompaniment-control .trigger-label {
+        flex-basis: 76px;
+      }
+      .tempo-row {
+        grid-template-columns: 68px minmax(0,1fr);
+      }
+    }
+
+  
+    /* v1.40: upcoming-chord cue. Current chord stays steady. */
+    .prog-chip.next-cue {
+      box-shadow:
+        0 0 0 2px rgba(242,244,245,.95) inset,
+        0 0 0 1px rgba(242,244,245,.35);
+      filter: brightness(1.22);
+    }
+
+  
+    /* v1.41: next chord cue on circle of fifths */
+    .next-cue-wedge {
+      filter: brightness(1.18);
+    }
+
+  
+    /* v1.42: root–third–fifth interval display under each Roman numeral */
+    .triad-intervals {
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:4px;
+      min-height:12px;
+      font-size:11px;
+      font-weight:800;
+      line-height:1;
+      letter-spacing:0;
+      white-space:nowrap;
+    }
+
+    .triad-interval {
+      display:inline-block;
+      min-width:10px;
+      text-align:center;
+    }
+
+    .triad-interval.diatonic {
+      color:#65e69b;
+    }
+
+    .triad-interval.nondiatonic {
+      color:#ff7777;
+    }
+
+    .triad-interval-space {
+      display:none;
+    }
+
+    .prog-chip.active .triad-interval,
+    .prog-chip.next-cue .triad-interval {
+      filter:none;
+    }
+
+  
+    /* v1.44: compact meter selector, adapted from Metronomic */
+    .meter-row {
+      margin: 6px 4px 3px;
+      display: grid;
+      grid-template-columns: 74px minmax(0,1fr);
+      gap: 8px;
+      align-items: center;
+    }
+
+    .meter-choices {
+      display: grid;
+      grid-template-columns: repeat(5,minmax(0,1fr));
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .meter-choice {
+      min-width: 0 !important;
+      height: 34px;
+      padding: 0 3px !important;
+      border-radius: 8px !important;
+      font-size: 12px !important;
+      font-weight: 800 !important;
+      background: #202428 !important;
+      color: #9fa6ac !important;
+      border: 1px solid #454b51 !important;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .meter-choice.selected {
+      color: #f2f4f5 !important;
+      border-color: #d5d9dc !important;
+      background: #30353a !important;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.16);
+    }
+
+    @media (max-width:390px) {
+      .meter-row { grid-template-columns: 68px minmax(0,1fr); }
+      .meter-choice { font-size: 11px !important; }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="panel">
+      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.47"></svg>
+      <div id="progressionStrip" class="progression-strip" aria-label="Progression map"></div>
+      <div class="controls">
+        <select id="progressionSelect" class="source-select">
+          
+          
+          <optgroup label="Diatonic — Cadences & Core">
+            <option value="I-IV-V-I|4,4,4,8">I–IV–V–I</option>
+            <option value="I-ii-V-I|4,4,4,8">I–ii–V–I</option>
+            <option value="ii-V-I|4,4,8">ii–V–I</option>
+            <option value="I-vi-ii-V-I|4,4,4,4,8">I–vi–ii–V–I</option>
+            <option value="iii-vi-ii-V-I|4,4,4,4,8">iii–vi–ii–V–I</option>
+            <option value="I-V-vi-IV|4,4,4,4">I–V–vi–IV</option>
+            <option value="vi-IV-I-V|4,4,4,4">vi–IV–I–V</option>
+            <option value="I-vi-IV-V|4,4,4,4">I–vi–IV–V</option>
+            <option value="I-V-IV-I|4,4,4,8">I–V–IV–I</option>
+            <option value="IV-I-ii-V|4,4,4,4">IV–I–ii–V</option>
+          </optgroup>
+          <optgroup label="Mixolydian / ♭VII">
+            <option value="I-bVII-IV-I|4,4,4,8">I–♭VII–IV–I</option>
+            <option value="I-bVII-I|4,4,8">I–♭VII–I</option>
+            <option value="I-IV-bVII-I|4,4,4,8">I–IV–♭VII–I</option>
+            <option value="I-bVII-IV-bVII|4,4,4,4">I–♭VII–IV–♭VII</option>
+            <option value="I-V-bVII-IV|4,4,4,4">I–V–♭VII–IV</option>
+            <option value="IV-bVII-I|4,4,8">IV–♭VII–I</option>
+          </optgroup>
+          <optgroup label="Dorian / Minor-Modal">
+            <option value="i-IV-i|4,4,8">i–IV–i</option>
+            <option value="i-IV-bVII-i|4,4,4,8">i–IV–♭VII–i</option>
+            <option value="i-bVII-IV-i|4,4,4,8">i–♭VII–IV–i</option>
+            <option value="i-IV-bVII-IV|4,4,4,4">i–IV–♭VII–IV</option>
+            <option value="i-ii-IV-i|4,4,4,8">i–ii–IV–i</option>
+            <option value="i-bVII-i-IV|4,4,4,4">i–♭VII–i–IV</option>
+          </optgroup>
+          <optgroup label="Borrowed / Modal Mixture">
+            <option value="I-iv-I|4,4,8">I–iv–I</option>
+            <option value="I-IV-iv-I|4,4,4,8">I–IV–iv–I</option>
+            <option value="I-bVI-IV-I|4,4,4,8">I–♭VI–IV–I</option>
+            <option value="I-bVI-bVII-I|4,4,4,8">I–♭VI–♭VII–I</option>
+            <option value="I-bIII-IV-I|4,4,4,8">I–♭III–IV–I</option>
+            <option value="I-bIII-bVII-IV|4,4,4,4">I–♭III–♭VII–IV</option>
+            <option value="I-iv-bVII-I|4,4,4,8">I–iv–♭VII–I</option>
+            <option value="I-bVI-iv-I|4,4,4,8">I–♭VI–iv–I</option>
+          </optgroup>
+          <optgroup label="Secondary Dominants / Chromatic">
+            <option value="I-V2-ii-V-I|4,4,4,4,8">I–V/ii–ii–V–I</option>
+            <option value="I-V6-vi-ii-V-I|4,4,4,4,4,8">I–V/vi–vi–ii–V–I</option>
+            <option value="I-V5-V-I|4,4,4,8">I–V/V–V–I</option>
+            <option value="I-III-vi-IV|4,4,4,4">I–III–vi–IV</option>
+            <option value="I-VI-ii-V|4,4,4,4">I–VI–ii–V</option>
+            <option value="I-II-V-I|4,4,4,8">I–II–V–I</option>
+            <option value="iii-VI-ii-V-I|4,4,4,4,8">iii–VI–ii–V–I</option>
+            <option value="I-III-IV-iv-I|4,4,4,4,8">I–III–IV–iv–I</option>
+          </optgroup>
+          <optgroup label="Minor / Aeolian Color">
+            <option value="i-bVI-bIII-bVII|4,4,4,4">i–♭VI–♭III–♭VII</option>
+            <option value="i-bVII-bVI-bVII|4,4,4,4">i–♭VII–♭VI–♭VII</option>
+            <option value="i-bVI-bVII-i|4,4,4,8">i–♭VI–♭VII–i</option>
+            <option value="i-bIII-bVII-iv|4,4,4,4">i–♭III–♭VII–iv</option>
+            <option value="i-iv-bVII-bIII|4,4,4,4">i–iv–♭VII–♭III</option>
+            <option value="i-bVII-bVI-V|4,4,4,4">i–♭VII–♭VI–V</option>
+          </optgroup>
+          <optgroup label="Pop / Functional">
+            <option value="I-V-vi-IV|8,8,8,8">I–V–vi–IV (2 bars each)</option>
+            <option value="I-vi-ii-V|4,4,4,4">I–vi–ii–V</option>
+            <option value="ii-V-I|2,2,4">ii–V–I (quick ii–V)</option>
+            <option value="I-iii-vi-ii-V-I|4,4,4,4,4,8">I–iii–vi–ii–V–I</option>
+            <option value="vi-ii-V-I|2,2,2,4">vi–ii–V–I (quick)</option>
+            <option value="I-vi-IV-ii-V-I|4,4,4,4,4,8">I–vi–IV–ii–V–I</option>
+          </optgroup>
+          <optgroup label="Modal Practice — Dorian">
+            <option value="i-IV-i|4,4,8">Dorian: i–IV–i</option>
+            <option value="i-bVII-IV-i|4,4,4,8">Dorian: i–♭VII–IV–i</option>
+            <option value="i-ii-IV-i|4,4,4,8">Dorian: i–ii–IV–i</option>
+          </optgroup>
+          <optgroup label="Modal Practice — Phrygian">
+            <option value="i-bII-i|4,4,8">Phrygian: i–♭II–i</option>
+            <option value="i-bII-bVII-i|4,4,4,8">Phrygian: i–♭II–♭VII–i</option>
+            <option value="i-bVII-bII-i|4,4,4,8">Phrygian: i–♭VII–♭II–i</option>
+          </optgroup>
+          <optgroup label="Modal Practice — Lydian">
+            <option value="I-II-I|4,4,8">Lydian: I–II–I</option>
+            <option value="I-II-V-I|4,4,4,8">Lydian: I–II–V–I</option>
+            <option value="I-V-II-I|4,4,4,8">Lydian: I–V–II–I</option>
+          </optgroup>
+          <optgroup label="Modal Practice — Mixolydian">
+            <option value="I-bVII-I|4,4,8">Mixolydian: I–♭VII–I</option>
+            <option value="I-bVII-IV-I|4,4,4,8">Mixolydian: I–♭VII–IV–I</option>
+            <option value="I-IV-bVII-I|4,4,4,8">Mixolydian: I–IV–♭VII–I</option>
+          </optgroup>
+
+        </select>
+        <button id="playProgressionBtn">Play</button>
+      </div>
+<div id="audioStatus" class="audio-status" aria-label="Audio sample status">
+        <span class="audio-heading">Audio</span>
+        <span id="guitarSampleStatus" class="audio-status-item waiting" data-label="Guitar">
+          <span class="status-dot" aria-hidden="true"></span><span class="status-name">Guitar</span>
+        </span>
+        <span id="bassSampleStatus" class="audio-status-item waiting" data-label="Bass">
+          <span class="status-dot" aria-hidden="true"></span><span class="status-name">Bass</span>
+        </span>
+        <span id="sampleStatus" class="audio-status-item waiting" data-label="Drums">
+          <span class="status-dot" aria-hidden="true"></span><span class="status-name">Drums</span>
+        </span>
+      </div>
+
+      <div class="section-heading">Accompaniment</div>
+      <div class="controls accompaniment-control">
+        <select id="rhythmSelect" class="source-select">
+          <optgroup label="Straight / Basic">
+            <option value="quarter|1,1,1,1">Simple quarters</option>
+            <option value="eighths|0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5">Eighth pulse</option>
+            <option value="ballad|2,2">Half-note pulse</option>
+            <option value="ballad|4">Whole-bar sustain</option>
+            <option value="groove1|1,0.75,0.25,1">Quarter push</option>
+            <option value="groove3|1,0.5,0.5,1">Anticipation</option>
+            <option value="offbeats|0.5,1,1,1">Offbeat drive</option>
+            <option value="ballad|1,3">Sparse quarters</option>
+          </optgroup>
+          <optgroup label="Pop / Rock">
+            <option value="groove1|1,0.75,0.25,1">Pop groove (push)</option>
+            <option value="groove2|0.75,0.25,0.75,0.25,1">Syncopated pop</option>
+            <option value="groove4|0.5,1,0.5,1">Driving pop</option>
+            <option value="four_on_floor|1,1,1,1">Rock quarters</option>
+            <option value="eighths|0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5">Rock eighths</option>
+            <option value="backbeat_hits|1,1,1,1">Backbeat hits</option>
+            <option value="ballad|2,2">Power ballad</option>
+            <option value="ballad|4">Arena sustain</option>
+          </optgroup>
+          <optgroup label="Brazilian / Latin">
+            <option value="bossa|1.5,0.5,1,1">Bossa-style groove</option>
+            <option value="bossa|2,2">Bossa sparse</option>
+            <option value="bossa|0.75,0.75,0.5,1">Bossa syncopated</option>
+            <option value="groove7|1,0.5,0.5,0.5,0.5">Samba light</option>
+            <option value="groove5|0.75,0.75,0.5,1">Samba drive</option>
+            <option value="groove5|0.75,0.75,0.5,1">Tresillo</option>
+            <option value="tango|1,1,1,1">Tango</option>
+            <option value="offbeats|0.5,0.5,1,1,1">Latin offbeat</option>
+          </optgroup>
+          <optgroup label="Jazz / Swing">
+            <option value="swing|1.5,0.5,1,1">Swing comp</option>
+            <option value="swing|2,1,1">Swing sparse</option>
+            <option value="swing|0.75,0.25,1,2">Swing push</option>
+            <option value="swing|1.5,0.5,2">Charleston</option>
+            <option value="swing|0.5,1.5,2">Reverse Charleston</option>
+            <option value="ballad|2,2">Jazz ballad</option>
+            <option value="ballad|2,2">Two feel</option>
+            <option value="four_on_floor|1,1,1,1">Four to the bar</option>
+          </optgroup>
+          <optgroup label="Funk / Soul / R&B">
+            <option value="groove7|1,0.5,0.5,0.5,0.5">Funk subdivision</option>
+            <option value="groove2|0.75,0.25,0.75,0.25,1">Funk push</option>
+            <option value="groove4|0.5,1,0.5,2">Funk sparse</option>
+            <option value="backbeat_hits|1,1,1,1">Soul backbeat</option>
+            <option value="groove3|1,0.5,0.5,1">R&B pocket</option>
+            <option value="groove6|1.5,0.5,1,1">Neo-soul space</option>
+          </optgroup>
+          <optgroup label="Folk / Country">
+            <option value="quarter|1,1,1,1">Folk quarters</option>
+            <option value="eighths|0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5">Folk eighths</option>
+            <option value="ballad|2,2">Country two-step</option>
+            <option value="groove1|1,0.75,0.25,1">Country drive</option>
+            <option value="ballad|2,2">Ballad strum</option>
+            <option value="groove4|0.5,1,0.5,1">Train pulse</option>
+          </optgroup>
+          <optgroup label="Reggae / Other">
+            <option value="reggae|1,1,1,1">Reggae skank</option>
+            <option value="reggaeish|1,1,1,1">Reggae-ish push</option>
+            <option value="groove6|1.5,0.5,1,1">Long-short practice</option>
+            <option value="groove4|0.5,1.5,1,1">Short-long practice</option>
+            <option value="swing|0.67,0.33,0.67,0.33,2">Triplet-like push</option>
+            <option value="groove3|2,0.5,0.5,1">Space and push</option>
+          </optgroup>
+        </select>
+      </div>
+<div class="controls accompaniment-control"><select id="guitarPatternSelect" class="source-select" aria-label="Guitar pattern"><optgroup label="Straight / Foundation">
+<option value="C@0,C@1,C@2,C@3">Quarter chords</option>
+<option value="C@0,C@2">Half-note chords</option>
+<option value="C@1,C@3">Backbeat chords</option>
+<option value="C@0.5,C@2.5">Offbeat chords</option>
+<option value="C@1,C@2,C@3">Chords 2–4</option>
+<option value="C@0">Chord on 1</option>
+<option value="C@1,C@3">Alternating chord spaces</option>
+<option value="C@0,C@0.5,C@1,C@1.5,C@2,C@2.5,C@3,C@3.5">Eighth-note chords</option>
+</optgroup>
+<optgroup label="Arpeggio">
+<option value="A0@0,A1@1,A2@2,A1@3">Up 1-3-5-3</option>
+<option value="A0@0,A1@1,A2@2,A0@3">Up 1-3-5-1</option>
+<option value="A2@0,A1@1,A0@2,A1@3">Down 5-3-1-3</option>
+<option value="A0@0,A1@0.5,A2@1,A1@1.5,A0@2,A1@2.5,A2@3,A1@3.5">Rolling eighths</option>
+<option value="A1@1,A2@2,A1@3">Delayed rising arp</option>
+<option value="A1@0.5,A2@1,A1@1.5,A1@2.5,A2@3,A1@3.5">Eighth-note arp</option>
+<option value="A0@0,A1@1,A2@2,C@3">Arp then chord</option>
+<option value="C@0,A0@1,A1@2,A2@3">Chord then arp</option>
+</optgroup>
+<optgroup label="Pop / Rock">
+<option value="C@0.75,C@1.5,C@2.75,C@3.5">Pop push</option>
+<option value="C@1,C@1.5,C@3,C@3.5">Pop chord pocket</option>
+<option value="C@0.5,C@1,C@1.5,C@2.5,C@3,C@3.5">Driving eighths</option>
+<option value="C@1,C@3">Rock backbeat</option>
+<option value="C@0,C@1.5,C@3">Anthem</option>
+<option value="A1@1,A2@2,C@3">Ballad roll</option>
+<option value="C@0,C@1,C@2,C@3">Power pulse</option>
+<option value="C@0.5,C@1.5,C@2.5,C@3.5">Syncopated rock</option>
+</optgroup>
+<optgroup label="Brazilian / Latin">
+<option value="C@0.5,C@1.5,C@2.5,C@3.5">Bossa basic</option>
+<option value="C@1.5,C@3.5">Bossa sparse</option>
+<option value="A1@0.5,C@1.5,A2@2.5,C@3.5">Bossa arp</option>
+<option value="A1@0.5,A2@1,C@1.5,A1@2.5,A2@3,C@3.5">Bossa rolling</option>
+<option value="C@0.5,C@1,C@2,C@2.5,C@3.5">Samba pulse</option>
+<option value="A1@0.5,C@1,A2@1.5,A1@2.5,C@3,A2@3.5">Samba arp</option>
+<option value="C@0.75,C@1.5,C@2.75,C@3.5">Latin tresillo</option>
+<option value="C@1,C@2,C@3">Tango guitar</option>
+</optgroup>
+<optgroup label="Jazz / Swing">
+<option value="C@0.67,C@2,C@2.67">Swing comp</option>
+<option value="C@0,C@1.5,C@3">Charleston</option>
+<option value="C@0.5,C@2,C@3.5">Reverse Charleston</option>
+<option value="C@0.67,C@2.67">Jazz chord pocket</option>
+<option value="C@1,C@3">Shell comp feel</option>
+<option value="A1@0.67,A2@2,A1@2.67">Swing arp</option>
+<option value="A1@1,A2@2,C@3">Jazz ballad</option>
+<option value="C@0,C@1,C@2,C@3">Four-to-bar comp</option>
+</optgroup>
+<optgroup label="Funk / Soul / R&B">
+<option value="C@0.5,C@1.5,C@2.5,C@3.5">Funk stabs</option>
+<option value="C@0.5,C@1.5,C@2.5,C@3.5">Funk offbeats</option>
+<option value="C@1,C@1.5,C@3">Soul pocket</option>
+<option value="A1@0.5,A2@1.5,C@2.5,C@3.5">R&B roll</option>
+<option value="C@0.75,A1@1.5,C@3.25">Neo-soul space</option>
+<option value="C@0.5,C@1.5,C@2.5,C@3.5">Motown guitar</option>
+</optgroup>
+<optgroup label="Folk / Country / Other">
+<option value="C@1,C@3">Folk strum</option>
+<option value="C@1,C@3">Country chord pulse</option>
+<option value="A1@0.5,A2@1,A1@1.5,A1@2.5,A2@3,A1@3.5">Fingerpick 1</option>
+<option value="A2@0.5,A1@1,A2@1.5,A2@2.5,A1@3,A2@3.5">Fingerpick 2</option>
+</optgroup></select></div>
+
+<div class="controls accompaniment-control">
+<select id="bassPatternSelect" class="source-select" aria-label="Bass pattern">
+  <optgroup label="Straight / Foundation">
+    <option value="R@0">Root on 1</option>
+    <option value="R@0,R@2" selected>Two-feel roots</option>
+    <option value="R@0,5@2">Root–fifth</option>
+    <option value="R@0,R@1,R@2,R@3">Four roots</option>
+    <option value="R@0,5@1,R@2,5@3">Alternating root–fifth</option>
+  </optgroup>
+  <optgroup label="Brazilian / Latin">
+    <option value="R@0,5@1.5,R@2,5@3.5">Bossa basic</option>
+    <option value="R@0,5@2.5">Bossa sparse</option>
+    <option value="R@0,5@0.75,R@1.5,5@2,R@2.75,5@3.5">Samba pulse</option>
+    <option value="R@0,5@1.5,R@2.5">Latin tresillo</option>
+  </optgroup>
+  <optgroup label="Jazz / Swing">
+    <option value="R@0,5@2">Jazz two-feel</option>
+    <option value="R@0,3@1,5@2,3@3">Walking chord tones</option>
+    <option value="R@0,5@1.5,R@3">Charleston bass</option>
+  </optgroup>
+  <optgroup label="Funk / Soul / R&amp;B">
+    <option value="R@0,R@0.75,5@1.5,R@2.5,5@3.25">Funk syncopated</option>
+    <option value="R@0,5@2,R@3">Soul pocket</option>
+    <option value="R@0,5@1,R@2,3@3">Motown movement</option>
+    <option value="R@0,5@2.5">Neo-soul sparse</option>
+  </optgroup>
+  <optgroup label="Folk / Country / Other">
+    <option value="R@0,5@2">Country boom-chuck</option>
+    <option value="R@0,3@1,5@2,3@3">Country walk</option>
+    <option value="R@0,R@2">Folk two-feel</option>
+    <option value="R@0,5@2.5">Reggae sparse</option>
+  </optgroup>
+</select>
+</div>
+      <div class="section-heading mix-heading">Mix</div>
+      <div class="mix-row">
+        <label><input type="checkbox" id="bassToggle" checked /><span>Bass</span></label>
+        <label><input type="checkbox" id="chordToggle" checked /><span>Chords</span></label>
+        <label><input type="checkbox" id="percussionToggle" checked /><span>Drums</span></label>
+        <label><input type="checkbox" id="metronomeToggle" checked /><span>Click</span></label>
+      </div>
+
+      <div class="tempo-row">
+        <span class="row-heading">Tempo</span>
+        <select id="tempoSelect">
+          <option value="60">60 BPM</option>
+          <option value="72">72 BPM</option>
+          <option value="80">80 BPM</option>
+          <option value="90">90 BPM</option>
+          <option value="100" selected>100 BPM</option>
+          <option value="110">110 BPM</option>
+          <option value="120">120 BPM</option>
+          <option value="132">132 BPM</option>
+          <option value="144">144 BPM</option>
+          <option value="160">160 BPM</option>
+        </select>
+      </div>
+
+      <div class="meter-row">
+        <span class="row-heading">Meter</span>
+        <div id="timeSignatureChoices" class="meter-choices" role="group" aria-label="Time signature">
+          <button type="button" class="meter-choice selected" data-signature="4/4">4/4</button>
+          <button type="button" class="meter-choice" data-signature="3/4">3/4</button>
+          <button type="button" class="meter-choice" data-signature="6/8">6/8</button>
+          <button type="button" class="meter-choice" data-signature="12/8"><span x-apple-data-detectors="false">12/8</span></button>
+          <button type="button" class="meter-choice" data-signature="2/4">2/4</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var MAJOR_KEYS = ["C","G","D","A","E","B","F#","Db","Ab","Eb","Bb","F"];
+    var REL_MINOR = { C:"Am", G:"Em", D:"Bm", A:"F#m", E:"C#m", B:"G#m", "F#":"D#m", Db:"Bbm", Ab:"Fm", Eb:"Cm", Bb:"Gm", F:"Dm" };
+    var REL_MAJOR = { Am:"C", Em:"G", Bm:"D", "F#m":"A", "C#m":"E", "G#m":"B", "D#m":"F#", Bbm:"Db", Fm:"Ab", Cm:"Eb", Gm:"Bb", Dm:"F" };
+    var KEY_NOTES = {
+      C:["C","D","E","F","G","A","B"], G:["G","A","B","C","D","E","F#"], D:["D","E","F#","G","A","B","C#"],
+      A:["A","B","C#","D","E","F#","G#"], E:["E","F#","G#","A","B","C#","D#"], B:["B","C#","D#","E","F#","G#","A#"],
+      "F#":["F#","G#","A#","B","C#","D#","E#"], Db:["Db","Eb","F","Gb","Ab","Bb","C"], Ab:["Ab","Bb","C","Db","Eb","F","G"],
+      Eb:["Eb","F","G","Ab","Bb","C","D"], Bb:["Bb","C","D","Eb","F","G","A"], F:["F","G","A","Bb","C","D","E"]
+    };
+
+    var audioCtx = null, masterGain = null;
+    var activeOscillators = [], progressionOscillators = [];
+    var arpIntervalId = null;
+    var progressionPlaying = false;
+    var selectedMajor = "C";
+    var activeRoman = null, activeChordKey = null, activeChordRing = null, activePitchClass = null, activeQuality = null, activeIsDiatonic = null;
+    var cuePitchClass = null, cueQuality = null, cueIsDiatonic = null, cueLitOnWheel = false;
+
+    var PC_MAP = {C:0,"C#":1,Db:1,D:2,"D#":3,Eb:3,E:4,F:5,"F#":6,Gb:6,G:7,"G#":8,Ab:8,A:9,"A#":10,Bb:10,B:11};
+    var SHARP_PC_NAMES = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+    var FLAT_PC_NAMES  = ["C","Db","D","Eb","E","F","Gb","G","Ab","A","Bb","B"];
+    var selectedSpellingPreference = "conventional";
+
+    function conventionalPreferenceForKey(keyName) {
+      if (["F","Bb","Eb","Ab","Db"].indexOf(keyName) !== -1) return "flat";
+      if (["G","D","A","E","B","F#"].indexOf(keyName) !== -1) return "sharp";
+      return "conventional";
+    }
+
+    function displayPitchClass(pc, preference, conventionalName) {
+      pc = ((pc % 12) + 12) % 12;
+      if (preference === "sharp") return SHARP_PC_NAMES[pc];
+      if (preference === "flat") return FLAT_PC_NAMES[pc];
+      return conventionalName || FLAT_PC_NAMES[pc];
+    }
+
+    function displayMajorForCanonical(canonicalMajor) {
+      return displayPitchClass(PC_MAP[canonicalMajor], selectedSpellingPreference, canonicalMajor);
+    }
+
+    function displayMinorForCanonical(canonicalMinor) {
+      var root = canonicalMinor.slice(0,-1);
+      return displayPitchClass(PC_MAP[root], selectedSpellingPreference, root) + "m";
+    }
+
+    function setSpellingFromSelectedDisplay(displayName, canonicalKey) {
+      if (displayName.indexOf("#") !== -1) selectedSpellingPreference = "sharp";
+      else if (displayName.indexOf("b") !== -1) selectedSpellingPreference = "flat";
+      else selectedSpellingPreference = conventionalPreferenceForKey(canonicalKey);
+    }
+
+    function activeChordDisplayName() {
+      if (activePitchClass === null) return "";
+      return displayPitchClass(activePitchClass, selectedSpellingPreference);
+    }
+
+    function enhMajor(note) { if (note === "Gb") return "F#"; if (note === "C#") return "Db"; return note; }
+    function enhMinor(note) { if (note === "A#m") return "Bbm"; if (note === "Ebm") return "D#m"; return note; }
+    function displayMinorFromNote(note) { return enhMinor(note + "m"); }
+    function parseKey(value) {
+      var raw = (value || "C").replace(/♯/g, "#").replace(/♭/g, "b").trim();
+      var normalized = raw ? raw.charAt(0).toUpperCase() + raw.slice(1) : "C";
+      if (MAJOR_KEYS.indexOf(normalized) !== -1) return normalized;
+      if (normalized.slice(-1) !== "m") normalized += "m";
+      return REL_MAJOR[normalized] || "C";
+    }
+    function getAudioCtx() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        masterGain = audioCtx.createGain();
+        masterGain.gain.value = 0.9;
+        masterGain.connect(audioCtx.destination);
+      }
+      return audioCtx;
+    }
+    function ensureAudioReady(callback) {
+      var ctx = getAudioCtx();
+      try {
+        if (ctx.state === "suspended") {
+          var resumed = ctx.resume();
+          if (resumed && typeof resumed.then === "function") { resumed.then(function(){ if (callback) callback(ctx); }); return; }
+        }
+      } catch (e) {}
+      if (callback) callback(ctx);
+    }
+    // Optional sampled acoustic guitar. Synthetic remains the default and fallback.
+    // Same Karoryfer Shinyguitar sample set used by Voicing Navigator.
+    // Local Shinyguitar acoustic/microphone samples, covering Circle's
+    // actual guitar range (MIDI 60-78) at three-semitone centers.
+    var GUITAR_SAMPLE_DEFS = [
+      {midi:60,url:"samples/guitar/guitar_C4.wav"},
+      {midi:63,url:"samples/guitar/guitar_Eb4.wav"},
+      {midi:66,url:"samples/guitar/guitar_Gb4.wav"},
+      {midi:69,url:"samples/guitar/guitar_A4.wav"},
+      {midi:72,url:"samples/guitar/guitar_C5.wav"},
+      {midi:75,url:"samples/guitar/guitar_Eb5.wav"},
+      {midi:78,url:"samples/guitar/guitar_Gb5.wav"}
+    ];
+    var guitarSampleBuffers = new Map();
+    var guitarSamplesPromise = null;
+
+    function selectedInstrument() {
+      return "sampled";
+    }
+
+    function setGuitarSampleStatus(text, stateClass) {
+      updateCompactAudioStatus(document.getElementById("guitarSampleStatus"), text, stateClass);
+    }
+
+    function loadGuitarSamples(ctx) {
+      if (guitarSampleBuffers.size === GUITAR_SAMPLE_DEFS.length) {
+        setGuitarSampleStatus("Guitar: samples ready", "ready");
+        return Promise.resolve(true);
+      }
+      if (guitarSamplesPromise) return guitarSamplesPromise;
+
+      setGuitarSampleStatus("Guitar: loading samples…", "");
+
+      guitarSamplesPromise = Promise.all(GUITAR_SAMPLE_DEFS.map(function(def){
+        return fetch(def.url, {cache:"force-cache"})
+          .then(function(r){
+            if (!r.ok) throw new Error(def.url + " HTTP " + r.status);
+            return r.arrayBuffer();
+          })
+          .then(function(ab){ return ctx.decodeAudioData(ab.slice(0)); })
+          .then(function(buf){ guitarSampleBuffers.set(def.midi,buf); });
+      })).then(function(){
+        setGuitarSampleStatus("Guitar: samples ready", "ready");
+        return true;
+      }).catch(function(err){
+        console.warn("Local guitar samples unavailable; using synthetic fallback.", err);
+        guitarSampleBuffers.clear();
+        setGuitarSampleStatus("Guitar: synth fallback", "fallback");
+        return false;
+      }).finally(function(){
+        guitarSamplesPromise = null;
+      });
+
+      return guitarSamplesPromise;
+    }
+
+
+    // Local bass samples served from this repository.
+    // These four recordings cover Circle's current one-octave bass range.
+    var BASS_SAMPLE_DEFS = [
+      { midi:48, url:"samples/bass/bass_C3.wav" },
+      { midi:51, url:"samples/bass/bass_Eb3.wav" },
+      { midi:54, url:"samples/bass/bass_Gb3.wav" },
+      { midi:57, url:"samples/bass/bass_A3.wav" }
+    ];
+    var bassSampleBuffers = new Map();
+    var bassSamplesPromise = null;
+
+    function setBassSampleStatus(text, stateClass) {
+      updateCompactAudioStatus(document.getElementById("bassSampleStatus"), text, stateClass);
+    }
+
+    function loadBassSamples(ctx) {
+      if (bassSampleBuffers.size === BASS_SAMPLE_DEFS.length) {
+        setBassSampleStatus("Bass: samples ready", "ready");
+        return Promise.resolve(true);
+      }
+      if (bassSamplesPromise) return bassSamplesPromise;
+
+      setBassSampleStatus("Bass: loading samples…", "");
+
+      bassSamplesPromise = Promise.all(BASS_SAMPLE_DEFS.map(function(def){
+        return fetch(def.url, {cache:"force-cache"})
+          .then(function(r){
+            if (!r.ok) throw new Error(def.url + " HTTP " + r.status);
+            return r.arrayBuffer();
+          })
+          .then(function(ab){ return ctx.decodeAudioData(ab.slice(0)); })
+          .then(function(buf){ bassSampleBuffers.set(def.midi, buf); });
+      })).then(function(){
+        setBassSampleStatus("Bass: samples ready", "ready");
+        return true;
+      }).catch(function(err){
+        console.warn("Local bass samples unavailable; using synth fallback.", err);
+        bassSampleBuffers.clear();
+        setBassSampleStatus("Bass: synth fallback", "fallback");
+        return false;
+      }).finally(function(){
+        bassSamplesPromise = null;
+      });
+
+      return bassSamplesPromise;
+    }
+
+    function nearestBassSample(midi) {
+      var best = null;
+      for (var i=0; i<BASS_SAMPLE_DEFS.length; i++) {
+        var def = BASS_SAMPLE_DEFS[i];
+        if (!bassSampleBuffers.has(def.midi)) continue;
+        var distance = Math.abs(midi - def.midi);
+        if (!best || distance < best.distance) {
+          best = {def:def, distance:distance};
+        }
+      }
+      return best;
+    }
+
+    function playSampledBassTone(ctx, midi, duration, when) {
+      var pick = nearestBassSample(midi);
+      if (!pick) return false;
+
+      var src = ctx.createBufferSource();
+      var gain = ctx.createGain();
+      src.buffer = bassSampleBuffers.get(pick.def.midi);
+      src.playbackRate.value = Math.pow(2, (midi - pick.def.midi) / 12);
+
+      var noteDuration = Math.max(0.09, duration || 0.45);
+      var fadeTime = Math.min(0.055, noteDuration * 0.22);
+      var fadeStart = when + Math.max(0.05, noteDuration - fadeTime);
+      var stopAt = when + noteDuration + 0.015;
+
+      gain.gain.setValueAtTime(0.31, when);
+      gain.gain.setValueAtTime(0.31, fadeStart);
+      gain.gain.linearRampToValueAtTime(0.0001, when + noteDuration);
+
+      src.connect(gain);
+      gain.connect(masterGain || ctx.destination);
+      src.start(when);
+      try { src.stop(stopAt); } catch(e) {}
+
+      var item = {osc:src, gain:gain, ctx:ctx};
+      progressionOscillators.push(item);
+      src.onended = function(){
+        var ix = progressionOscillators.indexOf(item);
+        if (ix !== -1) progressionOscillators.splice(ix,1);
+      };
+      return true;
+    }
+
+    // Local percussion samples served from this repository.
+    // Folder structure:
+    // samples/drums/kick.wav
+    // samples/drums/snare.wav
+    // samples/drums/hihat.wav
+    var PERCUSSION_SAMPLE_DEFS = {
+      kick: {
+        local: "samples/drums/kick.wav"
+      },
+      snare: {
+        local: "samples/drums/snare.wav"
+      },
+      hat: {
+        local: "samples/drums/hihat.wav"
+      },
+
+      // Pass 3: additional CC0 percussion colors.
+      // Circle tries the local repo path first, then the public CC0 source.
+      tomHigh: {
+        local: "samples/drums/tom-high.wav",
+        remote: "https://raw.githubusercontent.com/averagenative/0x808/main/samples/909/tom-h.wav"
+      },
+      tomLow: {
+        local: "samples/drums/tom-low.wav",
+        remote: "https://raw.githubusercontent.com/averagenative/0x808/main/samples/909/tom-l.wav"
+      },
+      rim: {
+        local: "samples/drums/rim.wav",
+        remote: "https://raw.githubusercontent.com/averagenative/0x808/main/samples/909/rim.wav"
+      },
+      openHat: {
+        local: "samples/drums/hihat-open.wav",
+        remote: "https://raw.githubusercontent.com/averagenative/0x808/main/samples/909/hihat-open-1.wav"
+      },
+      ride: {
+        local: "samples/drums/ride.wav",
+        remote: "https://raw.githubusercontent.com/averagenative/0x808/main/samples/909/ride.wav"
+      }
+    };
+    var percussionSampleBuffers = new Map();
+    var percussionSamplesPromise = null;
+
+    function updateCompactAudioStatus(el, text, stateClass) {
+      if (!el) return;
+      var label = el.getAttribute("data-label") || "";
+      var state = stateClass || "waiting";
+      el.className = "audio-status-item " + state;
+      el.title = text;
+
+      var name = el.querySelector(".status-name");
+      if (name) {
+        name.textContent = (state === "fallback") ? label + " synth" : label;
+      }
+
+      var audio = document.getElementById("audioStatus");
+      if (audio) {
+        var items = Array.prototype.slice.call(audio.querySelectorAll(".audio-status-item"));
+        audio.setAttribute("aria-label", "Audio: " + items.map(function(item){
+          return item.title || ((item.getAttribute("data-label") || "") + " waiting");
+        }).join("; "));
+      }
+    }
+
+    function setPercussionSampleStatus(text, stateClass) {
+      updateCompactAudioStatus(document.getElementById("sampleStatus"), text, stateClass);
+    }
+
+    function fetchAndDecodePercussionSample(ctx, urls) {
+      var list = Array.isArray(urls) ? urls.slice() : [urls];
+
+      function tryNext(index) {
+        if (index >= list.length) return Promise.reject(new Error("No sample source available"));
+
+        var url = list[index];
+        if (!url) return tryNext(index + 1);
+
+        return fetch(url, {cache:"force-cache"})
+          .then(function(r){
+            if (!r.ok) throw new Error(url + " HTTP " + r.status);
+            return r.arrayBuffer();
+          })
+          .then(function(ab){
+            return ctx.decodeAudioData(ab.slice(0));
+          })
+          .catch(function(){
+            return tryNext(index + 1);
+          });
+      }
+
+      return tryNext(0);
+    }
+
+    function loadPercussionSamples(ctx) {
+      var entries = Object.keys(PERCUSSION_SAMPLE_DEFS);
+
+      if (percussionSampleBuffers.size === entries.length) {
+        setPercussionSampleStatus("Drums: samples ready", "ready");
+        return Promise.resolve(true);
+      }
+      if (percussionSamplesPromise) return percussionSamplesPromise;
+
+      setPercussionSampleStatus("Drums: loading samples…", "");
+
+      percussionSamplesPromise = Promise.all(entries.map(function(kind){
+        var def = PERCUSSION_SAMPLE_DEFS[kind];
+        var urls = [];
+
+        if (typeof def === "string") {
+          urls.push(def);
+        } else {
+          if (def.local) urls.push(def.local);
+          if (def.remote) urls.push(def.remote);
+        }
+
+        return fetchAndDecodePercussionSample(ctx, urls)
+          .then(function(buf){
+            percussionSampleBuffers.set(kind, buf);
+            return true;
+          })
+          .catch(function(err){
+            console.warn("Percussion sample unavailable for " + kind + "; using synth fallback.", err);
+            percussionSampleBuffers.delete(kind);
+            return false;
+          });
+      })).then(function(results){
+        var loaded = results.filter(Boolean).length;
+        if (loaded === entries.length) {
+          setPercussionSampleStatus("Drums: samples ready", "ready");
+          return true;
+        }
+        if (loaded > 0) {
+          setPercussionSampleStatus("Drums: " + loaded + "/" + entries.length + " samples", "ready");
+          return true;
+        }
+        setPercussionSampleStatus("Drums: synth fallback", "fallback");
+        return false;
+      }).finally(function(){
+        percussionSamplesPromise = null;
+      });
+
+      return percussionSamplesPromise;
+    }
+
+    function playSampledPercussionHit(ctx, when, kind) {
+      var buf = percussionSampleBuffers.get(kind);
+      if (!buf) return false;
+
+      var src = ctx.createBufferSource();
+      var gain = ctx.createGain();
+      src.buffer = buf;
+
+      var levels = {
+        kick:0.72,
+        snare:0.52,
+        hat:0.30,
+        tomHigh:0.46,
+        tomLow:0.50,
+        rim:0.40,
+        openHat:0.28,
+        ride:0.25
+      };
+      var level = levels[kind] !== undefined ? levels[kind] : 0.35;
+      gain.gain.setValueAtTime(level, when);
+
+      src.connect(gain);
+      gain.connect(masterGain || ctx.destination);
+      src.start(when);
+
+      trackPercussionSource(src, gain, ctx);
+      return true;
+    }
+
+    function nearestGuitarSample(midi) {
+      var best=null;
+      for (var i=0;i<GUITAR_SAMPLE_DEFS.length;i++) {
+        var def=GUITAR_SAMPLE_DEFS[i];
+        if (!guitarSampleBuffers.has(def.midi)) continue;
+        var distance=Math.abs(midi-def.midi);
+        if (!best || distance<best.distance) best={def:def,distance:distance};
+      }
+      return best;
+    }
+
+    function playSampledTone(ctx,midi,when,volume,targetArray,duration) {
+      var pick=nearestGuitarSample(midi);
+      if (!pick) return false;
+
+      var src=ctx.createBufferSource(), gain=ctx.createGain();
+      src.buffer=guitarSampleBuffers.get(pick.def.midi);
+      src.playbackRate.value=Math.pow(2,(midi-pick.def.midi)/12);
+
+      // Gate the recorded guitar so one harmony does not ring into the next.
+      // Keep a short natural body, then use a 50 ms release.
+      var noteDuration = Math.max(0.09, duration || 0.45);
+      var fadeTime = Math.min(0.05, noteDuration * 0.25);
+      var fadeStart = when + Math.max(0.04, noteDuration - fadeTime);
+      var stopAt = when + noteDuration + 0.012;
+
+      gain.gain.cancelScheduledValues(when);
+      gain.gain.setValueAtTime(volume, when);
+      gain.gain.setValueAtTime(volume, fadeStart);
+      gain.gain.linearRampToValueAtTime(0.0001, when + noteDuration);
+
+      src.connect(gain);
+      gain.connect(masterGain || ctx.destination);
+      src.start(when);
+      try { src.stop(stopAt); } catch(e) {}
+
+      var sampleItem={osc:src,gain:gain,ctx:ctx};
+      targetArray.push(sampleItem);
+      src.onended=function(){
+        var ix=targetArray.indexOf(sampleItem);
+        if(ix!==-1) targetArray.splice(ix,1);
+      };
+      return true;
+    }
+
+    function midiToFreq(midi) { return 440 * Math.pow(2, (midi - 69) / 12); }
+    function text(svg, x, y, str, opts) {
+      opts = opts || {};
+      var el = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      el.setAttribute("x", x); el.setAttribute("y", y); el.setAttribute("text-anchor", opts.anchor || "middle");
+      el.setAttribute("font-size", opts.size || 16); el.setAttribute("font-weight", opts.weight || 700); el.setAttribute("fill", opts.fill || "#111827");
+      el.setAttribute("class", "label"); el.textContent = str; svg.appendChild(el); return el;
+    }
+    function circle(svg, cx, cy, r, fill, stroke, sw) {
+      var el = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      el.setAttribute("cx", cx); el.setAttribute("cy", cy); el.setAttribute("r", r); el.setAttribute("fill", fill);
+      el.setAttribute("stroke", stroke || "none"); el.setAttribute("stroke-width", sw || 0); svg.appendChild(el); return el;
+    }
+    function wedgePath(cx, cy, rInner, rOuter, startAngle, endAngle) {
+      var x1o = cx + Math.cos(startAngle) * rOuter, y1o = cy + Math.sin(startAngle) * rOuter;
+      var x2o = cx + Math.cos(endAngle) * rOuter, y2o = cy + Math.sin(endAngle) * rOuter;
+      var x2i = cx + Math.cos(endAngle) * rInner, y2i = cy + Math.sin(endAngle) * rInner;
+      var x1i = cx + Math.cos(startAngle) * rInner, y1i = cy + Math.sin(startAngle) * rInner;
+      return "M " + x1o + " " + y1o + " A " + rOuter + " " + rOuter + " 0 0 1 " + x2o + " " + y2o + " L " + x2i + " " + y2i + " A " + rInner + " " + rInner + " 0 0 0 " + x1i + " " + y1i + " Z";
+    }
+    function wedge(svg, cx, cy, rInner, rOuter, startAngle, endAngle, fill, stroke, sw) {
+      var el = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      el.setAttribute("d", wedgePath(cx, cy, rInner, rOuter, startAngle, endAngle));
+      el.setAttribute("fill", fill); el.setAttribute("stroke", stroke || "none"); el.setAttribute("stroke-width", sw || 0); el.setAttribute("class", "clickable");
+      svg.appendChild(el); return el;
+    }
+
+    function playSingleTone(ctx, midi, duration, targetArray, startWhen, role) {
+      var now = startWhen || ctx.currentTime;
+      var noteRole = role || "arp";
+
+      // Bass is rendered separately; the metronome remains synthetic.
+      // Chord/arp guitar voices use the local recorded guitar samples when selected.
+      if (selectedInstrument() === "sampled" && noteRole !== "metro" && noteRole !== "bass") {
+        var sampleVol = noteRole === "chord" ? 0.16 : 0.18;
+        if (playSampledTone(ctx,midi,now,sampleVol,targetArray,duration)) return;
+        // If samples are unavailable, fall through to the original synth.
+      }
+
+      var fundamental = ctx.createOscillator(), overtone1 = ctx.createOscillator(), overtone2 = ctx.createOscillator();
+      var gain = ctx.createGain(), filter = ctx.createBiquadFilter();
+      var pickFilter = ctx.createBiquadFilter(), pickGain = ctx.createGain();
+      var mix1 = ctx.createGain(), mix2 = ctx.createGain(), mix3 = ctx.createGain();
+
+      fundamental.type = "triangle";
+      overtone1.type = "sawtooth";
+      overtone2.type = "triangle";
+      filter.type = noteRole === "bass" ? "lowpass" : "bandpass";
+      filter.frequency.setValueAtTime(noteRole === "bass" ? 900 : 1850, now);
+      filter.Q.value = noteRole === "bass" ? 0.7 : 1.15;
+
+      var freq = midiToFreq(midi);
+      fundamental.frequency.value = freq;
+      overtone1.frequency.value = freq * 2;
+      overtone2.frequency.value = freq * 3;
+
+      var peak = 0.12;
+      var sustain = 0.035;
+      if (noteRole === "chord") { peak = 0.17; sustain = 0.02; }
+      if (noteRole === "bass") { peak = 0.14; sustain = 0.045; }
+      if (noteRole === "metro") { peak = 0.05; sustain = 0.015; }
+
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.linearRampToValueAtTime(peak, now + 0.004);
+      gain.gain.exponentialRampToValueAtTime(Math.max(0.001, peak * 0.28), now + sustain);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + Math.max(0.08, duration));
+
+      pickFilter.type = "highpass";
+      pickFilter.frequency.setValueAtTime(2800, now);
+      pickGain.gain.setValueAtTime(0.0001, now);
+      pickGain.gain.linearRampToValueAtTime(noteRole === "bass" ? 0.008 : 0.018, now + 0.002);
+      pickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.018);
+
+      mix1.gain.value = noteRole === "bass" ? 0.95 : 0.72;
+      mix2.gain.value = noteRole === "bass" ? 0.12 : 0.22;
+      mix3.gain.value = noteRole === "bass" ? 0.05 : 0.10;
+
+      fundamental.connect(mix1);
+      overtone1.connect(mix2);
+      overtone2.connect(mix3);
+      mix1.connect(filter);
+      mix2.connect(filter);
+      mix3.connect(filter);
+      filter.connect(gain);
+      gain.connect(masterGain || ctx.destination);
+
+      overtone1.connect(pickFilter);
+      pickFilter.connect(pickGain);
+      pickGain.connect(masterGain || ctx.destination);
+
+      fundamental.start(now);
+      overtone1.start(now);
+      overtone2.start(now);
+      fundamental.stop(now + Math.max(0.09, duration) + 0.03);
+      overtone1.stop(now + Math.max(0.09, duration) + 0.03);
+      overtone2.stop(now + Math.max(0.09, duration) + 0.03);
+
+      var voiceItems = [
+        { osc: fundamental, gain: gain, ctx: ctx },
+        { osc: overtone1, gain: gain, ctx: ctx },
+        { osc: overtone2, gain: gain, ctx: ctx }
+      ];
+      for (var vi=0; vi<voiceItems.length; vi++) targetArray.push(voiceItems[vi]);
+
+      // Long-running transport: remove every finished musical oscillator
+      // reference so the tracking array remains bounded.
+      if (noteRole === "bass" || noteRole === "chord" || noteRole === "arp") {
+        voiceItems.forEach(function(item){
+          item.osc.onended = function(){
+            var ix = targetArray.indexOf(item);
+            if (ix !== -1) targetArray.splice(ix,1);
+          };
+        });
+      }
+    }
+
+
+    function stopArpeggioOnly() {
+      if (arpIntervalId) { clearInterval(arpIntervalId); arpIntervalId = null; }
+      for (var i = 0; i < activeOscillators.length; i++) {
+        try {
+          activeOscillators[i].gain.gain.cancelScheduledValues(0);
+          activeOscillators[i].gain.gain.setTargetAtTime(0.0001, activeOscillators[i].ctx.currentTime, 0.03);
+          activeOscillators[i].osc.stop(activeOscillators[i].ctx.currentTime + 0.08);
+        } catch (e) {}
+      }
+      activeOscillators = [];
+      activeRoman = null; activeChordKey = null; activeChordRing = null; activePitchClass = null; activeQuality = null; activeIsDiatonic = null;
+    }
+    function stopProgressionPlayback() {
+      stopMasterTransport();
+
+      for (var k = 0; k < progressionOscillators.length; k++) {
+        try {
+          progressionOscillators[k].gain.gain.cancelScheduledValues(0);
+          progressionOscillators[k].gain.gain.setTargetAtTime(0.0001, progressionOscillators[k].ctx.currentTime, 0.03);
+          progressionOscillators[k].osc.stop(progressionOscillators[k].ctx.currentTime + 0.08);
+        } catch (e) {}
+      }
+      progressionOscillators = [];
+      progressionPlaying = false;
+
+      var btn = document.getElementById("playProgressionBtn");
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = "Play";
+        btn.classList.remove("playing");
+      }
+
+      var previewBtn = document.getElementById("choicePreview");
+      if (previewBtn) previewBtn.textContent = "Preview";
+
+      activeRoman = null;
+      activeChordKey = null;
+      activeChordRing = null;
+      activePitchClass = null;
+      activeQuality = null;
+      activeIsDiatonic = null;
+
+      render(selectedMajor);
+      renderProgressionStrip(null, null, false);
+    }
+    function stopAllAudio() { stopArpeggioOnly(); stopProgressionPlayback(); render(selectedMajor); }
+
+    function triadMidiNotes(root, quality) {
+      var map = {C:0, "C#":1, Db:1, D:2, "D#":3, Eb:3, E:4, F:5, "F#":6, Gb:6, G:7, "G#":8, Ab:8, A:9, "A#":10, Bb:10, B:11};
+      var intervals = [0,4,7]; if (quality === "minor") intervals = [0,3,7]; if (quality === "dim") intervals = [0,3,6];
+      var rootMidi = 60 + map[root]; return [rootMidi + intervals[0], rootMidi + intervals[1], rootMidi + intervals[2]];
+    }
+    function romanInfoForWedge(currentKey, keyName, ring) {
+      var notes = KEY_NOTES[currentKey];
+      var outer1 = currentKey, outer4 = enhMajor(notes[3]), outer5 = enhMajor(notes[4]);
+      var inner2 = displayMinorFromNote(notes[1]);
+      var inner3 = displayMinorFromNote(notes[2]);
+      var inner6 = REL_MINOR[currentKey];
+      if (ring === "outer") {
+        if (keyName === outer1) return { roman: "I", root: notes[0], quality: "major", playable: true };
+        if (keyName === outer4) return { roman: "IV", root: notes[3], quality: "major", playable: true };
+        if (keyName === outer5) return { roman: "V", root: notes[4], quality: "major", playable: true };
+      } else {
+        if (keyName === inner2) return { roman: "ii", root: notes[1], quality: "minor", playable: true };
+        if (keyName === inner3) return { roman: "iii", root: notes[2], quality: "minor", playable: true };
+        if (keyName === inner6) return { roman: "vi", root: notes[5], quality: "minor", playable: true };
+      }
+      return { playable: false };
+    }
+
+    function startChordLoop(root, quality, roman, chordKey, chordRing) {
+      ensureAudioReady(function(ctx){
+        var notes = triadMidiNotes(root, quality), pattern = [notes[0], notes[1], notes[2], notes[1]], step = 0;
+        function tick() { playSingleTone(ctx, pattern[step], 0.33, activeOscillators, undefined, "arp"); step = (step + 1) % pattern.length; }
+        tick(); arpIntervalId = setInterval(tick, 360); activeRoman = roman; activeChordKey = chordKey; activeChordRing = chordRing; render(selectedMajor);
+      });
+    }
+    function handleChordClick(root, quality, roman, chordKey, chordRing) {
+      if (activeRoman === roman && activeChordKey === chordKey && activeChordRing === chordRing && arpIntervalId) { stopArpeggioOnly(); render(selectedMajor); return; }
+      stopProgressionPlayback(); stopArpeggioOnly();
+      var pcMap = {C:0,"C#":1,Db:1,D:2,"D#":3,Eb:3,E:4,F:5,"F#":6,Gb:6,G:7,"G#":8,Ab:8,A:9,"A#":10,Bb:10,B:11};
+      activePitchClass = pcMap[root]; activeQuality = quality;
+      startChordLoop(root, quality, roman, chordKey, chordRing);
+    }
+
+    function selectedPercussionPatternName() {
+      var select = document.getElementById("rhythmSelect");
+      if (!select || !select.value) return "quarter";
+      return select.value.split("|")[0];
+    }
+
+    function selectedPercussionLabel() {
+      var select = document.getElementById("rhythmSelect");
+      var opt = selectedOptionFor(select);
+      return opt ? opt.textContent.trim() : "Simple quarters";
+    }
+
+    // Each named Percussion choice now has an actual four-beat groove.
+    // Values are beat positions within a 4/4 bar. Fractions are scheduled
+    // directly on the AudioContext clock, so offbeats do not depend on JS timers.
+    var PERCUSSION_GROOVES = {
+      "Simple quarters": {
+        kick:[0,2], snare:[1,3], hat:[0,1,2,3]
+      },
+      "Eighth pulse": {
+        kick:[0,2], snare:[1,3], hat:[0,0.5,1,1.5,2,2.5,3,3.5]
+      },
+      "Half-note pulse": {
+        kick:[0], snare:[2], hat:[0,2]
+      },
+      "Whole-bar sustain": {
+        kick:[0], snare:[], hat:[0]
+      },
+      "Quarter push": {
+        kick:[0,1.75,2.75], snare:[1,3], hat:[0,0.75,1.5,2,2.75,3.5]
+      },
+      "Anticipation": {
+        kick:[0,1.5,2.5], snare:[1,3], hat:[0,0.5,1.5,2,2.5,3.5]
+      },
+      "Offbeat drive": {
+        kick:[0,2], snare:[1.5,3.5], hat:[0.5,1.5,2.5,3.5]
+      },
+      "Sparse quarters": {
+        kick:[0], snare:[3], hat:[0,2]
+      },
+
+      "Pop groove (push)": {
+        kick:[0,1.75,2.5], snare:[1,3], hat:[0,0.5,1,1.5,2,2.5,3,3.5]
+      },
+      "Syncopated pop": {
+        kick:[0,0.75,2,2.75], snare:[1.5,3.5], hat:[0,0.5,1,1.5,2,2.5,3,3.5]
+      },
+      "Driving pop": {
+        kick:[0,1.5,2,3.5], snare:[1,3], hat:[0,0.5,1,1.5,2,2.5,3,3.5]
+      },
+      "Rock quarters": {
+        kick:[0,1,2,3], snare:[1,3], hat:[0,1,2,3]
+      },
+      "Rock eighths": {
+        kick:[0,1.5,2,2.5], snare:[1,3], hat:[0,0.5,1,1.5,2,2.5,3,3.5]
+      },
+      "Backbeat hits": {
+        kick:[0,2], snare:[1,3], hat:[0,2]
+      },
+      "Power ballad": {
+        kick:[0,2.5], snare:[1,3], hat:[0,1,2,3]
+      },
+      "Arena sustain": {
+        kick:[0], snare:[2], hat:[0,1,2,3]
+      },
+
+      "Bossa-style groove": {
+        kick:[0,1.5,2,3.5], snare:[0.5,1.5,2.5,3.5], hat:[0,1,2,3]
+      },
+      "Bossa sparse": {
+        kick:[0,2], snare:[1.5,3.5], hat:[0,1,2,3]
+      },
+      "Bossa syncopated": {
+        kick:[0,1.5,2.75], snare:[0.75,2,3.5], hat:[0,0.5,1,1.5,2,2.5,3,3.5]
+      },
+      "Samba light": {
+        kick:[0,1.5,2,3.5], snare:[0.5,1.5,2.5,3.5], hat:[0,0.5,1,1.5,2,2.5,3,3.5]
+      },
+      "Samba drive": {
+        kick:[0,0.75,1.5,2.5,3.25], snare:[1,2,3], hat:[0,0.5,1,1.5,2,2.5,3,3.5]
+      },
+      "Tresillo": {
+        kick:[0,1.5,2.5], snare:[3], hat:[0,1,2,3]
+      },
+      "Tango": {
+        kick:[0,1,2.5,3], snare:[1.5,3.5], hat:[0,1,2,3]
+      },
+      "Latin offbeat": {
+        kick:[0,2], snare:[0.5,1.5,2.5,3.5], hat:[0.5,1.5,2.5,3.5]
+      },
+
+      "Swing comp": {
+        kick:[0,2], snare:[1.67,3.67], hat:[0,0.67,1,1.67,2,2.67,3,3.67]
+      },
+      "Swing sparse": {
+        kick:[0,2], snare:[3.67], hat:[0,0.67,2,2.67]
+      },
+      "Swing push": {
+        kick:[0,2.67], snare:[1.67,3.67], hat:[0,0.67,1,1.67,2,2.67,3,3.67]
+      },
+      "Charleston": {
+        kick:[0], snare:[1.5,3], hat:[0,1.5,3]
+      },
+      "Reverse Charleston": {
+        kick:[0.5,2], snare:[1.5,3.5], hat:[0.5,2,3.5]
+      },
+      "Jazz ballad": {
+        kick:[0,2], snare:[3], hat:[0,1,2,3]
+      },
+      "Two feel": {
+        kick:[0,2], snare:[1.67,3.67], hat:[0,0.67,2,2.67]
+      },
+      "Four to the bar": {
+        kick:[0,1,2,3], snare:[1.67,3.67], hat:[0,0.67,1,1.67,2,2.67,3,3.67]
+      },
+
+      "Funk subdivision": {
+        kick:[0,0.75,2,2.5], snare:[1,3], hat:[0,0.5,1,1.5,2,2.5,3,3.5]
+      },
+      "Funk push": {
+        kick:[0,0.75,1.75,2.5,3.25], snare:[1,3], hat:[0.5,1.5,2.5,3.5]
+      },
+      "Funk sparse": {
+        kick:[0,2.5], snare:[1.5,3], hat:[0,0.5,1.5,2,3.5]
+      },
+      "Soul backbeat": {
+        kick:[0,2.5], snare:[1,3], hat:[0,0.5,1,1.5,2,2.5,3,3.5]
+      },
+      "R&B pocket": {
+        kick:[0,1.5,2.75], snare:[1,3], hat:[0,0.5,1.5,2,2.5,3.5]
+      },
+      "Neo-soul space": {
+        kick:[0,2.75], snare:[1.5,3.5], hat:[0.5,2,3]
+      },
+
+      "Folk quarters": {
+        kick:[0,2], snare:[1,3], hat:[0,1,2,3]
+      },
+      "Folk eighths": {
+        kick:[0,2], snare:[1,3], hat:[0,0.5,1,1.5,2,2.5,3,3.5]
+      },
+      "Country two-step": {
+        kick:[0,2], snare:[1,3], hat:[0.5,1.5,2.5,3.5]
+      },
+      "Country drive": {
+        kick:[0,1.5,2,3.5], snare:[1,3], hat:[0,0.5,1,1.5,2,2.5,3,3.5]
+      },
+      "Ballad strum": {
+        kick:[0,2], snare:[3], hat:[0,1,2,3]
+      },
+      "Train pulse": {
+        kick:[0,1.5,2,3.5], snare:[0.5,1.5,2.5,3.5], hat:[0,0.5,1,1.5,2,2.5,3,3.5]
+      },
+
+      "Reggae skank": {
+        kick:[2], snare:[2], hat:[0.5,1.5,2.5,3.5]
+      },
+      "Reggae-ish push": {
+        kick:[0,2.5], snare:[2,3.5], hat:[0.5,1.5,2.5,3.5]
+      },
+      "Long-short practice": {
+        kick:[0,1.5,2.5], snare:[1,3], hat:[0,1.5,2,3.5]
+      },
+      "Short-long practice": {
+        kick:[0,0.5,2,2.5], snare:[1.5,3.5], hat:[0,0.5,2,2.5]
+      },
+      "Triplet-like push": {
+        kick:[0,2.67], snare:[1.33,3.33], hat:[0,0.67,1,1.67,2,2.67,3,3.67]
+      },
+      "Space and push": {
+        kick:[0,2.5], snare:[2,3.5], hat:[0,0.5,2,3]
+      }
+    };
+
+    function selectedPercussionGroove() {
+      var label = selectedPercussionLabel();
+      return PERCUSSION_GROOVES[label] || PERCUSSION_GROOVES["Simple quarters"];
+    }
+
+    function schedulePercussionPositions(ctx, when, beatSeconds, beatInBar, positions, kind) {
+      if (!positions || !positions.length) return;
+      for (var i=0; i<positions.length; i++) {
+        var pos = positions[i];
+        var whole = Math.floor(pos + 1e-9);
+        if (whole !== beatInBar) continue;
+        var fraction = pos - whole;
+        renderPercussionEvent(ctx, when + fraction * beatSeconds, kind);
+      }
+    }
+    function playMetronomeClick(ctx, when, accent) {
+      var osc = ctx.createOscillator(), gain = ctx.createGain();
+      osc.type = "square"; osc.frequency.setValueAtTime(accent ? 1600 : 1100, when);
+      gain.gain.setValueAtTime(0.0001, when); gain.gain.linearRampToValueAtTime(accent ? 0.12 : 0.08, when + 0.002); gain.gain.exponentialRampToValueAtTime(0.001, when + 0.06);
+      osc.connect(gain); gain.connect(masterGain || ctx.destination); gain.gain.value = accent ? 0.035 : 0.025; osc.start(when); osc.stop(when + 0.07);
+      trackPercussionSource(osc, gain, ctx);
+    }
+
+    function trackPercussionSource(source, gain, ctx) {
+      var item = { osc: source, gain: gain, ctx: ctx };
+      progressionOscillators.push(item);
+
+      // Finished drum voices must not accumulate indefinitely during long runs.
+      source.onended = function() {
+        var i = progressionOscillators.indexOf(item);
+        if (i !== -1) progressionOscillators.splice(i, 1);
+      };
+    }
+
+    function playPercussionHit(ctx, when, kind) {
+      function noiseBurst(duration, hpFreq, level, decay) {
+        var size = Math.max(1, Math.floor(ctx.sampleRate * duration));
+        var buffer = ctx.createBuffer(1, size, ctx.sampleRate);
+        var data = buffer.getChannelData(0);
+        for (var i=0;i<size;i++) data[i] = (Math.random()*2-1) * (1-i/size);
+
+        var src = ctx.createBufferSource();
+        src.buffer = buffer;
+
+        var filter = ctx.createBiquadFilter();
+        filter.type = "highpass";
+        filter.frequency.setValueAtTime(hpFreq, when);
+
+        var gain = ctx.createGain();
+        gain.gain.setValueAtTime(0.0001, when);
+        gain.gain.linearRampToValueAtTime(level, when + 0.001);
+        gain.gain.exponentialRampToValueAtTime(0.001, when + decay);
+
+        src.connect(filter);
+        filter.connect(gain);
+        gain.connect(masterGain || ctx.destination);
+        src.start(when);
+        src.stop(when + duration);
+        trackPercussionSource(src, gain, ctx);
+      }
+
+      function pitchedDrum(startFreq, endFreq, duration, level) {
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(startFreq, when);
+        osc.frequency.exponentialRampToValueAtTime(endFreq, when + duration * .62);
+
+        gain.gain.setValueAtTime(0.0001, when);
+        gain.gain.linearRampToValueAtTime(level, when + 0.002);
+        gain.gain.exponentialRampToValueAtTime(0.001, when + duration);
+
+        osc.connect(gain);
+        gain.connect(masterGain || ctx.destination);
+        osc.start(when);
+        osc.stop(when + duration + .01);
+        progressionOscillators.push({osc:osc,gain:gain,ctx:ctx});
+      }
+
+      if (kind === "kick") {
+        pitchedDrum(110,55,.12,.18);
+        return;
+      }
+
+      if (kind === "snare") {
+        noiseBurst(.12,1400,.12,.09);
+        return;
+      }
+
+      if (kind === "tomHigh") {
+        pitchedDrum(240,155,.20,.13);
+        return;
+      }
+
+      if (kind === "tomLow") {
+        pitchedDrum(150,88,.26,.15);
+        return;
+      }
+
+      if (kind === "rim") {
+        var osc = ctx.createOscillator();
+        var g = ctx.createGain();
+        osc.type = "square";
+        osc.frequency.setValueAtTime(1080,when);
+        g.gain.setValueAtTime(.055,when);
+        g.gain.exponentialRampToValueAtTime(.001,when+.035);
+        osc.connect(g);
+        g.connect(masterGain || ctx.destination);
+        osc.start(when);
+        osc.stop(when+.04);
+        progressionOscillators.push({osc:osc,gain:g,ctx:ctx});
+        return;
+      }
+
+      if (kind === "openHat") {
+        noiseBurst(.30,5200,.045,.26);
+        return;
+      }
+
+      if (kind === "ride") {
+        noiseBurst(.42,3600,.035,.36);
+        return;
+      }
+
+      // closed hi-hat and safe fallback
+      noiseBurst(.05,5000,.05,.04);
+    }
+
+    function selectedGuitarPatternEvents(){
+      var s=document.getElementById("guitarPatternSelect");
+      return (!s?[]:s.value.split(",").filter(Boolean).map(function(x){
+        var p=x.split("@");
+        return {kind:p[0],beat:+p[1]};
+      }));
+    }
+
+    function selectedBassPatternEvents(){
+      var s=document.getElementById("bassPatternSelect");
+      return (!s?[]:s.value.split(",").filter(Boolean).map(function(x){
+        var p=x.split("@");
+        return {kind:p[0],beat:+p[1]};
+      }));
+    }
+
+    function bassMidiForKind(info, kind) {
+      if (!info || !info.midiNotes || !info.midiNotes.length) return 48;
+
+      var midi;
+      if (kind === "3" && info.midiNotes.length > 1) midi = info.midiNotes[1] - 12;
+      else if (kind === "5" && info.midiNotes.length > 2) midi = info.midiNotes[2] - 12;
+      else midi = info.midiNotes[0] - 12;
+
+      // Keep chord-tone motion in a practical bass register.
+      while (midi > 59) midi -= 12;
+      while (midi < 43) midi += 12;
+      return midi;
+    }
+
+
+    function normalizedDegreeLabel(deg) {
+      if (deg === "V2") return "V/ii";
+      if (deg === "V5") return "V/V";
+      if (deg === "V6") return "V/vi";
+      return deg.replace(/^b/, "♭");
+    }
+
+    function progressionModeForDegrees(degrees) {
+      // Circle uses only two diatonic reference frames:
+      // Major for major-tonic phrases and Minor/Aeolian for minor-tonic phrases.
+      // Mixolydian, Dorian, secondary dominants and modal mixture are colors
+      // relative to those frames, not replacement "keys."
+      return degrees.indexOf("i") !== -1 ? "aeolian" : "major";
+    }
+
+    function diatonicDegreesForMode(mode) {
+      if (mode === "aeolian") return ["i","ii","bIII","iv","v","bVI","bVII"];
+      return ["I","ii","iii","IV","V","vi"];
+    }
+
+    function isDegreeDiatonic(deg, mode) {
+      return diatonicDegreesForMode(mode || "major").indexOf(deg) !== -1;
+    }
+
+    function progressionContext() {
+      var prog = getSelectedProgression();
+      var mode = progressionModeForDegrees(prog.degrees);
+      return {prog:prog, mode:mode};
+    }
+
+    function modeDisplayName(mode) {
+      return mode === "aeolian" ? "Minor / Aeolian" : "Major";
+    }
+
+    function scaledProgressionBeats(baseBeats) {
+      var scale = currentMeter().progressionScale;
+      return baseBeats.map(function(value){
+        var n = parseFloat(value);
+        if (!isFinite(n) || n <= 0) n = 1;
+        if (currentTimeSignature === "4/4") return Math.max(1, Math.round(n));
+        return Math.max(1, Math.round(n * scale));
+      });
+    }
+
+    function getSelectedProgression() {
+      var s = document.getElementById("progressionSelect");
+      if (!s) return {degrees:[], beats:[], baseBeats:[]};
+      var p = s.value.split("|");
+      var base = (p[1] || "").split(",");
+      return {
+        degrees:p[0].split("-"),
+        baseBeats:base,
+        beats:scaledProgressionBeats(base)
+      };
+    }
+
+    function modeScalePitchClasses(tonicPC, mode) {
+      var ints = mode==="aeolian" ? [0,2,3,5,7,8,10] : [0,2,4,5,7,9,11];
+      var out={}; for(var i=0;i<ints.length;i++) out[(tonicPC+ints[i])%12]=true; return out;
+    }
+    function intervalLabelFromTonic(n, preferSharp, referenceMode) {
+      var pc=((n%12)+12)%12;
+      var flatLabels  = ["1","♭2","2","♭3","3","4","♭5","5","♭6","6","♭7","7"];
+      var sharpLabels = ["1","♯1","2","♯2","3","4","♯4","5","♯5","6","♯6","7"];
+
+      // In a Minor/Aeolian reference frame, plain 3, 6, and 7 are
+      // restorations of ♭3, ♭6, and ♭7. Mark them explicitly as naturals
+      // so the annotation reads as an alteration of the reference scale,
+      // not merely as an interval number.
+      if (referenceMode === "aeolian") {
+        if (pc === 4)  return "♮3";
+        if (pc === 9)  return "♮6";
+        if (pc === 11) return "♮7";
+      }
+
+      return (preferSharp ? sharpLabels : flatLabels)[pc];
+    }
+    function divergentIntervalsForDegree(deg, mode) {
+      var info=chordInfoForDegree(selectedMajor,deg); if(!info||!info.midiNotes) return [];
+      var chroma={C:0,"C#":1,Db:1,D:2,"D#":3,Eb:3,E:4,F:5,"F#":6,Gb:6,G:7,"G#":8,Ab:8,A:9,"A#":10,Bb:10,B:11};
+      var tonic=chroma[KEY_NOTES[selectedMajor][0]], allowed=modeScalePitchClasses(tonic,mode), seen={}, out=[];
+      for(var i=0;i<info.midiNotes.length;i++){var pc=((info.midiNotes[i]%12)+12)%12;
+        if(!allowed[pc]&&!seen[pc]){
+          seen[pc]=1;
+          var sharpFunction=["II","III","VI","V2","V5","V6"].indexOf(deg)!==-1;
+          out.push(intervalLabelFromTonic(pc-tonic,sharpFunction,mode));
+        }}
+      return out;
+    }
+
+    function triadIntervalDisplayForDegree(deg, mode) {
+      var info = chordInfoForDegree(selectedMajor, deg);
+      if (!info || !info.midiNotes) return [];
+
+      var chroma = {
+        C:0,"C#":1,Db:1,D:2,"D#":3,Eb:3,E:4,F:5,
+        "F#":6,Gb:6,G:7,"G#":8,Ab:8,A:9,"A#":10,Bb:10,B:11
+      };
+      var tonic = chroma[KEY_NOTES[selectedMajor][0]];
+      var allowed = modeScalePitchClasses(tonic, mode);
+
+      // Preserve Circle's established functional spelling:
+      // raised tones in major-function chromatic chords use sharps;
+      // borrowed/modal-flat functions use flats.
+      var preferSharp = ["II","III","VI","V2","V5","V6"].indexOf(deg) !== -1;
+
+      return info.midiNotes.map(function(midi){
+        var pc = ((midi % 12) + 12) % 12;
+        return {
+          label: intervalLabelFromTonic(pc - tonic, preferSharp, mode),
+          diatonic: !!allowed[pc]
+        };
+      });
+    }
+
+
+    function renderProgressionStrip(activeIndex, cueIndex, cueLit) {
+      var host = document.getElementById("progressionStrip");
+      if (!host) return;
+      var prog = getSelectedProgression();
+      var mode = progressionModeForDegrees(prog.degrees);
+      host.innerHTML = "";
+
+      for (var i=0; i<prog.degrees.length; i++) {
+        var d = prog.degrees[i];
+        var chip = document.createElement("div");
+        chip.className = "prog-chip " + (isDegreeDiatonic(d, mode) ? "in-key" : "out-key");
+
+        // Current chord remains steadily highlighted.
+        if (activeIndex !== null && activeIndex !== undefined && i === activeIndex) {
+          chip.className += " active";
+        }
+
+        // The upcoming chord gets the old off→on cue instead.
+        // On the penultimate beat cueLit is false; on the final beat it is true.
+        if (cueLit === true &&
+            cueIndex !== null &&
+            cueIndex !== undefined &&
+            cueIndex !== activeIndex &&
+            i === cueIndex) {
+          chip.className += " next-cue";
+        }
+
+        var roman=document.createElement("div");
+        roman.textContent=normalizedDegreeLabel(d);
+        chip.appendChild(roman);
+
+        var triadIntervals = triadIntervalDisplayForDegree(d,mode);
+        if (triadIntervals.length) {
+          var intervalRow = document.createElement("div");
+          intervalRow.className = "triad-intervals";
+
+          triadIntervals.forEach(function(item, idx){
+            var interval = document.createElement("span");
+            interval.className = "triad-interval " + (item.diatonic ? "diatonic" : "nondiatonic");
+            interval.textContent = item.label;
+            intervalRow.appendChild(interval);
+
+            if (idx < triadIntervals.length - 1) {
+              var spacer = document.createElement("span");
+              spacer.className = "triad-interval-space";
+              spacer.textContent = " ";
+              intervalRow.appendChild(spacer);
+            }
+          });
+
+          chip.appendChild(intervalRow);
+        }
+        host.appendChild(chip);
+      }
+    }
+
+    function progressionChordClasses() {
+      var prog = getSelectedProgression(), inPC = {}, outPC = {};
+      var mode = progressionModeForDegrees(prog.degrees);
+      for (var i=0; i<prog.degrees.length; i++) {
+        var d = prog.degrees[i], info = chordInfoForDegree(selectedMajor, d);
+        if (!info || !info.midiNotes) continue;
+        var pc = ((info.midiNotes[0] % 12) + 12) % 12;
+        var q = info.quality || ((info.midiNotes[1]-info.midiNotes[0] === 3) ? "minor" : "major");
+        var key = pc + ":" + q;
+        if (isDegreeDiatonic(d, mode)) inPC[key] = true;
+        else outPC[key] = true;
+      }
+      return {inPC:inPC, outPC:outPC};
+    }
+
+    function chordInfoForDegree(selectedMajorKey, degreeRoman) {
+      var notes = KEY_NOTES[selectedMajorKey];
+      var chroma = {C:0,"C#":1,Db:1,D:2,"D#":3,Eb:3,E:4,F:5,"F#":6,Gb:6,G:7,"G#":8,Ab:8,A:9,"A#":10,Bb:10,B:11};
+      var tonicPC = chroma[notes[0]];
+      function make(offset, quality) {
+        var rootMidi = 60 + ((tonicPC + offset + 120) % 12);
+        var ints = quality === "minor" ? [0,3,7] : quality === "dim" ? [0,3,6] : [0,4,7];
+        return { midiNotes:[rootMidi+ints[0],rootMidi+ints[1],rootMidi+ints[2]], chordKey:null, chordRing:null, pitchClass:((tonicPC + offset + 120) % 12), quality:quality };
+      }
+      var direct = {
+        "I":[0,"major"], "i":[0,"minor"], "ii":[2,"minor"], "II":[2,"major"],
+        "iii":[4,"minor"], "III":[4,"major"], "IV":[5,"major"], "iv":[5,"minor"],
+        "V":[7,"major"], "vi":[9,"minor"], "VI":[9,"major"],
+        "bII":[1,"major"], "bIII":[3,"major"], "bVI":[8,"major"], "bVII":[10,"major"]
+      };
+      if (degreeRoman === "V2") return make(9,"major");  // V/ii
+      if (degreeRoman === "V5") return make(2,"major");  // V/V
+      if (degreeRoman === "V6") return make(4,"major");  // V/vi
+      if (direct[degreeRoman]) {
+        var result = make(direct[degreeRoman][0], direct[degreeRoman][1]);
+        // Preserve wheel highlighting for the ordinary diatonic degrees.
+        if (degreeRoman === "I") { result.chordKey=selectedMajorKey; result.chordRing="outer"; }
+        if (degreeRoman === "ii") { result.chordKey=displayMinorFromNote(notes[1]); result.chordRing="inner"; }
+        if (degreeRoman === "iii") { result.chordKey=displayMinorFromNote(notes[2]); result.chordRing="inner"; }
+        if (degreeRoman === "IV") { result.chordKey=enhMajor(notes[3]); result.chordRing="outer"; }
+        if (degreeRoman === "V") { result.chordKey=enhMajor(notes[4]); result.chordRing="outer"; }
+        if (degreeRoman === "vi") { result.chordKey=REL_MINOR[selectedMajorKey]; result.chordRing="inner"; }
+        return result;
+      }
+      return make(0,"major");
+    }
+
+    function startProgressionLoop() {
+      stopArpeggioOnly();
+      stopProgressionPlayback();
+      ensureAudioReady(function(ctx){
+        var btn = document.getElementById("playProgressionBtn");
+        if (btn) {
+          btn.disabled = true;
+          btn.textContent = "Loading…";
+        }
+
+        var startupLoads = [
+          loadPercussionSamples(ctx),
+          loadBassSamples(ctx)
+        ];
+        if (selectedInstrument() === "sampled") {
+          startupLoads.push(loadGuitarSamples(ctx));
+        } else {
+          setGuitarSampleStatus("Guitar: synthetic selected", "fallback");
+        }
+
+        Promise.all(startupLoads).then(function(){
+          progressionPlaying = true;
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = "Stop";
+            btn.classList.add("playing");
+          }
+
+          // All audible layers and graphics run from the stable master transport.
+          startMasterTransport(ctx);
+        });
+      });
+    }
+
+    function render(currentKey) {
+      var parsedKey = parseKey(currentKey);
+      if (parsedKey !== selectedMajor) {
+        selectedMajor = parsedKey;
+        selectedSpellingPreference = conventionalPreferenceForKey(selectedMajor);
+      } else {
+        selectedMajor = parsedKey;
+      }
+      var svg = document.getElementById("wheel"); svg.innerHTML = "";
+      var cx = 215, cy = 215, outerInnerR = 128, outerOuterR = 203, innerInnerR = 64, innerOuterR = 128;
+      var notes = KEY_NOTES[selectedMajor], selectedMinor = REL_MINOR[selectedMajor];
+      var renderChroma = {C:0,"C#":1,Db:1,D:2,"D#":3,Eb:3,E:4,F:5,"F#":6,Gb:6,G:7,"G#":8,Ab:8,A:9,"A#":10,Bb:10,B:11};
+      var IV = enhMajor(notes[3]), V = enhMajor(notes[4]);
+      var iiMinor = displayMinorFromNote(notes[1]);
+      var iiiMinor = displayMinorFromNote(notes[2]);
+
+      circle(svg, cx, cy, outerOuterR, "#171a1d", "#454b51", 2);
+      circle(svg, cx, cy, innerOuterR, "#15181a", "#454b51", 2);
+      circle(svg, cx, cy, innerInnerR, "#111315", "#454b51", 1.5); // center intentionally blank
+
+      for (var i = 0; i < MAJOR_KEYS.length; i++) {
+        var major = MAJOR_KEYS[i], minor = REL_MINOR[major];
+        var majorDisplay = displayMajorForCanonical(major);
+        var minorDisplay = displayMinorForCanonical(minor);
+        var centerAngle = (-90 + i * 30) * Math.PI / 180, startAngle = centerAngle - (Math.PI / 12), endAngle = centerAngle + (Math.PI / 12);
+        var harmonicMap = progressionChordClasses();
+        var majorKey = renderChroma[major] + ":major";
+        var majorFill = "#24282c", majorText = "#aeb4b9", majorStroke = "#454b51", majorSW = 2, majorSize = 22;
+        if (harmonicMap.inPC[majorKey]) { majorFill = "#153d29"; majorText = "#65e69b"; majorStroke = "#2b7d50"; }
+        if (harmonicMap.outPC[majorKey]) { majorFill = "#492020"; majorText = "#ff7777"; majorStroke = "#8d3939"; }
+        var majorIsActive = (activeChordKey === major && activeChordRing === "outer") ||
+                            (activePitchClass !== null && activeQuality === "major" &&
+                             renderChroma[major] === activePitchClass);
+        var majorIsCue = cueLitOnWheel &&
+                         cuePitchClass !== null &&
+                         cueQuality === "major" &&
+                         renderChroma[major] === cuePitchClass &&
+                         !majorIsActive;
+        if (majorIsActive) {
+          majorFill = (activeIsDiatonic === false) ? "#ef4b4b" : "#27c96f";
+          majorText = "#07100b"; majorStroke = "#f2f4f5"; majorSW = 7;
+        } else if (majorIsCue) {
+          majorFill = (cueIsDiatonic === false) ? "#6a2b2b" : "#1d5536";
+          majorText = (cueIsDiatonic === false) ? "#ff9999" : "#91f0b8";
+          majorStroke = "#f2f4f5"; majorSW = 5;
+        }
+
+        var minorRootName = minor.slice(0,-1);
+        var minorKey = renderChroma[minorRootName] + ":minor";
+        var minorFill = "#24282c", minorText = "#aeb4b9", minorStroke = "#454b51", minorSW = 2, minorSize = 18;
+        if (harmonicMap.inPC[minorKey]) { minorFill = "#153d29"; minorText = "#65e69b"; minorStroke = "#2b7d50"; }
+        if (harmonicMap.outPC[minorKey]) { minorFill = "#492020"; minorText = "#ff7777"; minorStroke = "#8d3939"; }
+        var minorIsActive = (activeChordKey === minor && activeChordRing === "inner") ||
+                            (activePitchClass !== null && activeQuality === "minor" &&
+                             renderChroma[minorRootName] === activePitchClass);
+        var minorIsCue = cueLitOnWheel &&
+                         cuePitchClass !== null &&
+                         cueQuality === "minor" &&
+                         renderChroma[minorRootName] === cuePitchClass &&
+                         !minorIsActive;
+        if (minorIsActive) {
+          minorFill = (activeIsDiatonic === false) ? "#ef4b4b" : "#27c96f";
+          minorText = "#07100b"; minorStroke = "#f2f4f5"; minorSW = 7;
+        } else if (minorIsCue) {
+          minorFill = (cueIsDiatonic === false) ? "#6a2b2b" : "#1d5536";
+          minorText = (cueIsDiatonic === false) ? "#ff9999" : "#91f0b8";
+          minorStroke = "#f2f4f5"; minorSW = 5;
+        }
+
+        var outer = wedge(svg, cx, cy, outerInnerR, outerOuterR, startAngle, endAngle, majorFill, majorStroke, majorSW);
+        if (majorIsActive) outer.setAttribute("class", "clickable active-wedge");
+        else if (majorIsCue) outer.setAttribute("class", "clickable next-cue-wedge");
+        var majorTextR = 165, majorX = cx + Math.cos(centerAngle) * majorTextR, majorY = cy + Math.sin(centerAngle) * majorTextR + 8, majorDx = 0;
+
+        // Persistent selected-key marker. Keep it independent of the
+        // current/next chord playback highlighting.
+        if (major === selectedMajor) {
+          circle(svg, majorX + majorDx, majorY - 7, 24, "none", "#f2f4f5", 2.5);
+        }
+
+        text(svg, majorX + majorDx, majorY, majorDisplay, { size: majorSize, weight: 800, fill: majorText });
+        (function(m,md){ outer.addEventListener("click", function(){
+          var info = romanInfoForWedge(selectedMajor, m, "outer");
+          if (info.playable) handleChordClick(info.root, info.quality, info.roman, m, "outer");
+          else {
+            stopAllAudio();
+            setSpellingFromSelectedDisplay(md,m);
+            selectedMajor = m;
+            render(m);
+            renderProgressionStrip(null, null, false);
+          }
+        }); })(major,majorDisplay);
+
+        var inner = wedge(svg, cx, cy, innerInnerR, innerOuterR, startAngle, endAngle, minorFill, minorStroke, minorSW);
+        if (minorIsActive) inner.setAttribute("class", "clickable active-wedge");
+        else if (minorIsCue) inner.setAttribute("class", "clickable next-cue-wedge");
+        var minorTextR = 98, minorX = cx + Math.cos(centerAngle) * minorTextR, minorY = cy + Math.sin(centerAngle) * minorTextR + 7, minorDx = 0;
+        text(svg, minorX + minorDx, minorY, minorDisplay, { size: minorSize, weight: 800, fill: minorText });
+        (function(mn,md,relMaj){ inner.addEventListener("click", function(){
+          var info = romanInfoForWedge(selectedMajor, mn, "inner");
+          if (info.playable) handleChordClick(info.root, info.quality, info.roman, mn, "inner");
+          else {
+            stopAllAudio();
+            setSpellingFromSelectedDisplay(md.slice(0,-1),relMaj);
+            selectedMajor = relMaj;
+            render(relMaj);
+            renderProgressionStrip(null, null, false);
+          }
+        }); })(minor,minorDisplay,major);
+      }
+    }
+
+
+    // ---------- Compact category browsers ----------
+    var selectorBrowserConfig = {
+      progressionSelect: { label:"Progression", title:"Choose Progression", recentKey:"circle_recent_progressions" },
+      guitarPatternSelect: { label:"Guitar", title:"Choose Guitar Pattern", recentKey:"circle_recent_guitar" },
+      bassPatternSelect: { label:"Bass", title:"Choose Bass Pattern", recentKey:"circle_recent_bass" },
+      rhythmSelect: { label:"Percussion", title:"Choose Percussion Rhythm", recentKey:"circle_recent_percussion" }
+    };
+    var activeBrowserSelect = null;
+    var activeBrowserCategory = null;
+    var browserWasPlaying = false;
+
+    function optionCategory(opt) {
+      var parent = opt ? opt.parentElement : null;
+      return parent && parent.tagName === "OPTGROUP" ? parent.label : "Other";
+    }
+
+    function readRecentValues(key) {
+      try {
+        var x = JSON.parse(localStorage.getItem(key) || "[]");
+        return Array.isArray(x) ? x : [];
+      } catch(e) { return []; }
+    }
+
+    function recentKeyForSelect(select, cfg) {
+      if (!select || !cfg) return "";
+      if (select.id === "rhythmSelect" ||
+          select.id === "guitarPatternSelect" ||
+          select.id === "bassPatternSelect") {
+        return cfg.recentKey + "_" + currentTimeSignature.replace("/","-");
+      }
+      return cfg.recentKey;
+    }
+
+    function rememberRecent(select, value) {
+      var cfg = selectorBrowserConfig[select.id];
+      if (!cfg) return;
+      var key = recentKeyForSelect(select,cfg);
+      var arr = readRecentValues(key).filter(function(v){ return v !== value; });
+      arr.unshift(value);
+      arr = arr.slice(0,6);
+      try { localStorage.setItem(key, JSON.stringify(arr)); } catch(e) {}
+    }
+
+    function selectedOptionFor(select) {
+      return select && select.options && select.selectedIndex >= 0 ? select.options[select.selectedIndex] : null;
+    }
+
+    function makeTrigger(select) {
+      var cfg = selectorBrowserConfig[select.id];
+      if (!cfg) return;
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "browser-trigger";
+      btn.id = select.id + "Trigger";
+      btn.innerHTML =
+        '<span class="trigger-label">'+cfg.label+'</span>'+
+        '<span class="trigger-value"><span class="main-value"></span><span class="trigger-arrow">▾</span></span>';
+      select.parentNode.insertBefore(btn, select);
+      btn.addEventListener("click", function(){ openChoiceBrowser(select.id); });
+      updateTrigger(select);
+    }
+
+    function updateTrigger(select) {
+      var btn = document.getElementById(select.id + "Trigger");
+      var opt = selectedOptionFor(select);
+      if (!btn || !opt) return;
+      var main = btn.querySelector(".main-value");
+      var cat = optionCategory(opt);
+      var label = opt.textContent.trim();
+
+      // Keep category context for Progression, but keep the three
+      // accompaniment controls visually compact.
+      if (select.id === "progressionSelect") {
+        main.textContent = cat + " · " + label;
+      } else {
+        main.textContent = label;
+      }
+    }
+
+    function optionDetail(select, opt) {
+      if (select.id === "progressionSelect") {
+        var parts = opt.value.split("|");
+        var base = parts[1] ? parts[1].split(",") : [];
+        var beats = scaledProgressionBeats(base).join(" · ");
+        return beats ? beats + " pulses · " + currentTimeSignature : "";
+      }
+      if (select.id === "guitarPatternSelect") {
+        var tokens = opt.value.split(",");
+        var c=0,a=0;
+        tokens.forEach(function(tok){
+          if(tok.indexOf("C@")===0) c++;
+          else if(tok.indexOf("A")===0) a++;
+        });
+        var bits=[];
+        if(c) bits.push(c+" chord");
+        if(a) bits.push(a+" arp");
+        return bits.join(" · ");
+      }
+      if (select.id === "bassPatternSelect") {
+        var bassTokens = opt.value.split(",");
+        var has3 = bassTokens.some(function(tok){ return tok.indexOf("3@")===0; });
+        var has5 = bassTokens.some(function(tok){ return tok.indexOf("5@")===0; });
+        var movement = has3 ? "root · 3rd · 5th" : (has5 ? "root · 5th" : "root");
+        return bassTokens.length + " attacks · " + movement;
+      }
+      if (select.id === "rhythmSelect" && /^meter:/.test(opt.value)) {
+        var rhythmId = opt.value.replace(/^meter:/,"");
+        var bundle = (METER_STYLE_BUNDLES[currentTimeSignature] || {})[rhythmId];
+        var fillType = (METER_TURNAROUND_TYPES[currentTimeSignature] || {})[rhythmId];
+        var bits = [];
+        if (bundle) bits.push(bundle.guitar + " · " + bundle.bass);
+        if (fillType) bits.push("fill: " + fillType.replace(/([a-z])([A-Z])/g,"$1 $2").toLowerCase());
+        return bits.length ? bits.join(" · ") : currentTimeSignature;
+      }
+      var p = opt.value.split("|");
+      return p[0].replace(/_/g," ");
+    }
+
+    function browserCategories(select) {
+      var cats = [];
+      var seen = {};
+      Array.prototype.forEach.call(select.options,function(opt){
+        var c=optionCategory(opt);
+        if(!seen[c]) { seen[c]=true; cats.push(c); }
+      });
+      var cfg=selectorBrowserConfig[select.id];
+      if(readRecentValues(cfg.recentKey).length) cats.unshift("Recent");
+      return cats;
+    }
+
+    function optionsForBrowserCategory(select, category) {
+      if (category === "Recent") {
+        var cfg=selectorBrowserConfig[select.id], vals=readRecentValues(recentKeyForSelect(select,cfg)), out=[];
+        vals.forEach(function(v){
+          // v1.37 stores exact option indices ("i:12"), so duplicate-valued
+          // choices remain distinct. Older saved values are still accepted.
+          if (typeof v === "string" && v.indexOf("i:") === 0) {
+            var ix = parseInt(v.slice(2),10);
+            if (!isNaN(ix) && select.options[ix]) out.push(select.options[ix]);
+            return;
+          }
+          for(var i=0;i<select.options.length;i++){
+            if(select.options[i].value===v){ out.push(select.options[i]); break; }
+          }
+        });
+        return out.filter(function(opt,idx,arr){ return arr.indexOf(opt)===idx; });
+      }
+      return Array.prototype.filter.call(select.options,function(opt){
+        return optionCategory(opt) === category;
+      });
+    }
+
+    function renderBrowserTabs() {
+      var host=document.getElementById("choiceTabs");
+      host.innerHTML="";
+      var cats=browserCategories(activeBrowserSelect);
+      if(!activeBrowserCategory || cats.indexOf(activeBrowserCategory)===-1) {
+        activeBrowserCategory=optionCategory(selectedOptionFor(activeBrowserSelect));
+        if(cats.indexOf(activeBrowserCategory)===-1) activeBrowserCategory=cats[0];
+      }
+      cats.forEach(function(cat){
+        var b=document.createElement("button");
+        b.type="button";
+        b.className="choice-tab"+(cat===activeBrowserCategory?" active":"");
+        b.textContent=cat;
+        b.addEventListener("click",function(){
+          activeBrowserCategory=cat;
+          renderBrowserTabs();
+          renderBrowserGrid();
+        });
+        host.appendChild(b);
+      });
+    }
+
+    function applyBrowserSelection(opt) {
+      if(!activeBrowserSelect || !opt) return;
+
+      // Use the exact option index. Several menus intentionally contain
+      // duplicate values with different labels, so assigning .value alone
+      // can select the wrong duplicate and make multiple tiles appear active.
+      var exactIndex = optionIndexInSelect(activeBrowserSelect,opt);
+      if (exactIndex < 0) return;
+      activeBrowserSelect.selectedIndex = exactIndex;
+      rememberRecent(activeBrowserSelect,optionRecentKey(activeBrowserSelect,opt));
+      updateTrigger(activeBrowserSelect);
+
+      // Reuse each source select's normal change behavior.
+      try {
+        activeBrowserSelect.dispatchEvent(new Event("change",{bubbles:true}));
+      } catch(e) {
+        var evt=document.createEvent("Event"); evt.initEvent("change",true,true);
+        activeBrowserSelect.dispatchEvent(evt);
+      }
+      renderBrowserTabs();
+      renderBrowserGrid();
+    }
+
+    function optionIndexInSelect(select, opt) {
+      if (!select || !opt) return -1;
+      for (var i=0; i<select.options.length; i++) {
+        if (select.options[i] === opt) return i;
+      }
+      return -1;
+    }
+
+    function optionRecentKey(select, opt) {
+      var ix = optionIndexInSelect(select, opt);
+      return ix >= 0 ? "i:" + ix : "";
+    }
+
+    function renderBrowserGrid() {
+      var host=document.getElementById("choiceGrid");
+      host.innerHTML="";
+      var opts=optionsForBrowserCategory(activeBrowserSelect,activeBrowserCategory);
+      opts.forEach(function(opt){
+        var b=document.createElement("button");
+        b.type="button";
+        var exactIndex = optionIndexInSelect(activeBrowserSelect,opt);
+        b.className="choice-item"+(exactIndex===activeBrowserSelect.selectedIndex?" selected":"");
+        var nm=document.createElement("div"); nm.className="choice-name"; nm.textContent=opt.textContent.trim();
+        var detail=document.createElement("div"); detail.className="choice-detail"; detail.textContent=optionDetail(activeBrowserSelect,opt);
+        b.appendChild(nm);
+        if(detail.textContent) b.appendChild(detail);
+        b.addEventListener("click",function(){ applyBrowserSelection(opt); });
+        host.appendChild(b);
+      });
+    }
+
+    function openChoiceBrowser(selectId) {
+      activeBrowserSelect=document.getElementById(selectId);
+      if(!activeBrowserSelect) return;
+      var cfg=selectorBrowserConfig[selectId];
+      document.getElementById("choiceTitle").textContent=cfg.title;
+      activeBrowserCategory=optionCategory(selectedOptionFor(activeBrowserSelect));
+      browserWasPlaying=progressionPlaying;
+      renderBrowserTabs();
+      renderBrowserGrid();
+      var ov=document.getElementById("choiceOverlay");
+      ov.classList.add("open");
+      ov.setAttribute("aria-hidden","false");
+    }
+
+    function closeChoiceBrowser() {
+      var ov=document.getElementById("choiceOverlay");
+      ov.classList.remove("open");
+      ov.setAttribute("aria-hidden","true");
+      activeBrowserSelect=null;
+      activeBrowserCategory=null;
+      if(progressionPlaying && !browserWasPlaying) stopProgressionPlayback();
+      browserWasPlaying=false;
+    }
+
+    function toggleBrowserPreview() {
+      var btn=document.getElementById("choicePreview");
+      if(progressionPlaying) {
+        stopProgressionPlayback();
+        if(btn) btn.textContent="Preview";
+      } else {
+        startProgressionLoop();
+        if(btn) btn.textContent="Stop Preview";
+      }
+    }
+
+    function initChoiceBrowsers() {
+      ["progressionSelect","guitarPatternSelect","bassPatternSelect","rhythmSelect"].forEach(function(id){
+        var s=document.getElementById(id);
+        if(s && !document.getElementById(id+"Trigger")) makeTrigger(s);
+      });
+
+      var closeBtn=document.getElementById("choiceClose");
+      var doneBtn=document.getElementById("choiceDone");
+      var previewBtn=document.getElementById("choicePreview");
+      var overlay=document.getElementById("choiceOverlay");
+
+      if(closeBtn) closeBtn.addEventListener("click",closeChoiceBrowser);
+      if(doneBtn) doneBtn.addEventListener("click",closeChoiceBrowser);
+      if(previewBtn) previewBtn.addEventListener("click",toggleBrowserPreview);
+      if(overlay) overlay.addEventListener("click",function(e){
+        if(e.target===this) closeChoiceBrowser();
+      });
+
+      // Capture the original, richer 4/4 menus before any meter switch.
+      if (!fourFourMenuMarkup) {
+        fourFourMenuMarkup = {
+          rhythm: document.getElementById("rhythmSelect").innerHTML,
+          guitar: document.getElementById("guitarPatternSelect").innerHTML,
+          bass: document.getElementById("bassPatternSelect").innerHTML
+        };
+      }
+
+      Array.prototype.forEach.call(document.querySelectorAll(".meter-choice"), function(button){
+        button.addEventListener("click", function(){
+          setCircleTimeSignature(button.getAttribute("data-signature"));
+        });
+      });
+
+      // Start with the accompaniment assigned to the default 4/4 progression.
+      applyAssociatedAccompanimentForProgression();
+    }
+
+
+
+    // ---------- Instrument renderer layer ----------
+    // The transport decides WHAT happens and WHEN. These functions decide
+    // HOW each event is rendered. External sample files can plug in here
+    // later without changing the transport or musical pattern logic.
+
+    function renderPercussionEvent(ctx, when, kind) {
+      if (playSampledPercussionHit(ctx, when, kind)) return;
+      playPercussionHit(ctx, when, kind);
+    }
+
+    function renderBassEvent(ctx, midi, duration, when) {
+      if (playSampledBassTone(ctx, midi, duration, when)) return;
+      playSingleTone(
+        ctx, midi, duration, progressionOscillators, when, "bass"
+      );
+    }
+
+    function renderGuitarChordEvent(ctx, midiNotes, duration, when) {
+      for (var n=0; n<midiNotes.length; n++) {
+        playSingleTone(
+          ctx,
+          midiNotes[n],
+          duration,
+          progressionOscillators,
+          when + n * 0.018,
+          "chord"
+        );
+      }
+    }
+
+    function renderGuitarArpEvent(ctx, midi, duration, when) {
+      playSingleTone(
+        ctx, midi, duration, progressionOscillators, when, "arp"
+      );
+    }
+
+    // ---------- Continuous master transport ----------
+    // Audio events are scheduled ahead on the AudioContext clock.
+    // Graphics follow that same clock with requestAnimationFrame().
+    // The transport emits musical events through the renderer layer above.
+    var transportRunning = false;
+    var transportTimer = null;
+    var transportNextBeatTime = 0;
+    var transportBeatNumber = 0;
+    var transportLookaheadMs = 25;
+    var transportScheduleAheadSec = 0.12;
+
+    // Small timeline of beat boundaries already placed on the AudioContext
+    // clock. The visual layer reads this rather than running its own timers.
+    var transportVisualBeats = [];
+    var transportVisualFrame = null;
+    var transportVisualStateKey = "";
+
+    // ---------- Meter model (v1.44) ----------
+    // Circle keeps its stable AudioContext master transport. "Pulse" is the
+    // metronome/accompaniment beat: quarter note in simple meters; dotted
+    // quarter in 6/8 and 12/8.
+    var TIME_SIGNATURES = {
+      "4/4":  {pulsesPerMeasure:4, progressionScale:1.00, compound:false, pulseName:"quarter"},
+      "3/4":  {pulsesPerMeasure:3, progressionScale:0.75, compound:false, pulseName:"quarter"},
+      "6/8":  {pulsesPerMeasure:2, progressionScale:0.50, compound:true,  pulseName:"dotted-quarter"},
+      "12/8": {pulsesPerMeasure:4, progressionScale:1.00, compound:true,  pulseName:"dotted-quarter"},
+      "2/4":  {pulsesPerMeasure:2, progressionScale:0.50, compound:false, pulseName:"quarter"}
+    };
+    var currentTimeSignature = "4/4";
+
+    function currentMeter() {
+      return TIME_SIGNATURES[currentTimeSignature] || TIME_SIGNATURES["4/4"];
+    }
+
+    function meterPulsesPerMeasure() {
+      return currentMeter().pulsesPerMeasure;
+    }
+
+    // Metronomic rhythm definitions, reused as the first non-4/4 rhythm set.
+    // Step arrays remain exactly in source-grid order. For compound meters,
+    // three notated eighth-note beats are grouped into one Circle pulse.
+    var METER_RHYTHMS = {
+      "3/4": [
+        {id:"waltz",name:"Waltz",subdivisions:4,kick:[0],snare:[4,8],hat:[0,4,8]},
+        {id:"rock-waltz",name:"Rock waltz",subdivisions:4,kick:[0,7],snare:[4,8],hat:[0,2,4,6,8,10]},
+        {id:"pop-34",name:"Pop 3/4",subdivisions:4,kick:[0,7],snare:[4,10],hat:[0,2,4,6,8,10]},
+        {id:"country-waltz",name:"Country waltz",subdivisions:4,kick:[0],snare:[4,8],hat:[0,2,4,6,8,10]},
+        {id:"jazz-waltz",name:"Jazz waltz",subdivisions:3,kick:[0,6],snare:[4,8],hat:[0,2,3,5,6,8]},
+        {id:"brush-waltz",name:"Brush waltz",subdivisions:3,kick:[0],snare:[2,5,8],hat:[0,1,2,3,4,5,6,7,8]},
+        {id:"half-34",name:"Half-time 3/4",subdivisions:4,kick:[0,8],snare:[6],hat:[0,2,4,6,8,10]},
+        {id:"folk-waltz",name:"Folk waltz",subdivisions:4,kick:[0],snare:[4,8],hat:[0,4,8]},
+        {id:"heavy-34",name:"Heavy 3/4",subdivisions:4,kick:[0,6,8],snare:[4,10],hat:[0,2,4,6,8,10]},
+        {id:"sync-34",name:"Syncopated 3/4",subdivisions:4,kick:[0,3,7,10],snare:[4,8],hat:[0,2,4,6,8,10]}
+      ],
+      "6/8": [
+        {id:"basic-68",name:"Basic 6/8",subdivisions:2,kick:[0],snare:[6],hat:[0,2,4,6,8,10]},
+        {id:"rock-ballad-68",name:"6/8 rock ballad",subdivisions:2,kick:[0,4,8],snare:[6],hat:[0,2,4,6,8,10]},
+        {id:"blues-68",name:"6/8 blues",subdivisions:2,kick:[0,8],snare:[6],hat:[0,2,4,6,8,10]},
+        {id:"shuffle-68",name:"6/8 shuffle",subdivisions:2,kick:[0,5,8],snare:[6],hat:[0,2,4,6,8,10]},
+        {id:"soul-68",name:"6/8 soul",subdivisions:2,kick:[0,3,8,11],snare:[6],hat:[0,2,4,6,8,10]},
+        {id:"gospel-68",name:"6/8 gospel",subdivisions:2,kick:[0,3,5,8,11],snare:[6],hat:[0,2,4,6,8,10]},
+        {id:"half-68",name:"Half-time 6/8",subdivisions:2,kick:[0,8],snare:[6],hat:[0,4,6,10]},
+        {id:"afro-cuban-68",name:"Afro-Cuban 6/8",subdivisions:2,kick:[0,5,8],snare:[3,6,10],hat:[0,2,4,6,8,10]},
+        {id:"african-68",name:"African 6/8",subdivisions:2,kick:[0,4,8],snare:[3,7,11],hat:[0,2,4,6,8,10]},
+        {id:"march-68",name:"6/8 march",subdivisions:2,kick:[0,6],snare:[4,10],hat:[0,2,4,6,8,10]}
+      ],
+      "12/8": [
+        {id:"blues-128",name:"12/8 blues",subdivisions:2,kick:[0,12],snare:[6,18],hat:[0,2,4,6,8,10,12,14,16,18,20,22]},
+        {id:"rock-ballad-128",name:"12/8 rock ballad",subdivisions:2,kick:[0,8,12,20],snare:[6,18],hat:[0,2,4,6,8,10,12,14,16,18,20,22]},
+        {id:"slow-blues-128",name:"12/8 slow blues",subdivisions:2,kick:[0,12,20],snare:[6,18],hat:[0,4,6,10,12,16,18,22]},
+        {id:"shuffle-128",name:"12/8 shuffle",subdivisions:2,kick:[0,5,12,17],snare:[6,18],hat:[0,2,4,6,8,10,12,14,16,18,20,22]},
+        {id:"soul-128",name:"12/8 soul",subdivisions:2,kick:[0,5,10,12,17,22],snare:[6,18],hat:[0,2,4,6,8,10,12,14,16,18,20,22]},
+        {id:"gospel-128",name:"12/8 gospel",subdivisions:2,kick:[0,4,10,12,16,22],snare:[6,18],hat:[0,2,4,6,8,10,12,14,16,18,20,22]},
+        {id:"rnb-128",name:"12/8 R&B ballad",subdivisions:2,kick:[0,10,12,22],snare:[6,18],hat:[0,2,4,6,8,10,12,14,16,18,20,22]},
+        {id:"half-128",name:"12/8 half-time",subdivisions:2,kick:[0,12],snare:[12],hat:[0,4,8,12,16,20]},
+        {id:"triplet-rock-128",name:"12/8 triplet rock",subdivisions:2,kick:[0,8,12,20],snare:[6,18],hat:[0,2,4,6,8,10,12,14,16,18,20,22]},
+        {id:"afro-128",name:"12/8 Afro-derived",subdivisions:2,kick:[0,5,10,14,20],snare:[3,8,12,17,22],hat:[0,2,4,6,8,10,12,14,16,18,20,22]}
+      ],
+      "2/4": [
+        {id:"basic-24",name:"Basic 2/4",subdivisions:4,kick:[0],snare:[4],hat:[0,2,4,6]},
+        {id:"march-24",name:"March",subdivisions:4,kick:[0,4],snare:[2,6],hat:[0,2,4,6]},
+        {id:"polka",name:"Polka",subdivisions:4,kick:[0],snare:[4],hat:[0,2,4,6]},
+        {id:"country-two",name:"Country two-beat",subdivisions:4,kick:[0,6],snare:[4],hat:[0,2,4,6]},
+        {id:"train",name:"Train beat",subdivisions:4,kick:[0,4],snare:[0,1,2,3,4,5,6,7],hat:[0,2,4,6]},
+        {id:"fast-rock-24",name:"Fast rock 2/4",subdivisions:4,kick:[0,6],snare:[4],hat:[0,2,4,6]},
+        {id:"samba",name:"Samba",subdivisions:4,kick:[0,3,4,7],snare:[2,5],hat:[0,2,4,6]},
+        {id:"baiao",name:"Baião",subdivisions:4,kick:[0,3,6],snare:[4,7],hat:[0,2,4,6]},
+        {id:"frevo",name:"Frevo",subdivisions:4,kick:[0,4],snare:[1,2,3,5,6,7],hat:[0,2,4,6]},
+        {id:"funk-24",name:"Two-beat funk",subdivisions:4,kick:[0,3,6],snare:[4,7],hat:[0,1,2,3,4,5,6,7]}
+      ]
+    };
+
+    var METER_GUITAR_PATTERNS = {
+      "3/4":[
+        {group:"Waltz / Folk",name:"Waltz full",value:"C@0,C@1,C@2"},
+        {group:"Waltz / Folk",name:"Waltz oom-pah",value:"C@1,C@2"},
+        {group:"Waltz / Folk",name:"Folk waltz",value:"C@0,C@1.5,C@2"},
+        {group:"Pop / Rock",name:"Pop waltz",value:"C@0,C@1,C@2.5"},
+        {group:"Pop / Rock",name:"Rock waltz",value:"C@0,C@1.5,C@2.5"},
+        {group:"Jazz",name:"Jazz waltz offbeats",value:"C@0.5,C@1.5,C@2.5"},
+        {group:"Jazz",name:"Sparse jazz waltz",value:"C@0,C@1.5"},
+        {group:"Syncopated",name:"Syncopated 3/4",value:"C@0,C@0.75,C@1.5,C@2.5"},
+        {group:"Arpeggio",name:"Waltz arpeggio",value:"A0@0,A1@1,A2@2"},
+        {group:"Arpeggio",name:"Rolling waltz arpeggio",value:"A0@0,A1@0.5,A2@1,A1@1.5,A0@2,A2@2.5"}
+      ],
+      "6/8":[
+        {group:"Foundation",name:"6/8 chord pulse",value:"C@0,C@1"},
+        {group:"Foundation",name:"6/8 beat one",value:"C@0"},
+        {group:"Foundation",name:"6/8 offbeat chords",value:"C@0.667,C@1.667"},
+        {group:"Pop / Rock",name:"6/8 rock ballad",value:"C@0,C@0.667,C@1,C@1.667"},
+        {group:"Blues / Shuffle",name:"6/8 blues comp",value:"C@0,C@0.667,C@1.333"},
+        {group:"Blues / Shuffle",name:"6/8 shuffle comp",value:"C@0,C@0.667,C@1,C@1.667"},
+        {group:"Soul / Gospel",name:"6/8 soul push",value:"C@0,C@0.667,C@1.333,C@1.667"},
+        {group:"Soul / Gospel",name:"6/8 gospel push",value:"C@0,C@0.667,C@1,C@1.333,C@1.667"},
+        {group:"Afro / Latin",name:"Afro 6/8 cross accents",value:"C@0,C@0.667,C@1.333"},
+        {group:"March / Folk",name:"6/8 march chords",value:"C@0,C@0.667,C@1,C@1.667"},
+        {group:"Arpeggio",name:"6/8 triplet arpeggio",value:"A0@0,A1@0.333,A2@0.667,A0@1,A1@1.333,A2@1.667"},
+        {group:"Arpeggio",name:"6/8 rolling guitar",value:"C@0,A1@0.667,C@1,A2@1.667"}
+      ],
+      "12/8":[
+        {group:"Foundation",name:"12/8 four-pulse chords",value:"C@0,C@1,C@2,C@3"},
+        {group:"Foundation",name:"12/8 half-time ballad",value:"C@0,C@2"},
+        {group:"Foundation",name:"12/8 backbeat chords",value:"C@1,C@3"},
+        {group:"Blues / Shuffle",name:"12/8 blues comp",value:"C@0,C@0.667,C@1.667,C@2,C@2.667,C@3.667"},
+        {group:"Blues / Shuffle",name:"12/8 shuffle comp",value:"C@0,C@0.667,C@1,C@1.667,C@2,C@2.667,C@3,C@3.667"},
+        {group:"Pop / Rock",name:"12/8 rock ballad roll",value:"C@0,A1@0.667,A2@1.333,C@2,A1@2.667,A2@3.333"},
+        {group:"Soul / R&B",name:"12/8 soul push",value:"C@0,C@0.667,C@1.667,C@2,C@2.667,C@3.667"},
+        {group:"Soul / R&B",name:"12/8 R&B space",value:"C@0,C@1.667,C@2,C@3.667"},
+        {group:"Gospel",name:"12/8 gospel push",value:"C@0,C@0.667,C@1.333,C@2,C@2.667,C@3.333"},
+        {group:"Afro",name:"Afro 12/8 cross accents",value:"C@0,C@0.667,C@1.667,C@2.333,C@3.333"},
+        {group:"Arpeggio",name:"12/8 triplet arpeggio",value:"A0@0,A1@0.333,A2@0.667,A0@1,A1@1.333,A2@1.667,A0@2,A1@2.333,A2@2.667,A0@3,A1@3.333,A2@3.667"},
+        {group:"Arpeggio",name:"12/8 sparse arpeggio",value:"A0@0,A1@0.667,A2@1.333,A0@2,A1@2.667,A2@3.333"}
+      ],
+      "2/4":[
+        {group:"Foundation",name:"Two-beat chords",value:"C@0,C@1"},
+        {group:"Foundation",name:"Chord on one",value:"C@0"},
+        {group:"Foundation",name:"2/4 offbeats",value:"C@0.5,C@1.5"},
+        {group:"Country / Folk",name:"Country boom-chuck",value:"C@0.5,C@1.5"},
+        {group:"Country / Folk",name:"Train drive",value:"C@0,C@0.5,C@1,C@1.5"},
+        {group:"March / Polka",name:"March chords",value:"C@0,C@1"},
+        {group:"March / Polka",name:"Polka oom-pah",value:"C@0.5,C@1.5"},
+        {group:"Brazilian",name:"Samba sync",value:"C@0,C@0.75,C@1,C@1.75"},
+        {group:"Brazilian",name:"Baião sync",value:"C@0,C@0.75,C@1.5"},
+        {group:"Brazilian",name:"Frevo drive",value:"C@0,C@0.5,C@1,C@1.25,C@1.5,C@1.75"},
+        {group:"Funk / Rock",name:"Fast rock 2/4",value:"C@0,C@0.5,C@1,C@1.5"},
+        {group:"Funk / Rock",name:"Two-beat funk",value:"C@0,C@0.75,C@1.5,C@1.75"},
+        {group:"Arpeggio",name:"2/4 arpeggio",value:"A0@0,A1@0.5,A2@1,A1@1.5"}
+      ]
+    };
+
+    var METER_BASS_PATTERNS = {
+      "3/4":[
+        {group:"Foundation",name:"Root on one",value:"R@0"},
+        {group:"Foundation",name:"Waltz root–fifth",value:"R@0,5@1"},
+        {group:"Foundation",name:"Waltz root–fifth–root",value:"R@0,5@1,R@2"},
+        {group:"Movement",name:"Waltz chord-tone walk",value:"R@0,3@1,5@2"},
+        {group:"Movement",name:"Sparse root–third",value:"R@0,3@2"},
+        {group:"Country / Folk",name:"Country alternating",value:"R@0,5@1,R@2"},
+        {group:"Syncopated",name:"3/4 pickup bass",value:"R@0,5@1.5,R@2.5"}
+      ],
+      "6/8":[
+        {group:"Foundation",name:"6/8 root on one",value:"R@0"},
+        {group:"Foundation",name:"6/8 roots",value:"R@0,R@1"},
+        {group:"Foundation",name:"6/8 root–fifth",value:"R@0,5@1"},
+        {group:"Movement",name:"6/8 pickup bass",value:"R@0,5@0.667,R@1,5@1.667"},
+        {group:"Blues / Shuffle",name:"6/8 blues walk",value:"R@0,3@0.667,5@1,3@1.667"},
+        {group:"Soul / Gospel",name:"6/8 gospel movement",value:"R@0,3@0.667,5@1.333,3@1.667"},
+        {group:"Afro / Latin",name:"Afro 6/8 cross bass",value:"R@0,5@0.667,R@1.333"}
+      ],
+      "12/8":[
+        {group:"Foundation",name:"12/8 root only",value:"R@0"},
+        {group:"Foundation",name:"12/8 two-feel",value:"R@0,R@2"},
+        {group:"Foundation",name:"12/8 four roots",value:"R@0,R@1,R@2,R@3"},
+        {group:"Foundation",name:"12/8 root–fifth",value:"R@0,5@2"},
+        {group:"Movement",name:"12/8 alternating root–fifth",value:"R@0,5@1,R@2,5@3"},
+        {group:"Movement",name:"12/8 chord-tone walk",value:"R@0,3@1,5@2,3@3"},
+        {group:"Blues / R&B",name:"12/8 pickup bass",value:"R@0,5@1.667,R@2,5@3.667"},
+        {group:"Soul / Gospel",name:"12/8 gospel movement",value:"R@0,3@1.333,5@2,3@3.333"},
+        {group:"Afro",name:"Afro 12/8 cross bass",value:"R@0,5@0.667,R@1.667,5@2.333,R@3.333"}
+      ],
+      "2/4":[
+        {group:"Foundation",name:"Two-beat roots",value:"R@0,R@1"},
+        {group:"Foundation",name:"Two-beat root–fifth",value:"R@0,5@1"},
+        {group:"Foundation",name:"Root on one",value:"R@0"},
+        {group:"Country",name:"Country pickup bass",value:"R@0,5@0.75,R@1,5@1.75"},
+        {group:"Movement",name:"Two-beat walk",value:"R@0,3@0.5,5@1,3@1.5"},
+        {group:"Brazilian",name:"Samba bass",value:"R@0,5@0.75,R@1,5@1.75"},
+        {group:"Brazilian",name:"Baião bass",value:"R@0,5@0.75,R@1.5"},
+        {group:"Brazilian",name:"Frevo bass",value:"R@0,5@0.5,R@1,5@1.5"},
+        {group:"Funk",name:"Two-beat funk bass",value:"R@0,5@0.75,R@1.25,3@1.75"}
+      ]
+    };
+
+    // Meter-specific style bundles. Percussion is the style leader:
+    // selecting a non-4/4 groove loads these recommended Guitar and Bass parts.
+    // Guitar and Bass remain independently editable afterward.
+    var METER_STYLE_BUNDLES = {
+      "3/4": {
+        "waltz":          {guitar:"Waltz full", bass:"Waltz root–fifth–root"},
+        "rock-waltz":     {guitar:"Rock waltz", bass:"Waltz root–fifth"},
+        "pop-34":         {guitar:"Pop waltz", bass:"Waltz chord-tone walk"},
+        "country-waltz":  {guitar:"Waltz oom-pah", bass:"Country alternating"},
+        "jazz-waltz":     {guitar:"Jazz waltz offbeats", bass:"Waltz chord-tone walk"},
+        "brush-waltz":    {guitar:"Sparse jazz waltz", bass:"Sparse root–third"},
+        "half-34":        {guitar:"Sparse jazz waltz", bass:"Root on one"},
+        "folk-waltz":     {guitar:"Folk waltz", bass:"Waltz root–fifth–root"},
+        "heavy-34":       {guitar:"Rock waltz", bass:"Country alternating"},
+        "sync-34":        {guitar:"Syncopated 3/4", bass:"3/4 pickup bass"}
+      },
+      "6/8": {
+        "basic-68":       {guitar:"6/8 chord pulse", bass:"6/8 roots"},
+        "rock-ballad-68": {guitar:"6/8 rock ballad", bass:"6/8 root–fifth"},
+        "blues-68":       {guitar:"6/8 blues comp", bass:"6/8 blues walk"},
+        "shuffle-68":     {guitar:"6/8 shuffle comp", bass:"6/8 blues walk"},
+        "soul-68":        {guitar:"6/8 soul push", bass:"6/8 pickup bass"},
+        "gospel-68":      {guitar:"6/8 gospel push", bass:"6/8 gospel movement"},
+        "half-68":        {guitar:"6/8 beat one", bass:"6/8 root on one"},
+        "afro-cuban-68":  {guitar:"Afro 6/8 cross accents", bass:"Afro 6/8 cross bass"},
+        "african-68":     {guitar:"Afro 6/8 cross accents", bass:"Afro 6/8 cross bass"},
+        "march-68":       {guitar:"6/8 march chords", bass:"6/8 roots"}
+      },
+      "12/8": {
+        "blues-128":        {guitar:"12/8 blues comp", bass:"12/8 root–fifth"},
+        "rock-ballad-128":  {guitar:"12/8 rock ballad roll", bass:"12/8 two-feel"},
+        "slow-blues-128":   {guitar:"12/8 half-time ballad", bass:"12/8 root only"},
+        "shuffle-128":      {guitar:"12/8 shuffle comp", bass:"12/8 chord-tone walk"},
+        "soul-128":         {guitar:"12/8 soul push", bass:"12/8 pickup bass"},
+        "gospel-128":       {guitar:"12/8 gospel push", bass:"12/8 gospel movement"},
+        "rnb-128":          {guitar:"12/8 R&B space", bass:"12/8 pickup bass"},
+        "half-128":         {guitar:"12/8 half-time ballad", bass:"12/8 root only"},
+        "triplet-rock-128": {guitar:"12/8 four-pulse chords", bass:"12/8 four roots"},
+        "afro-128":         {guitar:"Afro 12/8 cross accents", bass:"Afro 12/8 cross bass"}
+      },
+      "2/4": {
+        "basic-24":       {guitar:"Two-beat chords", bass:"Two-beat roots"},
+        "march-24":       {guitar:"March chords", bass:"Two-beat root–fifth"},
+        "polka":          {guitar:"Polka oom-pah", bass:"Two-beat root–fifth"},
+        "country-two":    {guitar:"Country boom-chuck", bass:"Country pickup bass"},
+        "train":          {guitar:"Train drive", bass:"Country pickup bass"},
+        "fast-rock-24":   {guitar:"Fast rock 2/4", bass:"Two-beat roots"},
+        "samba":          {guitar:"Samba sync", bass:"Samba bass"},
+        "baiao":          {guitar:"Baião sync", bass:"Baião bass"},
+        "frevo":          {guitar:"Frevo drive", bass:"Frevo bass"},
+        "funk-24":        {guitar:"Two-beat funk", bass:"Two-beat funk bass"}
+      }
+    };
+
+    // ---------- Non-4/4 turnaround vocabulary (v1.46) ----------
+    // The groove-to-fill-family mapping is adapted from Metronomic.
+    // Circle currently has kick/snare/hat samples only, so tom/ride/rim/open-hat
+    // families are rendered as related kick/snare/hat figures for now.
+    var METER_TURNAROUND_TYPES = {
+      "3/4": {
+        "waltz":"beat3Snare",
+        "rock-waltz":"beat3Tom",
+        "pop-34":"eighthSnareTom",
+        "country-waltz":"beat3Snare",
+        "jazz-waltz":"tripletRideSnare",
+        "brush-waltz":"brushSweep",
+        "half-34":"broadTom",
+        "folk-waltz":"beat3Snare",
+        "heavy-34":"descendingTom",
+        "sync-34":"syncKickSnare"
+      },
+      "6/8": {
+        "basic-68":"compoundTom",
+        "rock-ballad-68":"compoundSnareTom",
+        "blues-68":"tripletSnareTom",
+        "shuffle-68":"tripletTom",
+        "soul-68":"compoundSync",
+        "gospel-68":"rollingFill",
+        "half-68":"broadTom",
+        "afro-cuban-68":"crossRhythm",
+        "african-68":"crossTom",
+        "march-68":"snareRoll"
+      },
+      "12/8": {
+        "blues-128":"tripletSnareTom",
+        "rock-ballad-128":"descendingTom",
+        "slow-blues-128":"shortTriplet",
+        "shuffle-128":"tripletSnareTom",
+        "soul-128":"syncKickSnare",
+        "gospel-128":"rollingFill",
+        "rnb-128":"restrainedPickup",
+        "half-128":"broadTom",
+        "triplet-rock-128":"fullTripletTom",
+        "afro-128":"crossRhythm"
+      },
+      "2/4": {
+        "basic-24":"beat2Snare",
+        "march-24":"snareRoll",
+        "polka":"doubleStroke",
+        "country-two":"trainPickup",
+        "train":"accentedRoll",
+        "fast-rock-24":"fastSnareTom",
+        "samba":"syncTom",
+        "baiao":"kickTomSync",
+        "frevo":"rapidSnare",
+        "funk-24":"syncKickSnare"
+      }
+    };
+
+    function scheduleMeterFillHit(ctx, when, beatSeconds, fraction, kind) {
+      if (fraction < 0 || fraction >= 1) return;
+      scheduleTurnaroundHit(ctx, when, beatSeconds, fraction, kind);
+    }
+
+    function scheduleMeterStyleFill(ctx, when, beatSeconds, type, strength) {
+      if (!type) return;
+
+      var level =
+        strength === "strong" ? 3 :
+        strength === "medium" ? 2 : 1;
+
+      function kick(f)    { scheduleMeterFillHit(ctx,when,beatSeconds,f,"kick"); }
+      function snare(f)   { scheduleMeterFillHit(ctx,when,beatSeconds,f,"snare"); }
+      function hat(f)     { scheduleMeterFillHit(ctx,when,beatSeconds,f,"hat"); }
+      function tomHi(f)   { scheduleMeterFillHit(ctx,when,beatSeconds,f,"tomHigh"); }
+      function tomLo(f)   { scheduleMeterFillHit(ctx,when,beatSeconds,f,"tomLow"); }
+      function rim(f)     { scheduleMeterFillHit(ctx,when,beatSeconds,f,"rim"); }
+      function openHat(f) { scheduleMeterFillHit(ctx,when,beatSeconds,f,"openHat"); }
+      function ride(f)    { scheduleMeterFillHit(ctx,when,beatSeconds,f,"ride"); }
+
+      switch (type) {
+        case "beat3Snare":
+        case "beat2Snare":
+          if (level >= 1) snare(.75);
+          if (level >= 2) snare(.50);
+          if (level >= 3) {
+            rim(.25);
+            snare(.50);
+            snare(.75);
+          }
+          break;
+
+        case "beat3Tom":
+        case "compoundTom":
+        case "tripletTom":
+        case "fullTripletTom":
+        case "descendingTom":
+          if (level >= 1) tomLo(.75);
+          if (level >= 2) {
+            tomHi(.50);
+            tomLo(.75);
+          }
+          if (level >= 3) {
+            tomHi(.00);
+            tomHi(.25);
+            tomLo(.50);
+            tomLo(.75);
+          }
+          break;
+
+        case "eighthSnareTom":
+        case "fastSnareTom":
+        case "compoundSnareTom":
+          if (level >= 1) tomLo(.72);
+          if (level >= 2) {
+            snare(.45);
+            tomLo(.78);
+          }
+          if (level >= 3) {
+            tomHi(.18);
+            snare(.45);
+            tomHi(.68);
+            tomLo(.82);
+          }
+          break;
+
+        case "tripletSnareTom":
+          if (level >= 1) tomLo(2/3);
+          if (level >= 2) {
+            snare(1/3);
+            tomLo(2/3);
+          }
+          if (level >= 3) {
+            snare(.00);
+            tomHi(1/3);
+            tomLo(2/3);
+          }
+          break;
+
+        case "tripletRideSnare":
+          if (level >= 1) ride(2/3);
+          if (level >= 2) {
+            ride(1/3);
+            snare(2/3);
+          }
+          if (level >= 3) {
+            ride(.00);
+            ride(1/3);
+            snare(2/3);
+          }
+          break;
+
+        case "broadTom":
+          if (level >= 1) tomLo(2/3);
+          if (level >= 2) {
+            tomHi(1/3);
+            tomLo(2/3);
+          }
+          if (level >= 3) {
+            tomHi(.00);
+            tomHi(1/3);
+            tomLo(2/3);
+          }
+          break;
+
+        case "snareRoll":
+        case "rapidSnare":
+        case "accentedRoll":
+          if (level >= 1) snare(.75);
+          if (level >= 2) {
+            snare(.50);
+            snare(.75);
+          }
+          if (level >= 3) {
+            snare(.00);
+            snare(.25);
+            snare(.50);
+            snare(.75);
+          }
+          break;
+
+        case "rollingFill":
+          if (level >= 1) tomLo(.75);
+          if (level >= 2) {
+            snare(.50);
+            tomLo(.75);
+          }
+          if (level >= 3) {
+            snare(.00);
+            tomHi(.25);
+            tomHi(.50);
+            tomLo(.75);
+          }
+          break;
+
+        case "doubleStroke":
+          if (level >= 1) {
+            rim(.50);
+            snare(.75);
+          }
+          if (level >= 2) kick(.25);
+          if (level >= 3) {
+            rim(.125);
+            snare(.375);
+          }
+          break;
+
+        case "syncKickSnare":
+        case "compoundSync":
+          if (level >= 1) snare(.72);
+          if (level >= 2) {
+            kick(.35);
+            snare(.72);
+          }
+          if (level >= 3) {
+            kick(.00);
+            rim(.38);
+            kick(.65);
+            snare(.84);
+          }
+          break;
+
+        case "syncTom":
+        case "kickTomSync":
+          if (level >= 1) tomLo(.72);
+          if (level >= 2) {
+            kick(.35);
+            tomHi(.72);
+          }
+          if (level >= 3) {
+            kick(.00);
+            tomHi(.38);
+            kick(.65);
+            tomLo(.84);
+          }
+          break;
+
+        case "crossRhythm":
+        case "crossTom":
+          if (level >= 1) rim(2/3);
+          if (level >= 2) {
+            tomHi(.25);
+            rim(.72);
+          }
+          if (level >= 3) {
+            tomHi(.00);
+            rim(.42);
+            tomLo(.72);
+          }
+          break;
+
+        case "trainPickup":
+          if (level >= 1) openHat(.75);
+          if (level >= 2) {
+            rim(.50);
+            openHat(.75);
+          }
+          if (level >= 3) {
+            hat(.25);
+            rim(.50);
+            openHat(.75);
+          }
+          break;
+
+        case "brushSweep":
+          if (level >= 1) ride(.75);
+          if (level >= 2) {
+            ride(.50);
+            ride(.75);
+          }
+          if (level >= 3) {
+            ride(.25);
+            ride(.50);
+            snare(.75);
+          }
+          break;
+
+        case "restrainedPickup":
+          if (level >= 1) rim(.75);
+          if (level >= 2) openHat(.83);
+          if (level >= 3) {
+            rim(.50);
+            openHat(.75);
+          }
+          break;
+
+        case "shortTriplet":
+          if (level >= 1) tomLo(2/3);
+          if (level >= 2) tomHi(1/3);
+          if (level >= 3) {
+            snare(.00);
+            tomHi(1/3);
+            tomLo(2/3);
+          }
+          break;
+
+        case "openHatPickup":
+          if (level >= 1) openHat(.75);
+          if (level >= 2) snare(.75);
+          if (level >= 3) {
+            openHat(.50);
+            snare(.75);
+          }
+          break;
+
+        case "rimTomPickup":
+          if (level >= 1) rim(.72);
+          if (level >= 2) tomLo(.78);
+          if (level >= 3) {
+            rim(.35);
+            tomHi(.60);
+            tomLo(.82);
+          }
+          break;
+
+        default:
+          if (level >= 1) snare(.75);
+          if (level >= 2) tomHi(.50);
+          if (level >= 3) {
+            rim(.25);
+            tomLo(.75);
+          }
+          break;
+      }
+    }
+
+    function scheduleMeterTurnaroundBeat(ctx, when, beatNumber, beatSeconds) {
+      if (currentTimeSignature === "4/4") return;
+
+      var position = transportProgressionPosition(beatNumber);
+      if (!position || position.totalBeats < 2) return;
+
+      var beatsLeft = position.totalBeats - position.beatInPhrase;
+      if (beatsLeft !== 1) return;
+
+      var rhythm = selectedMeterRhythm();
+      if (!rhythm) return;
+
+      var typeMap = METER_TURNAROUND_TYPES[currentTimeSignature] || {};
+      var type = typeMap[rhythm.id];
+      if (!type) return;
+
+      // Preserve Circle's established alternation:
+      // first phrase ending light, second phrase ending strong.
+      var strength = (position.phrasePass % 2 === 0) ? "light" : "strong";
+      scheduleMeterStyleFill(ctx, when, beatSeconds, type, strength);
+    }
+
+    function selectedMeterRhythmId() {
+      var s = document.getElementById("rhythmSelect");
+      if (!s) return "";
+      return (s.value || "").replace(/^meter:/,"");
+    }
+
+    function applyMeterStyleBundle() {
+      if (currentTimeSignature === "4/4") return false;
+
+      var rhythmId = selectedMeterRhythmId();
+      var bundle = (METER_STYLE_BUNDLES[currentTimeSignature] || {})[rhythmId];
+      if (!bundle) return false;
+
+      var guitar = document.getElementById("guitarPatternSelect");
+      var bass = document.getElementById("bassPatternSelect");
+
+      var guitarFound = selectOptionByVisibleText(guitar,bundle.guitar);
+      var bassFound = selectOptionByVisibleText(bass,bundle.bass);
+
+      updateTrigger(guitar);
+      updateTrigger(bass);
+      return guitarFound || bassFound;
+    }
+
+    var fourFourMenuMarkup = null;
+    var meterSelections = {};
+
+    function saveCurrentMeterSelections() {
+      var ids = ["rhythmSelect","guitarPatternSelect","bassPatternSelect"];
+      var saved = {};
+      ids.forEach(function(id){
+        var s = document.getElementById(id);
+        var opt = selectedOptionFor(s);
+        saved[id] = opt ? opt.textContent.trim() : "";
+      });
+      meterSelections[currentTimeSignature] = saved;
+    }
+
+    function buildGroupedOptions(select, items, fallbackGroup) {
+      select.innerHTML = "";
+      var groups = {};
+      items.forEach(function(item){
+        var groupName = item.group || fallbackGroup;
+        if (!groups[groupName]) {
+          var g = document.createElement("optgroup");
+          g.label = groupName;
+          select.appendChild(g);
+          groups[groupName] = g;
+        }
+        var opt = document.createElement("option");
+        opt.value = item.value;
+        opt.textContent = item.name;
+        groups[groupName].appendChild(opt);
+      });
+    }
+
+    function buildMeterRhythmOptions(select, signature) {
+      var rhythms = METER_RHYTHMS[signature] || [];
+      select.innerHTML = "";
+      var g = document.createElement("optgroup");
+      g.label = signature + " Rhythms";
+      select.appendChild(g);
+      rhythms.forEach(function(rhythm){
+        var opt = document.createElement("option");
+        opt.value = "meter:" + rhythm.id;
+        opt.textContent = rhythm.name;
+        g.appendChild(opt);
+      });
+    }
+
+    function restoreSelectionByLabel(select, label) {
+      if (!select || !label) return false;
+      for (var i=0;i<select.options.length;i++) {
+        if (select.options[i].textContent.trim() === label) {
+          select.selectedIndex = i;
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function populateMeterAccompanimentMenus(signature) {
+      var rhythm = document.getElementById("rhythmSelect");
+      var guitar = document.getElementById("guitarPatternSelect");
+      var bass = document.getElementById("bassPatternSelect");
+      if (!rhythm || !guitar || !bass) return;
+
+      if (!fourFourMenuMarkup) {
+        fourFourMenuMarkup = {
+          rhythm: rhythm.innerHTML,
+          guitar: guitar.innerHTML,
+          bass: bass.innerHTML
+        };
+      }
+
+      if (signature === "4/4") {
+        rhythm.innerHTML = fourFourMenuMarkup.rhythm;
+        guitar.innerHTML = fourFourMenuMarkup.guitar;
+        bass.innerHTML = fourFourMenuMarkup.bass;
+      } else {
+        buildMeterRhythmOptions(rhythm, signature);
+        buildGroupedOptions(guitar, METER_GUITAR_PATTERNS[signature] || [], signature + " Guitar");
+        buildGroupedOptions(bass, METER_BASS_PATTERNS[signature] || [], signature + " Bass");
+      }
+
+      var saved = meterSelections[signature] || {};
+      var rhythmRestored = restoreSelectionByLabel(rhythm, saved.rhythmSelect);
+      var guitarRestored = restoreSelectionByLabel(guitar, saved.guitarPatternSelect);
+      var bassRestored = restoreSelectionByLabel(bass, saved.bassPatternSelect);
+
+      if (rhythm.selectedIndex < 0 && rhythm.options.length) rhythm.selectedIndex = 0;
+      if (guitar.selectedIndex < 0 && guitar.options.length) guitar.selectedIndex = 0;
+      if (bass.selectedIndex < 0 && bass.options.length) bass.selectedIndex = 0;
+
+      // On first entry to a non-4/4 meter, let its percussion style choose a
+      // coherent Guitar + Bass bundle. If the user has already used the meter,
+      // preserve those independent choices instead.
+      if (signature !== "4/4" && !guitarRestored && !bassRestored) {
+        applyMeterStyleBundle();
+      }
+
+      updateTrigger(rhythm);
+      updateTrigger(guitar);
+      updateTrigger(bass);
+    }
+
+    function setCircleTimeSignature(signature) {
+      if (!TIME_SIGNATURES[signature] || signature === currentTimeSignature) return;
+      if (progressionPlaying) stopProgressionPlayback();
+
+      saveCurrentMeterSelections();
+      currentTimeSignature = signature;
+
+      Array.prototype.forEach.call(document.querySelectorAll(".meter-choice"), function(button){
+        button.classList.toggle("selected", button.getAttribute("data-signature") === signature);
+      });
+
+      populateMeterAccompanimentMenus(signature);
+
+      transportVisualStateKey = "";
+      render(selectedMajor);
+      renderProgressionStrip(null, null, false);
+    }
+
+    function selectedMeterRhythm() {
+      if (currentTimeSignature === "4/4") return null;
+      var select = document.getElementById("rhythmSelect");
+      if (!select) return null;
+      var id = (select.value || "").replace(/^meter:/,"");
+      var list = METER_RHYTHMS[currentTimeSignature] || [];
+      for (var i=0;i<list.length;i++) if (list[i].id === id) return list[i];
+      return list.length ? list[0] : null;
+    }
+
+    function scheduleMeterRhythmSteps(ctx, when, beatSeconds, beatInMeasure, rhythm, steps, kind) {
+      if (!steps || !steps.length || !rhythm) return;
+      var stepsPerPulse = rhythm.subdivisions * (currentMeter().compound ? 3 : 1);
+      var stepDuration = beatSeconds / stepsPerPulse;
+
+      for (var i=0;i<steps.length;i++) {
+        var step = steps[i];
+        var eventPulse = Math.floor(step / stepsPerPulse);
+        if (eventPulse !== beatInMeasure) continue;
+        var localStep = step % stepsPerPulse;
+        renderPercussionEvent(ctx, when + localStep * stepDuration, kind);
+      }
+    }
+
+    function getTransportBeatSeconds() {
+      var tempo = document.getElementById("tempoSelect");
+      var bpm = tempo ? parseFloat(tempo.value) : 100;
+      if (!isFinite(bpm) || bpm <= 0) bpm = 100;
+      return 60 / bpm;
+    }
+
+    function scheduleTransportMetronomeBeat(ctx, when, beatNumber) {
+      var toggle = document.getElementById("metronomeToggle");
+      if (!toggle || !toggle.checked) return;
+      playMetronomeClick(ctx, when, (beatNumber % meterPulsesPerMeasure()) === 0);
+    }
+
+    function selectedPercussionFamily() {
+      var select = document.getElementById("rhythmSelect");
+      if (!select || select.selectedIndex < 0) return "Straight / Basic";
+      var opt = select.options[select.selectedIndex];
+      var parent = opt ? opt.parentElement : null;
+      return (parent && parent.tagName === "OPTGROUP") ? parent.label : "Straight / Basic";
+    }
+
+    function scheduleTurnaroundHit(ctx, baseWhen, beatSeconds, fraction, kind) {
+      var hitWhen = baseWhen + beatSeconds * fraction;
+      renderPercussionEvent(ctx, hitWhen, kind);
+    }
+
+    function scheduleTransportTurnaroundBeat(ctx, when, beatNumber, beatSeconds) {
+      var position = transportProgressionPosition(beatNumber);
+      if (!position || position.totalBeats < 2) return;
+
+      var beatsLeft = position.totalBeats - position.beatInPhrase;
+      var subtle = (position.phrasePass % 2 === 0);
+      var family = selectedPercussionFamily();
+
+      // First phrase ending = subtle; second phrase ending = stronger;
+      // then alternate forever. The turnaround occupies existing beats only.
+      if (subtle) {
+        if (beatsLeft !== 1) return;
+
+        if (family === "Brazilian / Latin") {
+          scheduleTurnaroundHit(ctx,when,beatSeconds,0.50,"hat");
+          scheduleTurnaroundHit(ctx,when,beatSeconds,0.75,"snare");
+        } else if (family === "Jazz / Swing") {
+          scheduleTurnaroundHit(ctx,when,beatSeconds,0.67,"hat");
+          scheduleTurnaroundHit(ctx,when,beatSeconds,0.83,"snare");
+        } else if (family === "Funk / Soul / R&B") {
+          scheduleTurnaroundHit(ctx,when,beatSeconds,0.75,"snare");
+        } else if (family === "Reggae / Other") {
+          scheduleTurnaroundHit(ctx,when,beatSeconds,0.75,"hat");
+        } else {
+          scheduleTurnaroundHit(ctx,when,beatSeconds,0.75,"snare");
+        }
+        return;
+      }
+
+      // Stronger turnaround spans the final two beats of every second pass.
+      if (beatsLeft === 2) {
+        if (family === "Brazilian / Latin") {
+          scheduleTurnaroundHit(ctx,when,beatSeconds,0.50,"snare");
+          scheduleTurnaroundHit(ctx,when,beatSeconds,0.75,"hat");
+        } else if (family === "Jazz / Swing") {
+          scheduleTurnaroundHit(ctx,when,beatSeconds,0.67,"snare");
+        } else if (family === "Funk / Soul / R&B") {
+          scheduleTurnaroundHit(ctx,when,beatSeconds,0.50,"snare");
+          scheduleTurnaroundHit(ctx,when,beatSeconds,0.75,"hat");
+        } else if (family === "Pop / Rock") {
+          scheduleTurnaroundHit(ctx,when,beatSeconds,0.50,"snare");
+        } else if (family === "Folk / Country") {
+          scheduleTurnaroundHit(ctx,when,beatSeconds,0.50,"hat");
+          scheduleTurnaroundHit(ctx,when,beatSeconds,0.75,"snare");
+        } else {
+          scheduleTurnaroundHit(ctx,when,beatSeconds,0.50,"snare");
+        }
+      } else if (beatsLeft === 1) {
+        if (family === "Brazilian / Latin") {
+          scheduleTurnaroundHit(ctx,when,beatSeconds,0.25,"snare");
+          scheduleTurnaroundHit(ctx,when,beatSeconds,0.50,"hat");
+          scheduleTurnaroundHit(ctx,when,beatSeconds,0.75,"snare");
+          scheduleTurnaroundHit(ctx,when,beatSeconds,0.875,"hat");
+        } else if (family === "Jazz / Swing") {
+          scheduleTurnaroundHit(ctx,when,beatSeconds,0.33,"snare");
+          scheduleTurnaroundHit(ctx,when,beatSeconds,0.67,"snare");
+          scheduleTurnaroundHit(ctx,when,beatSeconds,0.83,"hat");
+        } else if (family === "Funk / Soul / R&B") {
+          scheduleTurnaroundHit(ctx,when,beatSeconds,0.25,"snare");
+          scheduleTurnaroundHit(ctx,when,beatSeconds,0.50,"snare");
+          scheduleTurnaroundHit(ctx,when,beatSeconds,0.75,"snare");
+        } else if (family === "Pop / Rock") {
+          scheduleTurnaroundHit(ctx,when,beatSeconds,0.25,"snare");
+          scheduleTurnaroundHit(ctx,when,beatSeconds,0.50,"snare");
+          scheduleTurnaroundHit(ctx,when,beatSeconds,0.75,"snare");
+          scheduleTurnaroundHit(ctx,when,beatSeconds,0.875,"kick");
+        } else if (family === "Folk / Country") {
+          scheduleTurnaroundHit(ctx,when,beatSeconds,0.50,"snare");
+          scheduleTurnaroundHit(ctx,when,beatSeconds,0.75,"snare");
+        } else if (family === "Reggae / Other") {
+          scheduleTurnaroundHit(ctx,when,beatSeconds,0.50,"hat");
+          scheduleTurnaroundHit(ctx,when,beatSeconds,0.75,"snare");
+        } else {
+          scheduleTurnaroundHit(ctx,when,beatSeconds,0.25,"snare");
+          scheduleTurnaroundHit(ctx,when,beatSeconds,0.50,"hat");
+          scheduleTurnaroundHit(ctx,when,beatSeconds,0.75,"snare");
+        }
+      }
+    }
+
+    function scheduleTransportPercussionBeat(ctx, when, beatNumber, beatSeconds) {
+      var toggle = document.getElementById("percussionToggle");
+      if (!toggle || !toggle.checked) return;
+
+      var beatInMeasure = beatNumber % meterPulsesPerMeasure();
+
+      if (currentTimeSignature === "4/4") {
+        var groove = selectedPercussionGroove();
+        schedulePercussionPositions(ctx,when,beatSeconds,beatInMeasure,groove.kick,"kick");
+        schedulePercussionPositions(ctx,when,beatSeconds,beatInMeasure,groove.snare,"snare");
+        schedulePercussionPositions(ctx,when,beatSeconds,beatInMeasure,groove.hat,"hat");
+
+        // Preserve Circle's existing 4/4 phrase-ending fill engine unchanged.
+        scheduleTransportTurnaroundBeat(ctx, when, beatNumber, beatSeconds);
+        return;
+      }
+
+      var rhythm = selectedMeterRhythm();
+      if (!rhythm) return;
+      scheduleMeterRhythmSteps(ctx,when,beatSeconds,beatInMeasure,rhythm,rhythm.kick,"kick");
+      scheduleMeterRhythmSteps(ctx,when,beatSeconds,beatInMeasure,rhythm,rhythm.snare,"snare");
+      scheduleMeterRhythmSteps(ctx,when,beatSeconds,beatInMeasure,rhythm,rhythm.hat,"hat");
+
+      // Meter-specific phrase-ending turnaround.
+      scheduleMeterTurnaroundBeat(ctx, when, beatNumber, beatSeconds);
+    }
+
+    function transportProgressionPosition(beatNumber) {
+      var prog = getSelectedProgression();
+      if (!prog || !prog.degrees.length) return null;
+
+      var counts = [];
+      var totalBeats = 0;
+      for (var i=0; i<prog.degrees.length; i++) {
+        var n = parseInt(prog.beats[i],10);
+        if (!isFinite(n) || n < 1) n = 1;
+        counts.push(n);
+        totalBeats += n;
+      }
+      if (totalBeats < 1) return null;
+
+      var beatInPhrase = ((beatNumber % totalBeats) + totalBeats) % totalBeats;
+      var cursor = 0;
+      for (var j=0; j<counts.length; j++) {
+        if (beatInPhrase < cursor + counts[j]) {
+          return {
+            chordIndex:j,
+            degree:prog.degrees[j],
+            beatInChord:beatInPhrase-cursor,
+            beatsForChord:counts[j],
+            beatInPhrase:beatInPhrase,
+            phrasePass:Math.floor(beatNumber/totalBeats),
+            totalBeats:totalBeats
+          };
+        }
+        cursor += counts[j];
+      }
+      return null;
+    }
+
+    function scheduleTransportBassBeat(ctx, when, beatNumber, beatSeconds) {
+      var bassToggle = document.getElementById("bassToggle");
+      if (!bassToggle || !bassToggle.checked) return;
+
+      var position = transportProgressionPosition(beatNumber);
+      if (!position) return;
+
+      var events = selectedBassPatternEvents();
+      if (!events.length) return;
+
+      var info = chordInfoForDegree(selectedMajor, position.degree);
+      if (!info || !info.midiNotes || !info.midiNotes.length) return;
+
+      // Bass now has its own four-beat pattern, independent of Guitar.
+      // R = root, 3 = chord third, 5 = chord fifth.
+      for (var i=0; i<events.length; i++) {
+        for (var base=0; base<position.beatsForChord; base+=meterPulsesPerMeasure()) {
+          var pos = base + events[i].beat;
+          if (pos >= position.beatsForChord) continue;
+          if (Math.floor(pos + 1e-9) !== position.beatInChord) continue;
+
+          var fraction = pos - position.beatInChord;
+          var noteWhen = when + fraction * beatSeconds;
+          var remaining = (position.beatsForChord - pos) * beatSeconds;
+          var bassDur = Math.max(
+            0.07,
+            Math.min(beatSeconds * 0.72, remaining - 0.025)
+          );
+
+          renderBassEvent(
+            ctx,
+            bassMidiForKind(info, events[i].kind),
+            bassDur,
+            noteWhen
+          );
+        }
+      }
+    }
+
+    function scheduleTransportGuitarBeat(ctx, when, beatNumber, beatSeconds) {
+      var chordToggle = document.getElementById("chordToggle");
+      if (!chordToggle || !chordToggle.checked) return;
+
+      var position = transportProgressionPosition(beatNumber);
+      if (!position) return;
+
+      var events = selectedGuitarPatternEvents();
+      if (!events.length) return;
+
+      var info = chordInfoForDegree(selectedMajor, position.degree);
+      if (!info || !info.midiNotes || !info.midiNotes.length) return;
+
+      // C@... and A0/A1/A2@... events repeat every four beats WITHIN
+      // the current chord. Fractional positions are scheduled directly
+      // against this transport beat's exact AudioContext time.
+      for (var i=0; i<events.length; i++) {
+        var kind = events[i].kind;
+
+        for (var base=0; base<position.beatsForChord; base+=meterPulsesPerMeasure()) {
+          var pos = base + events[i].beat;
+          if (pos >= position.beatsForChord) continue;
+          if (Math.floor(pos + 1e-9) !== position.beatInChord) continue;
+
+          var fraction = pos - position.beatInChord;
+          var noteWhen = when + fraction * beatSeconds;
+          var remaining = (position.beatsForChord - pos) * beatSeconds;
+
+          if (kind === "C") {
+            var chordDur = Math.max(
+              0.07,
+              Math.min(beatSeconds * 0.50, remaining - 0.065)
+            );
+
+            renderGuitarChordEvent(
+              ctx,
+              info.midiNotes,
+              chordDur,
+              noteWhen
+            );
+          } else if (kind.charAt(0) === "A") {
+            var a = parseInt(kind.slice(1),10);
+            a = Math.max(
+              0,
+              Math.min(info.midiNotes.length-1, isFinite(a) ? a : 0)
+            );
+            var arpDur = Math.max(
+              0.07,
+              Math.min(beatSeconds * 0.42, remaining - 0.025)
+            );
+
+            renderGuitarArpEvent(
+              ctx,
+              info.midiNotes[a],
+              arpDur,
+              noteWhen
+            );
+          }
+        }
+      }
+    }
+
+
+
+    function applyTransportVisualState(beatNumber) {
+      var position = transportProgressionPosition(beatNumber);
+      if (!position) return;
+
+      var info = chordInfoForDegree(selectedMajor, position.degree);
+      if (!info || !info.midiNotes || !info.midiNotes.length) return;
+
+      var prog = getSelectedProgression();
+
+      // Keep the current chord steadily lit.
+      // Reuse the previous cue timing for the NEXT chord:
+      // penultimate beat = cue OFF; final beat = cue ON.
+      var cueIndex = null;
+      var cueLit = false;
+
+      if (position.beatsForChord >= 3 &&
+          position.beatInChord === position.beatsForChord - 2) {
+        cueIndex = (position.chordIndex + 1) % prog.degrees.length;
+        cueLit = false;
+      } else if (position.beatInChord === position.beatsForChord - 1) {
+        cueIndex = (position.chordIndex + 1) % prog.degrees.length;
+        cueLit = true;
+      }
+
+      // Derive the same upcoming-chord cue for the circle of fifths.
+      cuePitchClass = null;
+      cueQuality = null;
+      cueIsDiatonic = null;
+      cueLitOnWheel = false;
+
+      if (cueIndex !== null && cueLit === true) {
+        var cueDegree = prog.degrees[cueIndex];
+        var cueInfo = chordInfoForDegree(selectedMajor, cueDegree);
+        if (cueInfo && cueInfo.midiNotes && cueInfo.midiNotes.length) {
+          cuePitchClass = ((cueInfo.midiNotes[0] % 12) + 12) % 12;
+          cueQuality = cueInfo.quality ||
+            ((cueInfo.midiNotes[1] - cueInfo.midiNotes[0] === 3) ? "minor" : "major");
+          cueIsDiatonic = isDegreeDiatonic(
+            cueDegree,
+            progressionModeForDegrees(prog.degrees)
+          );
+          cueLitOnWheel = true;
+        }
+      }
+
+      // Avoid rebuilding the SVG on every animation frame. Re-render only
+      // when the chord position or cue state has actually changed.
+      var stateKey = [
+        position.chordIndex,
+        position.beatInChord,
+        cueIndex === null ? -1 : cueIndex,
+        cueLit ? 1 : 0,
+        position.degree
+      ].join("|");
+
+      if (stateKey === transportVisualStateKey) return;
+      transportVisualStateKey = stateKey;
+
+      activeRoman = position.degree;
+      activeChordKey = info.chordKey;
+      activeChordRing = info.chordRing;
+      activePitchClass = ((info.midiNotes[0] % 12) + 12) % 12;
+      activeQuality = info.quality ||
+        ((info.midiNotes[1] - info.midiNotes[0] === 3) ? "minor" : "major");
+      activeIsDiatonic = isDegreeDiatonic(
+        position.degree,
+        progressionModeForDegrees(prog.degrees)
+      );
+
+      render(selectedMajor);
+      renderProgressionStrip(position.chordIndex, cueIndex, cueLit);
+    }
+
+    function runTransportVisualFollower() {
+      if (!transportRunning || !progressionPlaying) {
+        transportVisualFrame = null;
+        return;
+      }
+
+      var ctx = getAudioCtx();
+      var now = ctx.currentTime;
+
+      // Keep the current beat at [0]. Once the next beat boundary is actually
+      // reached on the audio clock, advance to it. This remains correct even
+      // if a browser frame is delayed or skipped.
+      while (transportVisualBeats.length > 1 &&
+             transportVisualBeats[1].time <= now) {
+        transportVisualBeats.shift();
+      }
+
+      if (transportVisualBeats.length &&
+          transportVisualBeats[0].time <= now) {
+        applyTransportVisualState(transportVisualBeats[0].beatNumber);
+      }
+
+      transportVisualFrame = requestAnimationFrame(runTransportVisualFollower);
+    }
+
+    function startTransportVisualFollower() {
+      if (transportVisualFrame !== null) {
+        cancelAnimationFrame(transportVisualFrame);
+      }
+      transportVisualFrame = requestAnimationFrame(runTransportVisualFollower);
+    }
+
+    function stopTransportVisualFollower() {
+      if (transportVisualFrame !== null) {
+        cancelAnimationFrame(transportVisualFrame);
+        transportVisualFrame = null;
+      }
+      transportVisualBeats = [];
+      transportVisualStateKey = "";
+      cuePitchClass = null;
+      cueQuality = null;
+      cueIsDiatonic = null;
+      cueLitOnWheel = false;
+    }
+
+    function runTransportScheduler() {
+      if (!transportRunning) return;
+      var ctx = getAudioCtx();
+      var beatSeconds = getTransportBeatSeconds();
+
+      while (transportNextBeatTime < ctx.currentTime + transportScheduleAheadSec) {
+        // Record the SAME beat boundary used by every audible layer.
+        transportVisualBeats.push({
+          time: transportNextBeatTime,
+          beatNumber: transportBeatNumber,
+          beatSeconds: beatSeconds
+        });
+
+        scheduleTransportMetronomeBeat(ctx, transportNextBeatTime, transportBeatNumber);
+        scheduleTransportPercussionBeat(ctx, transportNextBeatTime, transportBeatNumber, beatSeconds);
+        scheduleTransportBassBeat(ctx, transportNextBeatTime, transportBeatNumber, beatSeconds);
+        scheduleTransportGuitarBeat(ctx, transportNextBeatTime, transportBeatNumber, beatSeconds);
+        transportNextBeatTime += beatSeconds;
+        transportBeatNumber++;
+      }
+
+      transportTimer = setTimeout(runTransportScheduler, transportLookaheadMs);
+    }
+
+    function startMasterTransport(ctx) {
+      if (!ctx) ctx = getAudioCtx();
+
+      transportRunning = true;
+      transportBeatNumber = 0;
+      transportVisualBeats = [];
+      transportVisualStateKey = "";
+
+      // All layers share this first exact beat boundary.
+      transportNextBeatTime = ctx.currentTime + 0.05;
+
+      if (transportTimer) clearTimeout(transportTimer);
+      transportTimer = null;
+      runTransportScheduler();
+      startTransportVisualFollower();
+    }
+
+    function stopMasterTransport() {
+      transportRunning = false;
+      if (transportTimer) {
+        clearTimeout(transportTimer);
+        transportTimer = null;
+      }
+      stopTransportVisualFollower();
+    }
+
+    // ---------- Progression-specific accompaniment defaults ----------
+    // Every progression phrase has one deliberate guitar and percussion pairing.
+    // Choosing a progression applies its pairing; the user may then override
+    // Guitar or Percussion manually without changing the progression.
+    var progressionAccompanimentMap = {"Diatonic — Cadences & Core||I–IV–V–I":{"guitar":"Folk bass-strum","percussion":"Folk quarters"},"Diatonic — Cadences & Core||I–ii–V–I":{"guitar":"Jazz ballad","percussion":"Jazz ballad"},"Diatonic — Cadences & Core||ii–V–I":{"guitar":"Swing comp","percussion":"Swing comp"},"Diatonic — Cadences & Core||I–vi–ii–V–I":{"guitar":"Jazz bass/chord","percussion":"Swing sparse"},"Diatonic — Cadences & Core||iii–vi–ii–V–I":{"guitar":"Walking shell feel","percussion":"Four to the bar"},"Diatonic — Cadences & Core||I–V–vi–IV":{"guitar":"Pop bass/chord","percussion":"Pop groove (push)"},"Diatonic — Cadences & Core||vi–IV–I–V":{"guitar":"Driving eighths","percussion":"Driving pop"},"Diatonic — Cadences & Core||I–vi–IV–V":{"guitar":"Folk bass-strum","percussion":"Folk eighths"},"Diatonic — Cadences & Core||I–V–IV–I":{"guitar":"Rock backbeat","percussion":"Rock quarters"},"Diatonic — Cadences & Core||IV–I–ii–V":{"guitar":"Charleston","percussion":"Charleston"},"Mixolydian / ♭VII||I–♭VII–IV–I":{"guitar":"Rock backbeat","percussion":"Rock eighths"},"Mixolydian / ♭VII||I–♭VII–I":{"guitar":"Power pulse","percussion":"Rock quarters"},"Mixolydian / ♭VII||I–IV–♭VII–I":{"guitar":"Driving eighths","percussion":"Backbeat hits"},"Mixolydian / ♭VII||I–♭VII–IV–♭VII":{"guitar":"Syncopated rock","percussion":"Driving pop"},"Mixolydian / ♭VII||I–V–♭VII–IV":{"guitar":"Anthem","percussion":"Power ballad"},"Mixolydian / ♭VII||IV–♭VII–I":{"guitar":"Folk bass-strum","percussion":"Country drive"},"Dorian / Minor-Modal||i–IV–i":{"guitar":"Funk stabs","percussion":"Funk subdivision"},"Dorian / Minor-Modal||i–IV–♭VII–i":{"guitar":"Soul pocket","percussion":"Soul backbeat"},"Dorian / Minor-Modal||i–♭VII–IV–i":{"guitar":"Neo-soul space","percussion":"Neo-soul space"},"Dorian / Minor-Modal||i–IV–♭VII–IV":{"guitar":"Funk offbeats","percussion":"Funk push"},"Dorian / Minor-Modal||i–ii–IV–i":{"guitar":"R&B roll","percussion":"R&B pocket"},"Dorian / Minor-Modal||i–♭VII–i–IV":{"guitar":"Motown guitar","percussion":"Soul backbeat"},"Borrowed / Modal Mixture||I–iv–I":{"guitar":"Jazz ballad","percussion":"Jazz ballad"},"Borrowed / Modal Mixture||I–IV–iv–I":{"guitar":"Ballad roll","percussion":"Power ballad"},"Borrowed / Modal Mixture||I–♭VI–IV–I":{"guitar":"Neo-soul space","percussion":"Neo-soul space"},"Borrowed / Modal Mixture||I–♭VI–♭VII–I":{"guitar":"Anthem","percussion":"Arena sustain"},"Borrowed / Modal Mixture||I–♭III–IV–I":{"guitar":"Soul pocket","percussion":"R&B pocket"},"Borrowed / Modal Mixture||I–♭III–♭VII–IV":{"guitar":"Rock backbeat","percussion":"Backbeat hits"},"Borrowed / Modal Mixture||I–iv–♭VII–I":{"guitar":"Bossa sparse","percussion":"Bossa sparse"},"Borrowed / Modal Mixture||I–♭VI–iv–I":{"guitar":"R&B roll","percussion":"Neo-soul space"},"Secondary Dominants / Chromatic||I–V/ii–ii–V–I":{"guitar":"Swing comp","percussion":"Swing comp"},"Secondary Dominants / Chromatic||I–V/vi–vi–ii–V–I":{"guitar":"Jazz bass/chord","percussion":"Swing sparse"},"Secondary Dominants / Chromatic||I–V/V–V–I":{"guitar":"Four-to-bar comp","percussion":"Four to the bar"},"Secondary Dominants / Chromatic||I–III–vi–IV":{"guitar":"Soul pocket","percussion":"Soul backbeat"},"Secondary Dominants / Chromatic||I–VI–ii–V":{"guitar":"Charleston","percussion":"Charleston"},"Secondary Dominants / Chromatic||I–II–V–I":{"guitar":"Bossa basic","percussion":"Bossa-style groove"},"Secondary Dominants / Chromatic||iii–VI–ii–V–I":{"guitar":"Walking shell feel","percussion":"Four to the bar"},"Secondary Dominants / Chromatic||I–III–IV–iv–I":{"guitar":"Jazz ballad","percussion":"Jazz ballad"},"Minor / Aeolian Color||i–♭VI–♭III–♭VII":{"guitar":"Driving eighths","percussion":"Rock eighths"},"Minor / Aeolian Color||i–♭VII–♭VI–♭VII":{"guitar":"Syncopated rock","percussion":"Backbeat hits"},"Minor / Aeolian Color||i–♭VI–♭VII–i":{"guitar":"Anthem","percussion":"Power ballad"},"Minor / Aeolian Color||i–♭III–♭VII–iv":{"guitar":"R&B roll","percussion":"Neo-soul space"},"Minor / Aeolian Color||i–iv–♭VII–♭III":{"guitar":"Bossa arp","percussion":"Bossa syncopated"},"Minor / Aeolian Color||i–♭VII–♭VI–V":{"guitar":"Tango guitar","percussion":"Tango"},"Pop / Functional||I–V–vi–IV (2 bars each)":{"guitar":"Pop bass/chord","percussion":"Pop groove (push)"},"Pop / Functional||I–vi–ii–V":{"guitar":"Ballad roll","percussion":"Power ballad"},"Pop / Functional||ii–V–I (quick ii–V)":{"guitar":"Swing comp","percussion":"Swing push"},"Pop / Functional||I–iii–vi–ii–V–I":{"guitar":"Jazz bass/chord","percussion":"Four to the bar"},"Pop / Functional||vi–ii–V–I (quick)":{"guitar":"Four-to-bar comp","percussion":"Four to the bar"},"Pop / Functional||I–vi–IV–ii–V–I":{"guitar":"Bossa rolling","percussion":"Bossa-style groove"},"Modal Practice — Dorian||Dorian: i–IV–i":{"guitar":"Funk stabs","percussion":"Funk subdivision"},"Modal Practice — Dorian||Dorian: i–♭VII–IV–i":{"guitar":"Neo-soul space","percussion":"Neo-soul space"},"Modal Practice — Dorian||Dorian: i–ii–IV–i":{"guitar":"Soul pocket","percussion":"R&B pocket"},"Modal Practice — Phrygian||Phrygian: i–♭II–i":{"guitar":"Tango guitar","percussion":"Tango"},"Modal Practice — Phrygian||Phrygian: i–♭II–♭VII–i":{"guitar":"Latin tresillo","percussion":"Tresillo"},"Modal Practice — Phrygian||Phrygian: i–♭VII–♭II–i":{"guitar":"Tango guitar","percussion":"Latin offbeat"},"Modal Practice — Lydian||Lydian: I–II–I":{"guitar":"Jazz ballad","percussion":"Two feel"},"Modal Practice — Lydian||Lydian: I–II–V–I":{"guitar":"Swing arp","percussion":"Swing sparse"},"Modal Practice — Lydian||Lydian: I–V–II–I":{"guitar":"Bossa arp","percussion":"Bossa sparse"},"Modal Practice — Mixolydian||Mixolydian: I–♭VII–I":{"guitar":"Rock backbeat","percussion":"Rock quarters"},"Modal Practice — Mixolydian||Mixolydian: I–♭VII–IV–I":{"guitar":"Driving eighths","percussion":"Rock eighths"},"Modal Practice — Mixolydian||Mixolydian: I–IV–♭VII–I":{"guitar":"Folk bass-strum","percussion":"Country drive"}};
+
+    function optionGroupLabel(opt) {
+      return opt && opt.parentElement && opt.parentElement.tagName === "OPTGROUP"
+        ? opt.parentElement.label : "Other";
+    }
+
+    function selectOptionByVisibleText(select, textValue) {
+      if(!select) return false;
+      for(var i=0;i<select.options.length;i++) {
+        if(select.options[i].textContent.trim() === textValue) {
+          select.selectedIndex=i;
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function associatedBassPatternFor(percussionName) {
+      var s=(percussionName || "").toLowerCase();
+      if (s.indexOf("bossa") !== -1) return "Bossa basic";
+      if (s.indexOf("samba") !== -1) return "Samba pulse";
+      if (s.indexOf("tresillo") !== -1 || s.indexOf("latin") !== -1 || s.indexOf("tango") !== -1) return "Latin tresillo";
+
+      if (s.indexOf("swing") !== -1 || s.indexOf("charleston") !== -1 || s.indexOf("four to the bar") !== -1) return "Walking chord tones";
+      if (s.indexOf("jazz ballad") !== -1 || s.indexOf("two feel") !== -1) return "Jazz two-feel";
+
+      if (s.indexOf("funk") !== -1) return "Funk syncopated";
+      if (s.indexOf("motown") !== -1) return "Motown movement";
+      if (s.indexOf("neo-soul") !== -1) return "Neo-soul sparse";
+      if (s.indexOf("soul") !== -1 || s.indexOf("r&b") !== -1) return "Soul pocket";
+
+      if (s.indexOf("country") !== -1 || s.indexOf("train") !== -1) return "Country boom-chuck";
+      if (s.indexOf("folk") !== -1) return "Folk two-feel";
+      if (s.indexOf("reggae") !== -1) return "Reggae sparse";
+
+      if (s.indexOf("eighth") !== -1 || s.indexOf("driving") !== -1 || s.indexOf("rock") !== -1) return "Alternating root–fifth";
+      return "Two-feel roots";
+    }
+
+    function applyAssociatedAccompanimentForProgression() {
+      if (currentTimeSignature !== "4/4") return;
+      var progressionSelect=document.getElementById("progressionSelect");
+      var guitarSelect=document.getElementById("guitarPatternSelect");
+      var bassSelect=document.getElementById("bassPatternSelect");
+      var percussionSelect=document.getElementById("rhythmSelect");
+      var opt=selectedOptionFor(progressionSelect);
+      if(!opt) return;
+
+      var key=optionGroupLabel(opt)+"||"+opt.textContent.trim();
+      var pairing=progressionAccompanimentMap[key];
+      if(!pairing) return;
+
+      selectOptionByVisibleText(guitarSelect,pairing.guitar);
+      selectOptionByVisibleText(percussionSelect,pairing.percussion);
+      selectOptionByVisibleText(bassSelect,associatedBassPatternFor(pairing.percussion));
+
+      updateTrigger(guitarSelect);
+      updateTrigger(bassSelect);
+      updateTrigger(percussionSelect);
+    }
+
+    document.getElementById("playProgressionBtn").addEventListener("click", function(){ if (progressionPlaying) stopProgressionPlayback(); else startProgressionLoop(); });
+    document.getElementById("progressionSelect").addEventListener("change", function(){
+      if (progressionPlaying) stopProgressionPlayback();
+      applyAssociatedAccompanimentForProgression();
+      render(selectedMajor);
+      renderProgressionStrip(null, null, false);
+      updateTrigger(this);
+    });
+    document.getElementById("guitarPatternSelect").addEventListener("change", function(){
+      if (progressionPlaying) stopProgressionPlayback();
+      updateTrigger(this);
+    });
+    document.getElementById("bassPatternSelect").addEventListener("change", function(){
+      if (progressionPlaying) stopProgressionPlayback();
+      updateTrigger(this);
+    });
+    document.getElementById("rhythmSelect").addEventListener("change", function(){
+      if (progressionPlaying) stopProgressionPlayback();
+
+      if (currentTimeSignature !== "4/4") {
+        applyMeterStyleBundle();
+      }
+
+      updateTrigger(this);
+    });
+function primeAudioSamples(){
+      ensureAudioReady(function(ctx){
+        loadPercussionSamples(ctx);
+        loadBassSamples(ctx);
+        if (selectedInstrument() === "sampled") {
+          loadGuitarSamples(ctx);
+        } else {
+          setGuitarSampleStatus("Guitar: synthetic selected", "fallback");
+        }
+      });
+    }
+
+
+    document.addEventListener("touchstart", function bootAudio(){
+      primeAudioSamples();
+      document.removeEventListener("touchstart", bootAudio);
+    }, { once: true });
+    document.addEventListener("mousedown", function bootAudioMouse(){
+      primeAudioSamples();
+      document.removeEventListener("mousedown", bootAudioMouse);
+    }, { once: true });
+
+    selectedSpellingPreference = "conventional";
+    render("C");
+    renderProgressionStrip(null, null, false);
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", function(){
+        initChoiceBrowsers();
+      }, { once:true });
+    } else {
+      initChoiceBrowsers();
+    }
+</script>
+
+  <div id="choiceOverlay" class="choice-overlay" aria-hidden="true">
+    <div class="choice-sheet" role="dialog" aria-modal="true" aria-labelledby="choiceTitle">
+      <div class="choice-head">
+        <div id="choiceTitle" class="choice-title">Choose</div>
+        <button type="button" id="choiceClose" class="choice-close">Close</button>
+      </div>
+      <div id="choiceTabs" class="choice-tabs"></div>
+      <div id="choiceGrid" class="choice-grid"></div>
+      <div class="choice-foot">
+        <button type="button" id="choicePreview">Preview</button>
+        <button type="button" id="choiceDone" class="done">Done</button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
