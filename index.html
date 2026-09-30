@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Circle v1.60</title>
+  <title>Circle v1.61</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -990,12 +990,173 @@
       }
     }
 
+
+    /* v1.61: user-driven disclosure controls */
+    .detail-tabs {
+      margin: 7px 4px 0;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      align-items: end;
+      gap: 8px;
+    }
+
+    .detail-tab {
+      appearance: none;
+      -webkit-appearance: none;
+      min-width: 0;
+      padding: 8px 3px 6px;
+      border: 0;
+      border-bottom: 2px solid transparent;
+      background: transparent;
+      color: #9aa1a7;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1;
+      text-align: center;
+      cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .detail-tab.active {
+      color: #f2f4f5;
+      border-bottom-color: #f2f4f5;
+    }
+
+    .detail-tab:focus-visible {
+      outline: 1px solid #d8dcdf;
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+
+    .disclosure-panel {
+      width: auto;
+      margin: 0 4px;
+      max-height: 0;
+      opacity: 0;
+      visibility: hidden;
+      overflow: hidden;
+      pointer-events: none;
+      transform: translateY(-5px);
+      transition:
+        opacity 180ms ease,
+        transform 180ms ease,
+        max-height 240ms ease,
+        margin 240ms ease,
+        visibility 0s linear 240ms;
+    }
+
+    .disclosure-panel.open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateY(0);
+      margin-top: 5px;
+      transition:
+        opacity 180ms ease 25ms,
+        transform 180ms ease 25ms,
+        max-height 240ms ease,
+        margin 240ms ease,
+        visibility 0s linear 0s;
+    }
+
+    .mixer-panel.open { max-height: 180px; }
+    .meter-panel.open { max-height: 48px; }
+    .accompaniment-panel.open { max-height: 180px; }
+
+    /* Same two-column geometry as the transport above: the four faders occupy
+       only the left column, keeping them centered under Bass/Chords/Drums/Click. */
+    .mixer-inner {
+      width: 100%;
+      height: 170px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 132px;
+      gap: 8px;
+      align-items: start;
+    }
+
+    .mixer-faders {
+      grid-column: 1;
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 5px;
+      align-items: start;
+      justify-items: center;
+    }
+
+    .mixer-channel,
+    .mixer-fader-wrap {
+      height: 166px;
+    }
+
+    .mixer-title { display: none !important; }
+
+    .meter-panel .meter-row {
+      width: 100%;
+      margin: 0;
+    }
+
+    .meter-panel .meter-choices {
+      display: grid;
+      width: 100%;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .meter-panel .meter-choice {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      height: 36px;
+      padding: 0 3px !important;
+      border-radius: 8px !important;
+      font-size: 12px !important;
+      font-weight: 800 !important;
+      background: #202428 !important;
+      color: #9fa6ac !important;
+      border: 1px solid #454b51 !important;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      white-space: nowrap;
+    }
+
+    .meter-panel .meter-choice.selected {
+      color: #f2f4f5 !important;
+      border-color: #d5d9dc !important;
+      background: #30353a !important;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.16);
+    }
+
+    .accompaniment-panel .accompaniment-control {
+      margin: 5px 0 0 !important;
+    }
+
+    .accompaniment-panel .accompaniment-control:first-child {
+      margin-top: 0 !important;
+    }
+
+    .accompaniment-panel .browser-trigger {
+      width: 100%;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .disclosure-panel,
+      .disclosure-panel.open {
+        transition-duration: 1ms !important;
+        transition-delay: 0ms !important;
+      }
+    }
+
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="panel">
-      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.60"></svg>
+      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.61"></svg>
       <div id="progressionStrip" class="progression-strip" aria-label="Progression map"></div>
       <div class="top-arrangement">
         <div class="progression-stack">
@@ -1096,8 +1257,33 @@
             <label><input type="checkbox" id="percussionToggle" checked /><span>Drums</span></label>
             <label><input type="checkbox" id="metronomeToggle" checked /><span>Click</span></label>
           </div>
-          <div id="playbackMixer" class="playback-mixer" aria-hidden="true">
-            <div class="mixer-inner" role="group" aria-label="Playback mixer">
+        </div>
+        <div class="play-stack">
+          <button id="playProgressionBtn" type="button" aria-label="Play" title="Play"><span class="transport-icon play-icon" aria-hidden="true"></span></button>
+          <div class="tempo-row">
+            <select id="tempoSelect">
+              <option value="60">60 BPM</option>
+              <option value="72">72 BPM</option>
+              <option value="80">80 BPM</option>
+              <option value="90">90 BPM</option>
+              <option value="100" selected>100 BPM</option>
+              <option value="110">110 BPM</option>
+              <option value="120">120 BPM</option>
+              <option value="132">132 BPM</option>
+              <option value="144">144 BPM</option>
+              <option value="160">160 BPM</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div id="detailTabs" class="detail-tabs" role="group" aria-label="Additional controls">
+        <button type="button" class="detail-tab" data-panel="mixerPanel" aria-controls="mixerPanel" aria-expanded="false">Mixer</button>
+        <button type="button" class="detail-tab" data-panel="meterPanel" aria-controls="meterPanel" aria-expanded="false">Meter</button>
+        <button type="button" class="detail-tab" data-panel="accompanimentPanel" aria-controls="accompanimentPanel" aria-expanded="false">Accompaniment</button>
+      </div>
+
+      <div id="mixerPanel" class="disclosure-panel mixer-panel" aria-hidden="true">
+        <div class="mixer-inner" role="group" aria-label="Playback mixer">
               <div class="mixer-faders">
                 <label class="mixer-channel">
                   <div class="mixer-fader-wrap">
@@ -1120,27 +1306,10 @@
                   </div>
                 </label>
               </div>
-              <div class="mixer-title">Mixer</div>
-            </div>
-          </div>
         </div>
-        <div class="play-stack">
-          <button id="playProgressionBtn" type="button" aria-label="Play" title="Play"><span class="transport-icon play-icon" aria-hidden="true"></span></button>
-          <div class="tempo-row">
-            <select id="tempoSelect">
-              <option value="60">60 BPM</option>
-              <option value="72">72 BPM</option>
-              <option value="80">80 BPM</option>
-              <option value="90">90 BPM</option>
-              <option value="100" selected>100 BPM</option>
-              <option value="110">110 BPM</option>
-              <option value="120">120 BPM</option>
-              <option value="132">132 BPM</option>
-              <option value="144">144 BPM</option>
-              <option value="160">160 BPM</option>
-            </select>
-          </div>
-        </div>
+      </div>
+
+      <div id="meterPanel" class="disclosure-panel meter-panel" aria-hidden="true">
         <div class="meter-row">
             <div id="timeSignatureChoices" class="meter-choices" role="group" aria-label="Time signature">
               <button type="button" class="meter-choice selected" data-signature="4/4">4/4</button>
@@ -1149,23 +1318,10 @@
               <button type="button" class="meter-choice" data-signature="12/8"><span x-apple-data-detectors="false">12/8</span></button>
               <button type="button" class="meter-choice" data-signature="2/4">2/4</button>
             </div>
-          </div>
-      </div>
-<div id="lowerControls" class="lower-controls" aria-hidden="false">
-      <div id="audioStatus" class="audio-status" aria-label="Audio sample status">
-        <span class="audio-heading">Audio</span>
-        <span id="guitarSampleStatus" class="audio-status-item waiting" data-label="Guitar">
-          <span class="status-dot" aria-hidden="true"></span><span class="status-name">Guitar</span>
-        </span>
-        <span id="bassSampleStatus" class="audio-status-item waiting" data-label="Bass">
-          <span class="status-dot" aria-hidden="true"></span><span class="status-name">Bass</span>
-        </span>
-        <span id="sampleStatus" class="audio-status-item waiting" data-label="Drums">
-          <span class="status-dot" aria-hidden="true"></span><span class="status-name">Drums</span>
-        </span>
+        </div>
       </div>
 
-      <div class="section-heading">Accompaniment</div>
+      <div id="accompanimentPanel" class="disclosure-panel accompaniment-panel" aria-hidden="true">
       <div class="controls accompaniment-control">
         <select id="rhythmSelect" class="source-select">
           <optgroup label="Straight / Basic">
@@ -1334,10 +1490,8 @@
 </select>
 </div>
       </div>
-      </div>
     </div>
   </div>
-
   <script>
     var MAJOR_KEYS = ["C","G","D","A","E","B","F#","Db","Ab","Eb","Bb","F"];
     var REL_MINOR = { C:"Am", G:"Em", D:"Bm", A:"F#m", E:"C#m", B:"G#m", "F#":"D#m", Db:"Bbm", Ab:"Fm", Eb:"Cm", Bb:"Gm", F:"Dm" };
@@ -2745,25 +2899,34 @@
       return make(0,"major");
     }
 
+    var openDetailPanelId = null;
+
+    function setDetailPanel(panelId) {
+      openDetailPanelId = panelId || null;
+      Array.prototype.forEach.call(document.querySelectorAll(".detail-tab"), function(tab){
+        var active = !!panelId && tab.getAttribute("data-panel") === panelId;
+        tab.classList.toggle("active", active);
+        tab.setAttribute("aria-expanded", active ? "true" : "false");
+      });
+      Array.prototype.forEach.call(document.querySelectorAll(".disclosure-panel"), function(panel){
+        var open = !!panelId && panel.id === panelId;
+        panel.classList.toggle("open", open);
+        panel.setAttribute("aria-hidden", open ? "false" : "true");
+      });
+    }
+
+    function toggleDetailPanel(panelId) {
+      setDetailPanel(openDetailPanelId === panelId ? null : panelId);
+    }
+
+    function closeDetailPanels() {
+      setDetailPanel(null);
+    }
+
+    // Kept as a compatibility hook for the transport. Playback now only
+    // closes an open user panel; stopping playback does not reopen anything.
     function setLowerControlsPlaybackHidden(hidden) {
-      var lower = document.getElementById("lowerControls");
-      var meter = document.querySelector(".top-arrangement > .meter-row");
-      var mixer = document.getElementById("playbackMixer");
-
-      if (lower) {
-        lower.classList.toggle("playback-hidden", !!hidden);
-        lower.setAttribute("aria-hidden", hidden ? "true" : "false");
-      }
-
-      if (meter) {
-        meter.classList.toggle("playback-hidden", !!hidden);
-        meter.setAttribute("aria-hidden", hidden ? "true" : "false");
-      }
-
-      if (mixer) {
-        mixer.classList.toggle("active", !!hidden);
-        mixer.setAttribute("aria-hidden", hidden ? "false" : "true");
-      }
+      if (hidden) closeDetailPanels();
     }
 
     function setTransportButtonState(state) {
@@ -4647,7 +4810,15 @@
       updateTrigger(percussionSelect);
     }
 
-    document.getElementById("playProgressionBtn").addEventListener("click", function(){ if (progressionPlaying) stopProgressionPlayback(); else startProgressionLoop(); });
+    document.getElementById("playProgressionBtn").addEventListener("click", function(){
+      closeDetailPanels();
+      if (progressionPlaying) stopProgressionPlayback(); else startProgressionLoop();
+    });
+    Array.prototype.forEach.call(document.querySelectorAll(".detail-tab"), function(tab){
+      tab.addEventListener("click", function(){
+        toggleDetailPanel(tab.getAttribute("data-panel"));
+      });
+    });
     ["bassToggle","chordToggle","percussionToggle","metronomeToggle"].forEach(function(id){
       var input = document.getElementById(id);
       if (!input) return;
@@ -4709,7 +4880,7 @@ function primeAudioSamples(){
     setTransportButtonState("play");
     syncMixButtonStates();
     applyMixerLevels();
-    setLowerControlsPlaybackHidden(false);
+    closeDetailPanels();
     render("C");
     renderProgressionStrip(null, null, false);
 
