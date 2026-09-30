@@ -3163,6 +3163,17 @@ function setTransportButtonState(state) {
       "Aeolian","Borrowed","Secondary","Substitution","Chromatic"
     ];
 
+    // Compact display names for the ten Progression tabs. The underlying
+    // category names remain unchanged for selection, grouping, and mappings.
+    var progressionCategoryDisplay = {
+      Phrygian: "Phryg.",
+      Mixolydian: "Mixolyd.",
+      Borrowed: "Borrow.",
+      Secondary: "2° Dom.",
+      Substitution: "Subst.",
+      Chromatic: "Chrom."
+    };
+
     function browserCategories(select) {
       if (select && select.id === "progressionSelect") return progressionCategoryOrder.slice();
       var cats = [];
@@ -3202,7 +3213,11 @@ function setTransportButtonState(state) {
         var b=document.createElement("button");
         b.type="button";
         b.className="choice-tab"+(cat===activeBrowserCategory?" active":"");
-        b.textContent=cat;
+        var tabLabel = (activeBrowserSelect && activeBrowserSelect.id === "progressionSelect")
+          ? (progressionCategoryDisplay[cat] || cat)
+          : cat;
+        b.textContent=tabLabel;
+        if (tabLabel !== cat) b.title=cat;
         b.addEventListener("click",function(){
           activeBrowserCategory=cat;
           renderBrowserTabs();
