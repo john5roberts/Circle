@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Circle v1.61</title>
+  <title>Circle v1.64</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -1156,7 +1156,7 @@
 <body>
   <div class="wrap">
     <div class="panel">
-      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.61"></svg>
+      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.64"></svg>
       <div id="progressionStrip" class="progression-strip" aria-label="Progression map"></div>
       <div class="top-arrangement">
         <div class="progression-stack">
@@ -3072,21 +3072,28 @@
         else if (majorIsCue) outer.setAttribute("class", "clickable next-cue-wedge");
         var majorTextR = 165, majorX = cx + Math.cos(centerAngle) * majorTextR, majorY = cy + Math.sin(centerAngle) * majorTextR + 8, majorDx = 0;
 
-        // The white circle marks the parent major collection, not the modal
-        // center. Example: A Mixolydian -> D major circled; D Dorian -> C.
+        // Quiet role labels replace the former white key circle.
+        // "key" identifies the parent major collection. In an explicit mode,
+        // "center" identifies the modal tonic chord separately.
         var activeMode = progressionModeForSelection();
         var parentMajor = parentMajorForMode(selectedMajor, activeMode);
-        if (major === parentMajor) {
-          circle(svg, majorX + majorDx, majorY - 7, 24, "none", "#f2f4f5", 2.5);
-        }
+        var modalTonicPC = renderChroma[KEY_NOTES[selectedMajor][0]];
+        var modalCenterIsMajor = (activeMode === "ionian" || activeMode === "lydian" || activeMode === "mixolydian");
+        var roleLabelSize = 9;
 
         text(svg, majorX + majorDx, majorY, majorDisplay, { size: majorSize, weight: 800, fill: majorText });
+        if (major === parentMajor) {
+          text(svg, majorX + majorDx, majorY + 10, "key", { size: roleLabelSize, weight: 700, fill: majorText });
+        }
+        if (activeMode !== "ionian" && modalCenterIsMajor && renderChroma[major] === modalTonicPC) {
+          text(svg, majorX + majorDx, majorY + 10, "center", { size: roleLabelSize, weight: 700, fill: majorText });
+        }
         (function(m,md){ outer.addEventListener("click", function(){
           var mode = progressionModeForSelection();
 
           // In an explicit modal progression, clicking a note chooses that
           // pitch as the modal center. The mode stays fixed, and the parent
-          // major collection (white circle) is recalculated automatically.
+          // major collection (the chord labeled "key") is recalculated automatically.
           if (mode !== "ionian") {
             stopProgressionPlayback();
             stopArpeggioOnly();
@@ -3113,6 +3120,9 @@
         else if (minorIsCue) inner.setAttribute("class", "clickable next-cue-wedge");
         var minorTextR = 98, minorX = cx + Math.cos(centerAngle) * minorTextR, minorY = cy + Math.sin(centerAngle) * minorTextR + 7, minorDx = 0;
         text(svg, minorX + minorDx, minorY, minorDisplay, { size: minorSize, weight: 800, fill: minorText });
+        if (activeMode !== "ionian" && !modalCenterIsMajor && renderChroma[minorRootName] === modalTonicPC) {
+          text(svg, minorX + minorDx, minorY + 9, "center", { size: roleLabelSize, weight: 700, fill: minorText });
+        }
         (function(mn,md,relMaj){ inner.addEventListener("click", function(){
           var mode = progressionModeForSelection();
 
