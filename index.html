@@ -3,15 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Circle v1.81</title>
+  <title>Circle v1.90</title>
   <style>
     * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: Arial, Helvetica, sans-serif;
-      background:
-        repeating-linear-gradient(90deg, #c89a62 0px, #c89a62 42px, #c4925a 42px, #c4925a 84px),
-        linear-gradient(180deg, #d1a46d 0%, #ba8450 100%);
     }
     .wrap { min-height: 100vh; padding: 8px; }
     .panel {
@@ -89,11 +86,7 @@
       padding: 6px 4px;
       font-size: 11px;
     }
-.mix-heading {
-      display: none !important;
-    }
-
-    .controls + .controls { margin-top: 8px; }
+.controls + .controls { margin-top: 8px; }
     .controls select, .controls button {
       font: inherit; font-size: 16px; border-radius: 10px; border: 1px solid #cbd5e1;
       background: white; padding: 10px 12px;
@@ -245,8 +238,8 @@
     .browser-trigger .trigger-value {
       display:flex;
       align-items:center;
-      justify-content:space-between;
-      gap:10px;
+      justify-content:flex-start;
+      gap:0;
       font-size:15px;
       font-weight:800;
       line-height:1.15;
@@ -259,12 +252,6 @@
       text-overflow:ellipsis;
       white-space:nowrap;
     }
-    .browser-trigger .trigger-arrow {
-      flex:0 0 auto;
-      color:#c7ccd0;
-      font-size:13px;
-    }
-
     .choice-overlay {
       position:fixed;
       inset:0;
@@ -298,8 +285,8 @@
     .choice-head {
       display:flex;
       align-items:center;
-      justify-content:space-between;
-      gap:10px;
+      justify-content:flex-start;
+      gap:0;
       padding:13px 14px 10px;
       border-bottom:1px solid rgba(80,88,95,.55);
     }
@@ -343,141 +330,13 @@
       scrollbar-width:none;
     }
     .choice-tabs::-webkit-scrollbar { display:none; }
-    .choice-tabs.percussion-four-four,
-    .choice-tabs.guitar-four-four {
+    .choice-tabs.category-grid {
       display:grid;
-      grid-template-columns:repeat(4,minmax(0,1fr));
+      grid-template-columns:repeat(var(--choice-tab-columns),minmax(0,1fr));
       gap:7px;
       overflow-x:visible;
     }
-    .choice-tabs.percussion-four-four .choice-tab,
-    .choice-tabs.guitar-four-four .choice-tab {
-      width:100%;
-      min-width:0;
-      padding-left:4px;
-      padding-right:4px;
-      text-align:center;
-    }
-
-    .choice-tabs.bass-four-four {
-      display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:7px;
-      overflow-x:visible;
-    }
-    .choice-tabs.bass-four-four .choice-tab {
-      width:100%;
-      min-width:0;
-      padding-left:4px;
-      padding-right:4px;
-      text-align:center;
-    }
-
-    .choice-tabs.percussion-three-four {
-      display:grid;
-      grid-template-columns:repeat(4,minmax(0,1fr));
-      gap:7px;
-      overflow-x:visible;
-    }
-    .choice-tabs.guitar-three-four {
-      display:grid;
-      grid-template-columns:repeat(5,minmax(0,1fr));
-      gap:7px;
-      overflow-x:visible;
-    }
-    .choice-tabs.bass-three-four {
-      display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:7px;
-      overflow-x:visible;
-    }
-    .choice-tabs.percussion-three-four .choice-tab,
-    .choice-tabs.guitar-three-four .choice-tab,
-    .choice-tabs.bass-three-four .choice-tab {
-      width:100%;
-      min-width:0;
-      padding-left:4px;
-      padding-right:4px;
-      text-align:center;
-    }
-
-    .choice-tabs.percussion-six-eight {
-      display:grid;
-      grid-template-columns:repeat(5,minmax(0,1fr));
-      gap:7px;
-      overflow-x:visible;
-    }
-    .choice-tabs.guitar-six-eight {
-      display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:7px;
-      overflow-x:visible;
-    }
-    .choice-tabs.bass-six-eight {
-      display:grid;
-      grid-template-columns:repeat(4,minmax(0,1fr));
-      gap:7px;
-      overflow-x:visible;
-    }
-    .choice-tabs.percussion-six-eight .choice-tab,
-    .choice-tabs.guitar-six-eight .choice-tab,
-    .choice-tabs.bass-six-eight .choice-tab {
-      width:100%;
-      min-width:0;
-      padding-left:4px;
-      padding-right:4px;
-      text-align:center;
-    }
-
-    .choice-tabs.percussion-twelve-eight {
-      display:grid;
-      grid-template-columns:repeat(5,minmax(0,1fr));
-      gap:7px;
-      overflow-x:visible;
-    }
-    .choice-tabs.guitar-twelve-eight {
-      display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:7px;
-      overflow-x:visible;
-    }
-    .choice-tabs.bass-twelve-eight {
-      display:grid;
-      grid-template-columns:repeat(4,minmax(0,1fr));
-      gap:7px;
-      overflow-x:visible;
-    }
-    .choice-tabs.percussion-twelve-eight .choice-tab,
-    .choice-tabs.guitar-twelve-eight .choice-tab,
-    .choice-tabs.bass-twelve-eight .choice-tab {
-      width:100%;
-      min-width:0;
-      padding-left:4px;
-      padding-right:4px;
-      text-align:center;
-    }
-
-    .choice-tabs.percussion-two-four {
-      display:grid;
-      grid-template-columns:repeat(5,minmax(0,1fr));
-      gap:7px;
-      overflow-x:visible;
-    }
-    .choice-tabs.guitar-two-four {
-      display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:7px;
-      overflow-x:visible;
-    }
-    .choice-tabs.bass-two-four {
-      display:grid;
-      grid-template-columns:repeat(4,minmax(0,1fr));
-      gap:7px;
-      overflow-x:visible;
-    }
-    .choice-tabs.percussion-two-four .choice-tab,
-    .choice-tabs.guitar-two-four .choice-tab,
-    .choice-tabs.bass-two-four .choice-tab {
+    .choice-tabs.category-grid .choice-tab {
       width:100%;
       min-width:0;
       padding-left:4px;
@@ -488,12 +347,7 @@
     /* v1.80: Every chooser uses the same fixed outer height, doubled to match the requested popup footprint.  The choice
        viewport consumes whatever space remains below the header/tabs and
        scrolls internally when its choices exceed that space. */
-    .choice-tabs.percussion-four-four + .choice-grid {
-      overflow-y:auto;
-      overscroll-behavior:contain;
-      align-content:start;
-    }
-    .choice-tab {
+.choice-tab {
       flex:0 0 auto;
       border:1px solid #4b5258;
       background:#1b1f22;
@@ -573,42 +427,7 @@
     @media (max-width:380px) {
       .choice-grid { grid-template-columns:1fr; }
     }
-
-
-    .sample-status {
-      margin: 6px 4px 8px;
-      padding: 7px 10px;
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      font-size: 12px;
-      font-weight: 800;
-      color: #202428;
-      background: #e7e9eb;
-      border: 1px solid #aeb4b9;
-      border-radius: 9px;
-      letter-spacing: .01em;
-    }
-    .sample-status::before {
-      content: "●";
-      font-size: 9px;
-      color: #7a8187;
-    }
-    .sample-status.ready {
-      color: #202428;
-      background: #f2f3f4;
-      border-color: #6f767c;
-    }
-    .sample-status.ready::before { color: #4f565c; }
-    .sample-status.fallback {
-      color: #202428;
-      background: #dedfe1;
-      border-color: #8e9499;
-    }
-    .sample-status.fallback::before { color: #5f666c; }
-
-  
-    /* v1.38 compact control layout */
+/* v1.38 compact control layout */
     .section-heading {
       margin: 13px 5px 3px;
       font-size: 10px;
@@ -651,64 +470,7 @@
       border: 1px solid #4a5056 !important;
       color-scheme: dark;
     }
-
-    .audio-status {
-      margin: 7px 6px 2px;
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 8px 11px;
-      min-height: 20px;
-      color: #aeb5ba;
-      font-size: 11px;
-      line-height: 1;
-    }
-
-    .audio-heading {
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      font-weight: 850;
-      color: #8f979e;
-    }
-
-    .audio-status-item {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      white-space: nowrap;
-      font-weight: 750;
-      color: #b7bdc2;
-    }
-
-    .status-dot {
-      width: 7px;
-      height: 7px;
-      flex: 0 0 7px;
-      border-radius: 50%;
-      background: #6e757b;
-      box-shadow: 0 0 0 1px #777f85;
-    }
-
-    .audio-status-item.ready .status-dot {
-      background: #cbd0d4;
-      box-shadow: 0 0 0 1px #cbd0d4;
-    }
-
-    .audio-status-item.fallback {
-      color: #d2d5d7;
-    }
-
-    .audio-status-item.fallback .status-dot {
-      background: transparent;
-      box-shadow: 0 0 0 1.5px #b8bec3;
-    }
-
-    .audio-status-item.waiting .status-dot {
-      background: #555d63;
-      box-shadow: 0 0 0 1px #6d747a;
-    }
-
-    .accompaniment-control {
+.accompaniment-control {
       margin-top: 5px !important;
     }
 
@@ -717,29 +479,29 @@
       padding: 6px 10px !important;
       flex-direction: row;
       align-items: center;
-      justify-content: flex-start;
+      justify-content: flex-end;
       gap: 10px;
       border-radius: 8px;
     }
 
     .accompaniment-control .trigger-label {
+      order: 2;
       flex: 0 0 82px;
       font-size: 9.5px;
       line-height: 1;
+      text-align: right;
     }
 
     .accompaniment-control .trigger-value {
+      order: 1;
       flex: 1 1 auto;
       min-width: 0;
       font-size: 14px;
       line-height: 1.1;
+      text-align: right;
+      justify-content: flex-end;
     }
-
-    .mix-heading {
-      margin-top: 12px;
-    }
-
-    .mix-row {
+.mix-row {
       margin: 5px 4px 0;
       display: grid;
       grid-template-columns: repeat(4, minmax(0,1fr));
@@ -791,7 +553,7 @@
     }
 
   
-    /* v1.40: upcoming-chord cue. Current chord stays steady. */
+    /* Upcoming-chord cue. Current chord stays steady. */
     .prog-chip.next-cue {
       box-shadow:
         0 0 0 2px rgba(242,244,245,.95) inset,
@@ -800,13 +562,13 @@
     }
 
   
-    /* v1.41: next chord cue on circle of fifths */
+    /* Next-chord cue on the circle of fifths. */
     .next-cue-wedge {
       filter: brightness(1.18);
     }
 
   
-    /* v1.42: root–third–fifth interval display under each Roman numeral */
+    /* Root–third–fifth interval display under each Roman numeral. */
     .triad-intervals {
       display:flex;
       align-items:center;
@@ -843,127 +605,7 @@
       filter:none;
     }
 
-    /* v1.52: full-width, equal meter buttons */
-    .top-arrangement > .meter-row {
-      grid-column: 1 / -1;
-      display: block;
-      width: 100%;
-      min-width: 0;
-      margin: 0;
-    }
-
-    .top-arrangement > .meter-row .meter-choices {
-      display: grid;
-      width: 100%;
-      min-width: 0;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 8px;
-    }
-
-    .top-arrangement > .meter-row .meter-choice {
-      box-sizing: border-box;
-      width: 100% !important;
-      min-width: 0 !important;
-      height: 36px;
-      padding: 0 3px !important;
-      border-radius: 8px !important;
-      font-size: 12px !important;
-      font-weight: 800 !important;
-      background: #202428 !important;
-      color: #9fa6ac !important;
-      border: 1px solid #454b51 !important;
-      touch-action: manipulation;
-      -webkit-tap-highlight-color: transparent;
-      white-space: nowrap;
-    }
-
-    .top-arrangement > .meter-row .meter-choice.selected {
-      color: #f2f4f5 !important;
-      border-color: #d5d9dc !important;
-      background: #30353a !important;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.16);
-    }
-
-
-    /* v1.53: playback-focus fade for controls below the top transport */
-    .lower-controls {
-      overflow: hidden;
-      max-height: 420px;
-      opacity: 1;
-      transform: translateY(0);
-      visibility: visible;
-      pointer-events: auto;
-      transition:
-        opacity 300ms ease,
-        transform 300ms ease,
-        max-height 360ms ease,
-        margin 360ms ease,
-        visibility 0s linear 0s;
-    }
-
-    .lower-controls.playback-hidden {
-      max-height: 0;
-      opacity: 0;
-      transform: translateY(-8px);
-      visibility: hidden;
-      pointer-events: none;
-      margin-top: 0 !important;
-      transition:
-        opacity 240ms ease,
-        transform 240ms ease,
-        max-height 340ms ease,
-        margin 340ms ease,
-        visibility 0s linear 340ms;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .lower-controls,
-      .lower-controls.playback-hidden {
-        transition-duration: 1ms !important;
-      }
-    }
-
-  
-    /* v1.54: meter row joins the playback-focus fade */
-    .top-arrangement > .meter-row {
-      max-height: 44px;
-      opacity: 1;
-      transform: translateY(0);
-      visibility: visible;
-      overflow: hidden;
-      pointer-events: auto;
-      transition:
-        opacity 300ms ease,
-        transform 300ms ease,
-        max-height 360ms ease,
-        margin 360ms ease,
-        visibility 0s linear 0s;
-    }
-
-    .top-arrangement > .meter-row.playback-hidden {
-      max-height: 0;
-      opacity: 0;
-      transform: translateY(-8px);
-      visibility: hidden;
-      pointer-events: none;
-      margin: 0 !important;
-      transition:
-        opacity 240ms ease,
-        transform 240ms ease,
-        max-height 340ms ease,
-        margin 340ms ease,
-        visibility 0s linear 340ms;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .top-arrangement > .meter-row,
-      .top-arrangement > .meter-row.playback-hidden {
-        transition-duration: 1ms !important;
-      }
-    }
-
-  
-    /* v1.55: icon transport + outline-only mix controls */
+    /* Transport controls */
     .play-stack #playProgressionBtn {
       position: relative;
       display: flex;
@@ -1027,11 +669,16 @@
     }
 
     .progression-stack .mix-row label.mix-active {
-      border-color: #fff;
+      color: #f2f4f5;
+      border-color: #d5d9dc;
+      background: #30353a;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.16);
     }
 
     .progression-stack .mix-row label:not(.mix-active) {
       border-color: #6a7076;
+      background: #202428;
+      box-shadow: none;
     }
 
     .progression-stack .mix-row input[type="checkbox"] {
@@ -1055,49 +702,12 @@
     }
 
   
-    /* v1.57: mixer columns align exactly with Bass/Chords/Drums/Click */
+    /* Mixer columns align exactly with Bass/Chords/Drums/Click. */
     .play-stack #playProgressionBtn {
       background: #202428 !important;
       border-color: #4a5056 !important;
     }
-
-    .playback-mixer {
-      width: 100%;
-      height: 0;
-      max-height: 0;
-      margin: 0;
-      opacity: 0;
-      visibility: hidden;
-      overflow: hidden;
-      pointer-events: none;
-      transform: translateY(-5px);
-      transition:
-        opacity 260ms ease,
-        transform 260ms ease,
-        height 340ms ease,
-        max-height 340ms ease,
-        margin 340ms ease,
-        visibility 0s linear 340ms;
-    }
-
-    .playback-mixer.active {
-      height: 202px;
-      max-height: 202px;
-      margin: -3px 0 0;
-      opacity: 1;
-      visibility: visible;
-      pointer-events: auto;
-      transform: translateY(0);
-      transition:
-        opacity 280ms ease 60ms,
-        transform 280ms ease 60ms,
-        height 340ms ease,
-        max-height 340ms ease,
-        margin 340ms ease,
-        visibility 0s linear 0s;
-    }
-
-    .mixer-inner {
+.mixer-inner {
       width: 100%;
       height: 100%;
       display: flex;
@@ -1143,29 +753,7 @@
       accent-color: #f2f4f5;
       cursor: pointer;
     }
-
-    .mixer-title {
-      margin-top: -1px;
-      text-align: center;
-      color: #747b81;
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: .04em;
-      line-height: 1;
-      user-select: none;
-      -webkit-user-select: none;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .playback-mixer,
-      .playback-mixer.active {
-        transition-duration: 1ms !important;
-        transition-delay: 0ms !important;
-      }
-    }
-
-
-    /* v1.61: user-driven disclosure controls */
+/* v1.61: user-driven disclosure controls */
     .detail-tabs {
       margin: 7px 4px 0;
       display: grid;
@@ -1266,10 +854,7 @@
     .mixer-fader-wrap {
       height: 166px;
     }
-
-    .mixer-title { display: none !important; }
-
-    .meter-panel .meter-row {
+.meter-panel .meter-row {
       width: 100%;
       margin: 0;
     }
@@ -1325,10 +910,7 @@
       }
     }
 
-    /* v1.72: reserve the full detail-control height at all times so the
-       outer app frame never changes height when Mixer, Meter, or
-       Accompaniment is opened or closed. The three panels share one
-       fixed stage instead of contributing variable height to document flow. */
+    /* Reserve the full detail-control height so the outer app frame remains fixed. */
     .detail-stage {
       position: relative;
       height: 180px;
@@ -1356,20 +938,247 @@
       max-height: none;
     }
 
+
+    /* v1.90 design-system polish: one visual grammar, no behavioral changes. */
+    :root {
+      --space-1: 5px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --radius-control: 8px;
+      --radius-card: 10px;
+      --surface: #202428;
+      --surface-raised: #24292d;
+      --surface-selected: #30353a;
+      --border: #454b51;
+      --border-strong: #d5d9dc;
+      --text-primary: #f2f4f5;
+      --text-secondary: #9aa1a7;
+      --text-tertiary: #858d94;
+      --ui-fast: 150ms;
+      --ui-ease: cubic-bezier(.2,.7,.2,1);
+    }
+
+    html {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+
+    body,
+    button,
+    select,
+    input {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, Helvetica, sans-serif;
+    }
+
+    /* Primary control surfaces share one restrained depth treatment. */
+    .browser-trigger,
+    .progression-stack .mix-row label,
+    .meter-panel .meter-choice,
+    .choice-tab,
+    .choice-item,
+    .choice-head-actions button,
+    .play-stack #playProgressionBtn,
+    .play-stack #tempoSelect {
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
+      transition:
+        background-color var(--ui-fast) var(--ui-ease),
+        border-color var(--ui-fast) var(--ui-ease),
+        color var(--ui-fast) var(--ui-ease),
+        box-shadow var(--ui-fast) var(--ui-ease),
+        filter var(--ui-fast) var(--ui-ease),
+        transform var(--ui-fast) var(--ui-ease);
+    }
+
+    /* Shared selected state: selected means filled/outlined; open means underlined. */
+    .progression-stack .mix-row label.mix-active,
+    .meter-panel .meter-choice.selected,
+    .choice-tab.active,
+    .choice-item.selected {
+      background: var(--surface-selected) !important;
+      color: var(--text-primary) !important;
+      border-color: var(--border-strong) !important;
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,.16),
+        inset 0 1px 0 rgba(255,255,255,.07) !important;
+    }
+
+    /* Secondary labels are deliberately quieter than the value being chosen. */
+    .browser-trigger .trigger-label,
+    .row-heading,
+    .section-heading {
+      color: var(--text-tertiary);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .09em;
+      line-height: 1;
+    }
+
+    .browser-trigger .trigger-value {
+      color: var(--text-primary);
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: -.01em;
+      line-height: 1.15;
+    }
+
+    .accompaniment-control .trigger-label {
+      color: #8f979e;
+      font-size: 10px;
+      letter-spacing: .09em;
+    }
+
+    .accompaniment-control .trigger-value {
+      color: #f5f6f7;
+      font-size: 15px;
+      font-weight: 820;
+      letter-spacing: -.012em;
+    }
+
+    /* Navigation/open state remains intentionally different from selection. */
+    .detail-tabs {
+      gap: var(--space-2);
+    }
+
+    .detail-tab {
+      color: var(--text-tertiary);
+      font-size: 12px;
+      font-weight: 780;
+      letter-spacing: .005em;
+      transition:
+        color var(--ui-fast) var(--ui-ease),
+        border-color var(--ui-fast) var(--ui-ease),
+        opacity var(--ui-fast) var(--ui-ease);
+    }
+
+    .detail-tab.active {
+      color: var(--text-primary);
+      border-bottom-color: var(--text-primary);
+    }
+
+    /* Popup hierarchy and rhythm match the main controls. */
+    .choice-head {
+      padding: var(--space-3) var(--space-3) 10px;
+    }
+
+    .choice-title {
+      font-size: 17px;
+      font-weight: 850;
+      letter-spacing: -.015em;
+    }
+
+    .choice-tabs {
+      gap: 6px;
+      padding: 9px var(--space-3);
+    }
+
+    .choice-tab {
+      min-height: 34px;
+      padding-top: 7px;
+      padding-bottom: 7px;
+      font-size: 12px;
+      font-weight: 780;
+      letter-spacing: .005em;
+    }
+
+    .choice-grid {
+      gap: var(--space-2);
+      padding: var(--space-3);
+    }
+
+    .choice-item {
+      border-color: var(--border);
+      background: #1d2124;
+      border-radius: var(--radius-card);
+    }
+
+    .choice-item .choice-name {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: -.005em;
+    }
+
+    .choice-item .choice-detail {
+      color: #a3aab0;
+      font-size: 10px;
+      font-weight: 650;
+    }
+
+    /* Numerals and tempo read more cleanly without changing geometry. */
+    .prog-chip,
+    .meter-panel .meter-choice,
+    #tempoSelect {
+      font-variant-numeric: tabular-nums;
+    }
+
+    .prog-chip {
+      border-color: #41474c;
+      background: #1f2326;
+      letter-spacing: -.01em;
+    }
+
+    .prog-chip.in-key,
+    .prog-chip.out-key {
+      border-color: #41474c;
+      background: #1f2326;
+    }
+
+    /* Slightly clearer separation of interactive rows from the board. */
+    .accompaniment-panel .browser-trigger {
+      background: var(--surface-raised) !important;
+      border-color: #4b5258 !important;
+    }
+
+    .play-stack #tempoSelect {
+      background: var(--surface-raised) !important;
+    }
+
+    /* Touch feedback is quiet and immediate. */
+    @media (hover:hover) and (pointer:fine) {
+      .browser-trigger:hover,
+      .choice-item:hover,
+      .choice-tab:hover,
+      .meter-panel .meter-choice:hover,
+      .progression-stack .mix-row label:hover {
+        filter: brightness(1.06);
+      }
+    }
+
+    .browser-trigger:active,
+    .choice-item:active,
+    .choice-tab:active,
+    .meter-panel .meter-choice:active,
+    .progression-stack .mix-row label:active {
+      transform: translateY(1px);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .browser-trigger,
+      .progression-stack .mix-row label,
+      .meter-panel .meter-choice,
+      .choice-tab,
+      .choice-item,
+      .choice-head-actions button,
+      .play-stack #playProgressionBtn,
+      .play-stack #tempoSelect,
+      .detail-tab {
+        transition-duration: 1ms !important;
+      }
+    }
+
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="panel">
-      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.81"></svg>
+      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.90"></svg>
       <div id="progressionStrip" class="progression-strip" aria-label="Progression map"></div>
       <div class="top-arrangement">
         <div class="progression-stack">
           <div class="controls">
             <select id="progressionSelect" class="source-select">
-          
-          
-          <optgroup label="Diatonic — Cadences & Core">
+          <optgroup label="Ionian">
             <option value="I-IV-V-I|4,4,4,8">I–IV–V–I</option>
             <option value="I-ii-V-I|4,4,4,8">I–ii–V–I</option>
             <option value="ii-V-I|4,4,8">ii–V–I</option>
@@ -1380,16 +1189,14 @@
             <option value="I-vi-IV-V|4,4,4,4">I–vi–IV–V</option>
             <option value="I-V-IV-I|4,4,4,8">I–V–IV–I</option>
             <option value="IV-I-ii-V|4,4,4,4">IV–I–ii–V</option>
+            <option value="I-V-vi-IV|8,8,8,8">I–V–vi–IV (2 bars each)</option>
+            <option value="I-vi-ii-V|4,4,4,4">I–vi–ii–V</option>
+            <option value="ii-V-I|2,2,4">ii–V–I (quick ii–V)</option>
+            <option value="I-iii-vi-ii-V-I|4,4,4,4,4,8">I–iii–vi–ii–V–I</option>
+            <option value="vi-ii-V-I|2,2,2,4">vi–ii–V–I (quick)</option>
+            <option value="I-vi-IV-ii-V-I|4,4,4,4,4,8">I–vi–IV–ii–V–I</option>
           </optgroup>
-          <optgroup label="Mixolydian / ♭VII">
-            <option value="I-bVII-IV-I|4,4,4,8">I–♭VII–IV–I</option>
-            <option value="I-bVII-I|4,4,8">I–♭VII–I</option>
-            <option value="I-IV-bVII-I|4,4,4,8">I–IV–♭VII–I</option>
-            <option value="I-bVII-IV-bVII|4,4,4,4">I–♭VII–IV–♭VII</option>
-            <option value="I-V-bVII-IV|4,4,4,4">I–V–♭VII–IV</option>
-            <option value="IV-bVII-I|4,4,8">IV–♭VII–I</option>
-          </optgroup>
-          <optgroup label="Dorian / Minor-Modal">
+          <optgroup label="Dorian">
             <option value="i-IV-i|4,4,8">i–IV–i</option>
             <option value="i-IV-bVII-i|4,4,4,8">i–IV–♭VII–i</option>
             <option value="i-bVII-IV-i|4,4,4,8">i–♭VII–IV–i</option>
@@ -1397,7 +1204,33 @@
             <option value="i-ii-IV-i|4,4,4,8">i–ii–IV–i</option>
             <option value="i-bVII-i-IV|4,4,4,4">i–♭VII–i–IV</option>
           </optgroup>
-          <optgroup label="Borrowed / Modal Mixture">
+          <optgroup label="Phrygian">
+            <option value="i-bII-i|4,4,8">i–♭II–i</option>
+            <option value="i-bII-bVII-i|4,4,4,8">i–♭II–♭VII–i</option>
+            <option value="i-bVII-bII-i|4,4,4,8">i–♭VII–♭II–i</option>
+          </optgroup>
+          <optgroup label="Lydian">
+            <option value="I-II-I|4,4,8">I–II–I</option>
+            <option value="I-II-V-I|4,4,4,8">I–II–V–I</option>
+            <option value="I-V-II-I|4,4,4,8">I–V–II–I</option>
+          </optgroup>
+          <optgroup label="Mixolydian">
+            <option value="I-bVII-IV-I|4,4,4,8">I–♭VII–IV–I</option>
+            <option value="I-bVII-I|4,4,8">I–♭VII–I</option>
+            <option value="I-IV-bVII-I|4,4,4,8">I–IV–♭VII–I</option>
+            <option value="I-bVII-IV-bVII|4,4,4,4">I–♭VII–IV–♭VII</option>
+            <option value="I-V-bVII-IV|4,4,4,4">I–V–♭VII–IV</option>
+            <option value="IV-bVII-I|4,4,8">IV–♭VII–I</option>
+          </optgroup>
+          <optgroup label="Aeolian">
+            <option value="i-bVI-bIII-bVII|4,4,4,4">i–♭VI–♭III–♭VII</option>
+            <option value="i-bVII-bVI-bVII|4,4,4,4">i–♭VII–♭VI–♭VII</option>
+            <option value="i-bVI-bVII-i|4,4,4,8">i–♭VI–♭VII–i</option>
+            <option value="i-bIII-bVII-iv|4,4,4,4">i–♭III–♭VII–iv</option>
+            <option value="i-iv-bVII-bIII|4,4,4,4">i–iv–♭VII–♭III</option>
+            <option value="i-bVII-bVI-V|4,4,4,4">i–♭VII–♭VI–V</option>
+          </optgroup>
+          <optgroup label="Borrowed">
             <option value="I-iv-I|4,4,8">I–iv–I</option>
             <option value="I-IV-iv-I|4,4,4,8">I–IV–iv–I</option>
             <option value="I-bVI-IV-I|4,4,4,8">I–♭VI–IV–I</option>
@@ -1407,7 +1240,7 @@
             <option value="I-iv-bVII-I|4,4,4,8">I–iv–♭VII–I</option>
             <option value="I-bVI-iv-I|4,4,4,8">I–♭VI–iv–I</option>
           </optgroup>
-          <optgroup label="Secondary Dominants / Chromatic">
+          <optgroup label="Secondary">
             <option value="I-V2-ii-V-I|4,4,4,4,8">I–V/ii–ii–V–I</option>
             <option value="I-V6-vi-ii-V-I|4,4,4,4,4,8">I–V/vi–vi–ii–V–I</option>
             <option value="I-V5-V-I|4,4,4,8">I–V/V–V–I</option>
@@ -1415,50 +1248,16 @@
             <option value="I-VI-ii-V|4,4,4,4">I–VI–ii–V</option>
             <option value="I-II-V-I|4,4,4,8">I–II–V–I</option>
             <option value="iii-VI-ii-V-I|4,4,4,4,8">iii–VI–ii–V–I</option>
+          </optgroup>
+          <optgroup label="Substitution"></optgroup>
+          <optgroup label="Chromatic">
             <option value="I-III-IV-iv-I|4,4,4,4,8">I–III–IV–iv–I</option>
           </optgroup>
-          <optgroup label="Minor / Aeolian Color">
-            <option value="i-bVI-bIII-bVII|4,4,4,4">i–♭VI–♭III–♭VII</option>
-            <option value="i-bVII-bVI-bVII|4,4,4,4">i–♭VII–♭VI–♭VII</option>
-            <option value="i-bVI-bVII-i|4,4,4,8">i–♭VI–♭VII–i</option>
-            <option value="i-bIII-bVII-iv|4,4,4,4">i–♭III–♭VII–iv</option>
-            <option value="i-iv-bVII-bIII|4,4,4,4">i–iv–♭VII–♭III</option>
-            <option value="i-bVII-bVI-V|4,4,4,4">i–♭VII–♭VI–V</option>
-          </optgroup>
-          <optgroup label="Pop / Functional">
-            <option value="I-V-vi-IV|8,8,8,8">I–V–vi–IV (2 bars each)</option>
-            <option value="I-vi-ii-V|4,4,4,4">I–vi–ii–V</option>
-            <option value="ii-V-I|2,2,4">ii–V–I (quick ii–V)</option>
-            <option value="I-iii-vi-ii-V-I|4,4,4,4,4,8">I–iii–vi–ii–V–I</option>
-            <option value="vi-ii-V-I|2,2,2,4">vi–ii–V–I (quick)</option>
-            <option value="I-vi-IV-ii-V-I|4,4,4,4,4,8">I–vi–IV–ii–V–I</option>
-          </optgroup>
-          <optgroup label="Modal Practice — Dorian">
-            <option value="i-IV-i|4,4,8">Dorian: i–IV–i</option>
-            <option value="i-bVII-IV-i|4,4,4,8">Dorian: i–♭VII–IV–i</option>
-            <option value="i-ii-IV-i|4,4,4,8">Dorian: i–ii–IV–i</option>
-          </optgroup>
-          <optgroup label="Modal Practice — Phrygian">
-            <option value="i-bII-i|4,4,8">Phrygian: i–♭II–i</option>
-            <option value="i-bII-bVII-i|4,4,4,8">Phrygian: i–♭II–♭VII–i</option>
-            <option value="i-bVII-bII-i|4,4,4,8">Phrygian: i–♭VII–♭II–i</option>
-          </optgroup>
-          <optgroup label="Modal Practice — Lydian">
-            <option value="I-II-I|4,4,8">Lydian: I–II–I</option>
-            <option value="I-II-V-I|4,4,4,8">Lydian: I–II–V–I</option>
-            <option value="I-V-II-I|4,4,4,8">Lydian: I–V–II–I</option>
-          </optgroup>
-          <optgroup label="Modal Practice — Mixolydian">
-            <option value="I-bVII-I|4,4,8">Mixolydian: I–♭VII–I</option>
-            <option value="I-bVII-IV-I|4,4,4,8">Mixolydian: I–♭VII–IV–I</option>
-            <option value="I-IV-bVII-I|4,4,4,8">Mixolydian: I–IV–♭VII–I</option>
-          </optgroup>
-
         </select>
           </div>
           <div class="mix-row">
             <label><input type="checkbox" id="bassToggle" checked /><span>Bass</span></label>
-            <label><input type="checkbox" id="chordToggle" checked /><span>Chords</span></label>
+            <label><input type="checkbox" id="chordToggle" checked /><span>Guitar</span></label>
             <label><input type="checkbox" id="percussionToggle" checked /><span>Drums</span></label>
             <label><input type="checkbox" id="metronomeToggle" checked /><span>Click</span></label>
           </div>
@@ -1498,7 +1297,7 @@
                 </label>
                 <label class="mixer-channel">
                   <div class="mixer-fader-wrap">
-                    <input id="chordsFader" class="mixer-fader" type="range" min="0" max="100" value="100" aria-label="Chords volume">
+                    <input id="chordsFader" class="mixer-fader" type="range" min="0" max="100" value="100" aria-label="Guitar volume">
                   </div>
                 </label>
                 <label class="mixer-channel">
@@ -1529,6 +1328,108 @@
 
       <div id="accompanimentPanel" class="disclosure-panel accompaniment-panel" aria-hidden="true">
       <div class="controls accompaniment-control">
+<select id="bassPatternSelect" class="source-select" aria-label="Bass pattern">
+  <optgroup label="Basic">
+    <option value="R@0">Root on 1</option>
+    <option value="R@0,R@2" selected>Two-feel roots</option>
+    <option value="R@0,5@2">Root–fifth</option>
+    <option value="R@0,R@1,R@2,R@3">Four roots</option>
+    <option value="R@0,5@1,R@2,5@3">Alternating root–fifth</option>
+  </optgroup>
+  <optgroup label="Jazz">
+    <option value="R@0,5@2">Jazz two-feel</option>
+    <option value="R@0,3@1,5@2,3@3">Walking chord tones</option>
+    <option value="R@0,5@1.5,R@3">Charleston bass</option>
+  </optgroup>
+  <optgroup label="Funk">
+    <option value="R@0,R@0.75,5@1.5,R@2.5,5@3.25">Funk syncopated</option>
+    <option value="R@0,5@2,R@3">Soul pocket</option>
+    <option value="R@0,5@1,R@2,3@3">Motown movement</option>
+    <option value="R@0,5@2.5">Neo-soul sparse</option>
+  </optgroup>
+  <optgroup label="Latin">
+    <option value="R@0,5@1.5,R@2,5@3.5">Bossa basic</option>
+    <option value="R@0,5@2.5">Bossa sparse</option>
+    <option value="R@0,5@0.75,R@1.5,5@2,R@2.75,5@3.5">Samba pulse</option>
+    <option value="R@0,5@1.5,R@2.5">Latin tresillo</option>
+  </optgroup>
+  <optgroup label="Roots">
+    <option value="R@0,5@2">Country boom-chuck</option>
+    <option value="R@0,3@1,5@2,3@3">Country walk</option>
+    <option value="R@0,R@2">Folk two-feel</option>
+  </optgroup>
+  <optgroup label="Reggae">
+    <option value="R@0,5@2.5">Reggae sparse</option>
+  </optgroup>
+</select>
+</div>
+<div class="controls accompaniment-control"><select id="guitarPatternSelect" class="source-select" aria-label="Guitar pattern"><optgroup label="Basic">
+<option value="C@0,C@1,C@2,C@3">Quarter chords</option>
+<option value="C@0,C@2">Half-note chords</option>
+<option value="C@1,C@3">Backbeat chords</option>
+<option value="C@0.5,C@2.5">Offbeat chords</option>
+<option value="C@1,C@2,C@3">Chords 2–4</option>
+<option value="C@0">Chord on 1</option>
+<option value="C@1,C@3">Alternating chord spaces</option>
+<option value="C@0,C@0.5,C@1,C@1.5,C@2,C@2.5,C@3,C@3.5">Eighth-note chords</option>
+</optgroup>
+<optgroup label="Arpeggio">
+<option value="A0@0,A1@1,A2@2,A1@3">Up 1-3-5-3</option>
+<option value="A0@0,A1@1,A2@2,A0@3">Up 1-3-5-1</option>
+<option value="A2@0,A1@1,A0@2,A1@3">Down 5-3-1-3</option>
+<option value="A0@0,A1@0.5,A2@1,A1@1.5,A0@2,A1@2.5,A2@3,A1@3.5">Rolling eighths</option>
+<option value="A1@1,A2@2,A1@3">Delayed rising arp</option>
+<option value="A1@0.5,A2@1,A1@1.5,A1@2.5,A2@3,A1@3.5">Eighth-note arp</option>
+<option value="A0@0,A1@1,A2@2,C@3">Arp then chord</option>
+<option value="C@0,A0@1,A1@2,A2@3">Chord then arp</option>
+</optgroup>
+<optgroup label="Pop">
+<option value="C@0.75,C@1.5,C@2.75,C@3.5">Pop push</option>
+<option value="C@1,C@1.5,C@3,C@3.5">Pop chord pocket</option>
+<option value="C@0.5,C@1,C@1.5,C@2.5,C@3,C@3.5">Driving eighths</option>
+<option value="C@1,C@3">Rock backbeat</option>
+<option value="C@0,C@1.5,C@3">Anthem</option>
+<option value="A1@1,A2@2,C@3">Ballad roll</option>
+<option value="C@0,C@1,C@2,C@3">Power pulse</option>
+<option value="C@0.5,C@1.5,C@2.5,C@3.5">Syncopated rock</option>
+</optgroup>
+<optgroup label="Jazz">
+<option value="C@0.67,C@2,C@2.67">Swing comp</option>
+<option value="C@0,C@1.5,C@3">Charleston</option>
+<option value="C@0.5,C@2,C@3.5">Reverse Charleston</option>
+<option value="C@0.67,C@2.67">Jazz chord pocket</option>
+<option value="C@1,C@3">Shell comp feel</option>
+<option value="A1@0.67,A2@2,A1@2.67">Swing arp</option>
+<option value="A1@1,A2@2,C@3">Jazz ballad</option>
+<option value="C@0,C@1,C@2,C@3">Four-to-bar comp</option>
+</optgroup>
+<optgroup label="Funk">
+<option value="C@0.5,C@1.5,C@2.5,C@3.5">Funk stabs</option>
+<option value="C@0.5,C@1.5,C@2.5,C@3.5">Funk offbeats</option>
+<option value="C@1,C@1.5,C@3">Soul pocket</option>
+<option value="A1@0.5,A2@1.5,C@2.5,C@3.5">R&B roll</option>
+<option value="C@0.75,A1@1.5,C@3.25">Neo-soul space</option>
+<option value="C@0.5,C@1.5,C@2.5,C@3.5">Motown guitar</option>
+</optgroup>
+<optgroup label="Latin">
+<option value="C@0.5,C@1.5,C@2.5,C@3.5">Bossa basic</option>
+<option value="C@1.5,C@3.5">Bossa sparse</option>
+<option value="A1@0.5,C@1.5,A2@2.5,C@3.5">Bossa arp</option>
+<option value="A1@0.5,A2@1,C@1.5,A1@2.5,A2@3,C@3.5">Bossa rolling</option>
+<option value="C@0.5,C@1,C@2,C@2.5,C@3.5">Samba pulse</option>
+<option value="A1@0.5,C@1,A2@1.5,A1@2.5,C@3,A2@3.5">Samba arp</option>
+<option value="C@0.75,C@1.5,C@2.75,C@3.5">Latin tresillo</option>
+<option value="C@1,C@2,C@3">Tango guitar</option>
+</optgroup>
+<optgroup label="Roots">
+<option value="C@1,C@3">Folk strum</option>
+<option value="C@1,C@3">Country chord pulse</option>
+</optgroup>
+<optgroup label="Fingerstyle">
+<option value="A1@0.5,A2@1,A1@1.5,A1@2.5,A2@3,A1@3.5">Fingerpick 1</option>
+<option value="A2@0.5,A1@1,A2@1.5,A2@2.5,A1@3,A2@3.5">Fingerpick 2</option>
+</optgroup></select></div>
+<div class="controls accompaniment-control">
         <select id="rhythmSelect" class="source-select">
           <optgroup label="Basic">
             <option value="quarter|1,1,1,1">Simple quarters</option>
@@ -1598,109 +1499,6 @@
           </optgroup>
         </select>
       </div>
-<div class="controls accompaniment-control"><select id="guitarPatternSelect" class="source-select" aria-label="Guitar pattern"><optgroup label="Basic">
-<option value="C@0,C@1,C@2,C@3">Quarter chords</option>
-<option value="C@0,C@2">Half-note chords</option>
-<option value="C@1,C@3">Backbeat chords</option>
-<option value="C@0.5,C@2.5">Offbeat chords</option>
-<option value="C@1,C@2,C@3">Chords 2–4</option>
-<option value="C@0">Chord on 1</option>
-<option value="C@1,C@3">Alternating chord spaces</option>
-<option value="C@0,C@0.5,C@1,C@1.5,C@2,C@2.5,C@3,C@3.5">Eighth-note chords</option>
-</optgroup>
-<optgroup label="Arpeggio">
-<option value="A0@0,A1@1,A2@2,A1@3">Up 1-3-5-3</option>
-<option value="A0@0,A1@1,A2@2,A0@3">Up 1-3-5-1</option>
-<option value="A2@0,A1@1,A0@2,A1@3">Down 5-3-1-3</option>
-<option value="A0@0,A1@0.5,A2@1,A1@1.5,A0@2,A1@2.5,A2@3,A1@3.5">Rolling eighths</option>
-<option value="A1@1,A2@2,A1@3">Delayed rising arp</option>
-<option value="A1@0.5,A2@1,A1@1.5,A1@2.5,A2@3,A1@3.5">Eighth-note arp</option>
-<option value="A0@0,A1@1,A2@2,C@3">Arp then chord</option>
-<option value="C@0,A0@1,A1@2,A2@3">Chord then arp</option>
-</optgroup>
-<optgroup label="Pop">
-<option value="C@0.75,C@1.5,C@2.75,C@3.5">Pop push</option>
-<option value="C@1,C@1.5,C@3,C@3.5">Pop chord pocket</option>
-<option value="C@0.5,C@1,C@1.5,C@2.5,C@3,C@3.5">Driving eighths</option>
-<option value="C@1,C@3">Rock backbeat</option>
-<option value="C@0,C@1.5,C@3">Anthem</option>
-<option value="A1@1,A2@2,C@3">Ballad roll</option>
-<option value="C@0,C@1,C@2,C@3">Power pulse</option>
-<option value="C@0.5,C@1.5,C@2.5,C@3.5">Syncopated rock</option>
-</optgroup>
-<optgroup label="Jazz">
-<option value="C@0.67,C@2,C@2.67">Swing comp</option>
-<option value="C@0,C@1.5,C@3">Charleston</option>
-<option value="C@0.5,C@2,C@3.5">Reverse Charleston</option>
-<option value="C@0.67,C@2.67">Jazz chord pocket</option>
-<option value="C@1,C@3">Shell comp feel</option>
-<option value="A1@0.67,A2@2,A1@2.67">Swing arp</option>
-<option value="A1@1,A2@2,C@3">Jazz ballad</option>
-<option value="C@0,C@1,C@2,C@3">Four-to-bar comp</option>
-</optgroup>
-<optgroup label="Funk">
-<option value="C@0.5,C@1.5,C@2.5,C@3.5">Funk stabs</option>
-<option value="C@0.5,C@1.5,C@2.5,C@3.5">Funk offbeats</option>
-<option value="C@1,C@1.5,C@3">Soul pocket</option>
-<option value="A1@0.5,A2@1.5,C@2.5,C@3.5">R&B roll</option>
-<option value="C@0.75,A1@1.5,C@3.25">Neo-soul space</option>
-<option value="C@0.5,C@1.5,C@2.5,C@3.5">Motown guitar</option>
-</optgroup>
-<optgroup label="Latin">
-<option value="C@0.5,C@1.5,C@2.5,C@3.5">Bossa basic</option>
-<option value="C@1.5,C@3.5">Bossa sparse</option>
-<option value="A1@0.5,C@1.5,A2@2.5,C@3.5">Bossa arp</option>
-<option value="A1@0.5,A2@1,C@1.5,A1@2.5,A2@3,C@3.5">Bossa rolling</option>
-<option value="C@0.5,C@1,C@2,C@2.5,C@3.5">Samba pulse</option>
-<option value="A1@0.5,C@1,A2@1.5,A1@2.5,C@3,A2@3.5">Samba arp</option>
-<option value="C@0.75,C@1.5,C@2.75,C@3.5">Latin tresillo</option>
-<option value="C@1,C@2,C@3">Tango guitar</option>
-</optgroup>
-<optgroup label="Roots">
-<option value="C@1,C@3">Folk strum</option>
-<option value="C@1,C@3">Country chord pulse</option>
-</optgroup>
-<optgroup label="Fingerstyle">
-<option value="A1@0.5,A2@1,A1@1.5,A1@2.5,A2@3,A1@3.5">Fingerpick 1</option>
-<option value="A2@0.5,A1@1,A2@1.5,A2@2.5,A1@3,A2@3.5">Fingerpick 2</option>
-</optgroup></select></div>
-
-<div class="controls accompaniment-control">
-<select id="bassPatternSelect" class="source-select" aria-label="Bass pattern">
-  <optgroup label="Basic">
-    <option value="R@0">Root on 1</option>
-    <option value="R@0,R@2" selected>Two-feel roots</option>
-    <option value="R@0,5@2">Root–fifth</option>
-    <option value="R@0,R@1,R@2,R@3">Four roots</option>
-    <option value="R@0,5@1,R@2,5@3">Alternating root–fifth</option>
-  </optgroup>
-  <optgroup label="Jazz">
-    <option value="R@0,5@2">Jazz two-feel</option>
-    <option value="R@0,3@1,5@2,3@3">Walking chord tones</option>
-    <option value="R@0,5@1.5,R@3">Charleston bass</option>
-  </optgroup>
-  <optgroup label="Funk">
-    <option value="R@0,R@0.75,5@1.5,R@2.5,5@3.25">Funk syncopated</option>
-    <option value="R@0,5@2,R@3">Soul pocket</option>
-    <option value="R@0,5@1,R@2,3@3">Motown movement</option>
-    <option value="R@0,5@2.5">Neo-soul sparse</option>
-  </optgroup>
-  <optgroup label="Latin">
-    <option value="R@0,5@1.5,R@2,5@3.5">Bossa basic</option>
-    <option value="R@0,5@2.5">Bossa sparse</option>
-    <option value="R@0,5@0.75,R@1.5,5@2,R@2.75,5@3.5">Samba pulse</option>
-    <option value="R@0,5@1.5,R@2.5">Latin tresillo</option>
-  </optgroup>
-  <optgroup label="Roots">
-    <option value="R@0,5@2">Country boom-chuck</option>
-    <option value="R@0,3@1,5@2,3@3">Country walk</option>
-    <option value="R@0,R@2">Folk two-feel</option>
-  </optgroup>
-  <optgroup label="Reggae">
-    <option value="R@0,5@2.5">Reggae sparse</option>
-  </optgroup>
-</select>
-</div>
       </div>
       </div>
     </div>
@@ -1760,11 +1558,6 @@
       if (displayName.indexOf("#") !== -1) selectedSpellingPreference = "sharp";
       else if (displayName.indexOf("b") !== -1) selectedSpellingPreference = "flat";
       else selectedSpellingPreference = conventionalPreferenceForKey(canonicalKey);
-    }
-
-    function activeChordDisplayName() {
-      if (activePitchClass === null) return "";
-      return displayPitchClass(activePitchClass, selectedSpellingPreference);
     }
 
     function enhMajor(note) { if (note === "Gb") return "F#"; if (note === "C#") return "Db"; return note; }
@@ -1894,20 +1687,11 @@
     function selectedInstrument() {
       return "sampled";
     }
-
-    function setGuitarSampleStatus(text, stateClass) {
-      updateCompactAudioStatus(document.getElementById("guitarSampleStatus"), text, stateClass);
-    }
-
-    function loadGuitarSamples(ctx) {
+function loadGuitarSamples(ctx) {
       if (guitarSampleBuffers.size === GUITAR_SAMPLE_DEFS.length) {
-        setGuitarSampleStatus("Guitar: 7/7 samples", "ready");
         return Promise.resolve(true);
       }
       if (guitarSamplesPromise) return guitarSamplesPromise;
-
-      setGuitarSampleStatus("Guitar: loading samples…", "");
-
       guitarSamplesPromise = Promise.all(GUITAR_SAMPLE_DEFS.map(function(def){
         return fetchAndDecodePercussionSample(ctx, [def.local, def.remote])
           .then(function(buf){
@@ -1923,18 +1707,14 @@
         var loaded = results.filter(Boolean).length;
 
         if (loaded === GUITAR_SAMPLE_DEFS.length) {
-          setGuitarSampleStatus("Guitar: 7/7 samples", "ready");
           return true;
         }
 
         if (loaded > 0) {
           // Partial loading is still useful because nearestGuitarSample()
           // pitch-shifts the closest successfully loaded recording.
-          setGuitarSampleStatus("Guitar: " + loaded + "/7 samples", "ready");
           return true;
         }
-
-        setGuitarSampleStatus("Guitar: synth fallback", "fallback");
         return false;
       }).finally(function(){
         guitarSamplesPromise = null;
@@ -1954,20 +1734,11 @@
     ];
     var bassSampleBuffers = new Map();
     var bassSamplesPromise = null;
-
-    function setBassSampleStatus(text, stateClass) {
-      updateCompactAudioStatus(document.getElementById("bassSampleStatus"), text, stateClass);
-    }
-
-    function loadBassSamples(ctx) {
+function loadBassSamples(ctx) {
       if (bassSampleBuffers.size === BASS_SAMPLE_DEFS.length) {
-        setBassSampleStatus("Bass: samples ready", "ready");
         return Promise.resolve(true);
       }
       if (bassSamplesPromise) return bassSamplesPromise;
-
-      setBassSampleStatus("Bass: loading samples…", "");
-
       bassSamplesPromise = Promise.all(BASS_SAMPLE_DEFS.map(function(def){
         return fetch(def.url, {cache:"force-cache"})
           .then(function(r){
@@ -1977,12 +1748,10 @@
           .then(function(ab){ return ctx.decodeAudioData(ab.slice(0)); })
           .then(function(buf){ bassSampleBuffers.set(def.midi, buf); });
       })).then(function(){
-        setBassSampleStatus("Bass: samples ready", "ready");
         return true;
       }).catch(function(err){
         console.warn("Local bass samples unavailable; using synth fallback.", err);
         bassSampleBuffers.clear();
-        setBassSampleStatus("Bass: synth fallback", "fallback");
         return false;
       }).finally(function(){
         bassSamplesPromise = null;
@@ -2077,33 +1846,7 @@
     };
     var percussionSampleBuffers = new Map();
     var percussionSamplesPromise = null;
-
-    function updateCompactAudioStatus(el, text, stateClass) {
-      if (!el) return;
-      var label = el.getAttribute("data-label") || "";
-      var state = stateClass || "waiting";
-      el.className = "audio-status-item " + state;
-      el.title = text;
-
-      var name = el.querySelector(".status-name");
-      if (name) {
-        name.textContent = (state === "fallback") ? label + " synth" : label;
-      }
-
-      var audio = document.getElementById("audioStatus");
-      if (audio) {
-        var items = Array.prototype.slice.call(audio.querySelectorAll(".audio-status-item"));
-        audio.setAttribute("aria-label", "Audio: " + items.map(function(item){
-          return item.title || ((item.getAttribute("data-label") || "") + " waiting");
-        }).join("; "));
-      }
-    }
-
-    function setPercussionSampleStatus(text, stateClass) {
-      updateCompactAudioStatus(document.getElementById("sampleStatus"), text, stateClass);
-    }
-
-    function fetchAndDecodePercussionSample(ctx, urls) {
+function fetchAndDecodePercussionSample(ctx, urls) {
       var list = Array.isArray(urls) ? urls.slice() : [urls];
 
       function tryNext(index) {
@@ -2132,13 +1875,9 @@
       var entries = Object.keys(PERCUSSION_SAMPLE_DEFS);
 
       if (percussionSampleBuffers.size === entries.length) {
-        setPercussionSampleStatus("Drums: samples ready", "ready");
         return Promise.resolve(true);
       }
       if (percussionSamplesPromise) return percussionSamplesPromise;
-
-      setPercussionSampleStatus("Drums: loading samples…", "");
-
       percussionSamplesPromise = Promise.all(entries.map(function(kind){
         var def = PERCUSSION_SAMPLE_DEFS[kind];
         var urls = [];
@@ -2163,14 +1902,11 @@
       })).then(function(results){
         var loaded = results.filter(Boolean).length;
         if (loaded === entries.length) {
-          setPercussionSampleStatus("Drums: samples ready", "ready");
           return true;
         }
         if (loaded > 0) {
-          setPercussionSampleStatus("Drums: " + loaded + "/" + entries.length + " samples", "ready");
           return true;
         }
-        setPercussionSampleStatus("Drums: synth fallback", "fallback");
         return false;
       }).finally(function(){
         percussionSamplesPromise = null;
@@ -2394,7 +2130,6 @@
       }
       progressionOscillators = [];
       progressionPlaying = false;
-      setLowerControlsPlaybackHidden(false);
 
       var btn = document.getElementById("playProgressionBtn");
       if (btn) {
@@ -2454,12 +2189,6 @@
       var pcMap = {C:0,"C#":1,Db:1,D:2,"D#":3,Eb:3,E:4,F:5,"F#":6,Gb:6,G:7,"G#":8,Ab:8,A:9,"A#":10,Bb:10,B:11};
       activePitchClass = pcMap[root]; activeQuality = quality;
       startChordLoop(root, quality, roman, chordKey, chordRing);
-    }
-
-    function selectedPercussionPatternName() {
-      var select = document.getElementById("rhythmSelect");
-      if (!select || !select.value) return "quarter";
-      return select.value.split("|")[0];
     }
 
     function selectedPercussionLabel() {
@@ -2814,7 +2543,7 @@
       if (text.indexOf("mixolydian") !== -1) return "mixolydian";
       if (text.indexOf("lydian") !== -1) return "lydian";
       if (text.indexOf("locrian") !== -1) return "locrian";
-      if (text.indexOf("aeolian") !== -1 || group.toLowerCase().indexOf("minor /") !== -1) return "aeolian";
+      if (text.indexOf("aeolian") !== -1) return "aeolian";
       return "ionian";
     }
 
@@ -2823,15 +2552,6 @@
       // selected progression family. This prevents a modal progression from
       // being colored against parallel major/minor by mistake.
       return progressionModeForSelection();
-    }
-
-    function modeDisplayName(mode) {
-      var names = {
-        ionian:"Major / Ionian", dorian:"Dorian", phrygian:"Phrygian",
-        lydian:"Lydian", mixolydian:"Mixolydian", aeolian:"Minor / Aeolian",
-        locrian:"Locrian"
-      };
-      return names[mode] || "Major / Ionian";
     }
 
     function canonicalMajorForPitchClass(pc) {
@@ -2883,12 +2603,6 @@
       }
       if (info.quality === "dim") label += "°";
       return label;
-    }
-
-    function progressionContext() {
-      var prog = getSelectedProgression();
-      var mode = progressionModeForDegrees(prog.degrees);
-      return {prog:prog, mode:mode, parentMajor:parentMajorForMode(selectedMajor, mode)};
     }
 
     function scaledProgressionBeats(baseBeats) {
@@ -2956,18 +2670,6 @@
       }
 
       return (preferSharp ? sharpLabels : flatLabels)[pc];
-    }
-    function divergentIntervalsForDegree(deg, mode) {
-      var info=chordInfoForDegree(selectedMajor,deg); if(!info||!info.midiNotes) return [];
-      var chroma={C:0,"C#":1,Db:1,D:2,"D#":3,Eb:3,E:4,F:5,"F#":6,Gb:6,G:7,"G#":8,Ab:8,A:9,"A#":10,Bb:10,B:11};
-      var tonic=chroma[KEY_NOTES[selectedMajor][0]], allowed=modeScalePitchClasses(tonic,mode), seen={}, out=[];
-      for(var i=0;i<info.midiNotes.length;i++){var pc=((info.midiNotes[i]%12)+12)%12;
-        if(!allowed[pc]&&!seen[pc]){
-          seen[pc]=1;
-          var sharpFunction=["II","III","VI","V2","V5","V6"].indexOf(deg)!==-1;
-          out.push(intervalLabelFromTonic(pc-tonic,sharpFunction,mode));
-        }}
-      return out;
     }
 
     function triadIntervalDisplayForDegree(deg, mode) {
@@ -3135,14 +2837,7 @@
     function closeDetailPanels() {
       setDetailPanel(null);
     }
-
-    // Kept as a compatibility hook for the transport. Playback now only
-    // closes an open user panel; stopping playback does not reopen anything.
-    function setLowerControlsPlaybackHidden(hidden) {
-      if (hidden) closeDetailPanels();
-    }
-
-    function setTransportButtonState(state) {
+function setTransportButtonState(state) {
       var btn = document.getElementById("playProgressionBtn");
       if (!btn) return;
 
@@ -3169,7 +2864,7 @@
     function startProgressionLoop() {
       stopArpeggioOnly();
       stopProgressionPlayback();
-      setLowerControlsPlaybackHidden(true);
+      closeDetailPanels();
       ensureAudioReady(function(ctx){
         var btn = document.getElementById("playProgressionBtn");
         if (btn) {
@@ -3183,8 +2878,6 @@
         ];
         if (selectedInstrument() === "sampled") {
           startupLoads.push(loadGuitarSamples(ctx));
-        } else {
-          setGuitarSampleStatus("Guitar: synthetic selected", "fallback");
         }
 
         Promise.all(startupLoads).then(function(){
@@ -3370,10 +3063,10 @@
 
     // ---------- Compact category browsers ----------
     var selectorBrowserConfig = {
-      progressionSelect: { label:"Progression", title:"Choose Progression", recentKey:"circle_recent_progressions" },
-      guitarPatternSelect: { label:"Guitar", title:"Guitar Pattern", recentKey:"circle_recent_guitar" },
-      bassPatternSelect: { label:"Bass", title:"Bass Pattern", recentKey:"circle_recent_bass" },
-      rhythmSelect: { label:"Percussion", title:"Percussion Rhythm", recentKey:"circle_recent_percussion" }
+      progressionSelect: { label:"Progression", title:"Progression" },
+      guitarPatternSelect: { label:"Guitar", title:"Guitar Pattern" },
+      bassPatternSelect: { label:"Bass", title:"Bass Pattern" },
+      rhythmSelect: { label:"Drums", title:"Percussion Rhythm" }
     };
     var activeBrowserSelect = null;
     var activeBrowserCategory = null;
@@ -3384,32 +3077,6 @@
       return parent && parent.tagName === "OPTGROUP" ? parent.label : "Other";
     }
 
-    function readRecentValues(key) {
-      try {
-        var x = JSON.parse(localStorage.getItem(key) || "[]");
-        return Array.isArray(x) ? x : [];
-      } catch(e) { return []; }
-    }
-
-    function recentKeyForSelect(select, cfg) {
-      if (!select || !cfg) return "";
-      if (select.id === "rhythmSelect" ||
-          select.id === "guitarPatternSelect" ||
-          select.id === "bassPatternSelect") {
-        return cfg.recentKey + "_" + currentTimeSignature.replace("/","-");
-      }
-      return cfg.recentKey;
-    }
-
-    function rememberRecent(select, value) {
-      var cfg = selectorBrowserConfig[select.id];
-      if (!cfg) return;
-      var key = recentKeyForSelect(select,cfg);
-      var arr = readRecentValues(key).filter(function(v){ return v !== value; });
-      arr.unshift(value);
-      arr = arr.slice(0,6);
-      try { localStorage.setItem(key, JSON.stringify(arr)); } catch(e) {}
-    }
 
     function selectedOptionFor(select) {
       return select && select.options && select.selectedIndex >= 0 ? select.options[select.selectedIndex] : null;
@@ -3424,22 +3091,14 @@
       btn.id = select.id + "Trigger";
       btn.innerHTML =
         '<span class="trigger-label">'+cfg.label+'</span>'+
-        '<span class="trigger-value"><span class="main-value"></span><span class="trigger-arrow">▾</span></span>';
+        '<span class="trigger-value"><span class="main-value"></span></span>';
       select.parentNode.insertBefore(btn, select);
       btn.addEventListener("click", function(){ openChoiceBrowser(select.id); });
       updateTrigger(select);
     }
 
     function compactProgressionTriggerLabel(opt) {
-      var category = optionCategory(opt) || "";
-
-      // The first group is intentionally shortened to simply "Diatonic".
-      if (category.indexOf("Diatonic") === 0) return "Diatonic";
-
-      // For longer group names, show only the portion before an em dash.
-      // Groups without an em dash keep their full category name.
-      var emDash = category.indexOf(" — ");
-      return emDash >= 0 ? category.slice(0, emDash).trim() : category.trim();
+      return (optionCategory(opt) || "").trim();
     }
 
     function updateTrigger(select) {
@@ -3497,37 +3156,23 @@
       return p[0].replace(/_/g," ");
     }
 
+    var progressionCategoryOrder = [
+      "Ionian","Dorian","Phrygian","Lydian","Mixolydian",
+      "Aeolian","Borrowed","Secondary","Substitution","Chromatic"
+    ];
+
     function browserCategories(select) {
+      if (select && select.id === "progressionSelect") return progressionCategoryOrder.slice();
       var cats = [];
       var seen = {};
       Array.prototype.forEach.call(select.options,function(opt){
         var c=optionCategory(opt);
         if(!seen[c]) { seen[c]=true; cats.push(c); }
       });
-      var cfg=selectorBrowserConfig[select.id];
-      var suppressRecent = ((currentTimeSignature === "4/4" || currentTimeSignature === "3/4" || currentTimeSignature === "6/8" || currentTimeSignature === "12/8" || currentTimeSignature === "2/4") &&
-        (select.id === "rhythmSelect" || select.id === "guitarPatternSelect" || select.id === "bassPatternSelect"));
-      if(!suppressRecent && readRecentValues(cfg.recentKey).length) cats.unshift("Recent");
       return cats;
     }
 
     function optionsForBrowserCategory(select, category) {
-      if (category === "Recent") {
-        var cfg=selectorBrowserConfig[select.id], vals=readRecentValues(recentKeyForSelect(select,cfg)), out=[];
-        vals.forEach(function(v){
-          // v1.37 stores exact option indices ("i:12"), so duplicate-valued
-          // choices remain distinct. Older saved values are still accepted.
-          if (typeof v === "string" && v.indexOf("i:") === 0) {
-            var ix = parseInt(v.slice(2),10);
-            if (!isNaN(ix) && select.options[ix]) out.push(select.options[ix]);
-            return;
-          }
-          for(var i=0;i<select.options.length;i++){
-            if(select.options[i].value===v){ out.push(select.options[i]); break; }
-          }
-        });
-        return out.filter(function(opt,idx,arr){ return arr.indexOf(opt)===idx; });
-      }
       return Array.prototype.filter.call(select.options,function(opt){
         return optionCategory(opt) === category;
       });
@@ -3536,37 +3181,17 @@
     function renderBrowserTabs() {
       var host=document.getElementById("choiceTabs");
       host.innerHTML="";
-      var fourFourPercussion = !!(activeBrowserSelect && activeBrowserSelect.id === "rhythmSelect" && currentTimeSignature === "4/4");
-      var fourFourGuitar = !!(activeBrowserSelect && activeBrowserSelect.id === "guitarPatternSelect" && currentTimeSignature === "4/4");
-      var fourFourBass = !!(activeBrowserSelect && activeBrowserSelect.id === "bassPatternSelect" && currentTimeSignature === "4/4");
-      host.classList.toggle("percussion-four-four", fourFourPercussion);
-      host.classList.toggle("guitar-four-four", fourFourGuitar);
-      host.classList.toggle("bass-four-four", fourFourBass);
-      var threeFourPercussion = !!(activeBrowserSelect && activeBrowserSelect.id === "rhythmSelect" && currentTimeSignature === "3/4");
-      var threeFourGuitar = !!(activeBrowserSelect && activeBrowserSelect.id === "guitarPatternSelect" && currentTimeSignature === "3/4");
-      var threeFourBass = !!(activeBrowserSelect && activeBrowserSelect.id === "bassPatternSelect" && currentTimeSignature === "3/4");
-      host.classList.toggle("percussion-three-four", threeFourPercussion);
-      host.classList.toggle("guitar-three-four", threeFourGuitar);
-      host.classList.toggle("bass-three-four", threeFourBass);
-      var sixEightPercussion = !!(activeBrowserSelect && activeBrowserSelect.id === "rhythmSelect" && currentTimeSignature === "6/8");
-      var sixEightGuitar = !!(activeBrowserSelect && activeBrowserSelect.id === "guitarPatternSelect" && currentTimeSignature === "6/8");
-      var sixEightBass = !!(activeBrowserSelect && activeBrowserSelect.id === "bassPatternSelect" && currentTimeSignature === "6/8");
-      host.classList.toggle("percussion-six-eight", sixEightPercussion);
-      host.classList.toggle("guitar-six-eight", sixEightGuitar);
-      host.classList.toggle("bass-six-eight", sixEightBass);
-      var twelveEightPercussion = !!(activeBrowserSelect && activeBrowserSelect.id === "rhythmSelect" && currentTimeSignature === "12/8");
-      var twelveEightGuitar = !!(activeBrowserSelect && activeBrowserSelect.id === "guitarPatternSelect" && currentTimeSignature === "12/8");
-      var twelveEightBass = !!(activeBrowserSelect && activeBrowserSelect.id === "bassPatternSelect" && currentTimeSignature === "12/8");
-      host.classList.toggle("percussion-twelve-eight", twelveEightPercussion);
-      host.classList.toggle("guitar-twelve-eight", twelveEightGuitar);
-      host.classList.toggle("bass-twelve-eight", twelveEightBass);
-      var twoFourPercussion = !!(activeBrowserSelect && activeBrowserSelect.id === "rhythmSelect" && currentTimeSignature === "2/4");
-      var twoFourGuitar = !!(activeBrowserSelect && activeBrowserSelect.id === "guitarPatternSelect" && currentTimeSignature === "2/4");
-      var twoFourBass = !!(activeBrowserSelect && activeBrowserSelect.id === "bassPatternSelect" && currentTimeSignature === "2/4");
-      host.classList.toggle("percussion-two-four", twoFourPercussion);
-      host.classList.toggle("guitar-two-four", twoFourGuitar);
-      host.classList.toggle("bass-two-four", twoFourBass);
+      host.classList.remove("category-grid");
+      host.style.removeProperty("--choice-tab-columns");
+
       var cats=browserCategories(activeBrowserSelect);
+      if (activeBrowserSelect) {
+        var count = cats.length;
+        var columns = count === 10 ? 5 : (count === 8 ? 4 : (count === 6 ? 3 : Math.min(Math.max(count,1),5)));
+        host.classList.add("category-grid");
+        host.style.setProperty("--choice-tab-columns", String(columns));
+      }
+
       if(!activeBrowserCategory || cats.indexOf(activeBrowserCategory)===-1) {
         activeBrowserCategory=optionCategory(selectedOptionFor(activeBrowserSelect));
         if(cats.indexOf(activeBrowserCategory)===-1) activeBrowserCategory=cats[0];
@@ -3594,7 +3219,6 @@
       var exactIndex = optionIndexInSelect(activeBrowserSelect,opt);
       if (exactIndex < 0) return;
       activeBrowserSelect.selectedIndex = exactIndex;
-      rememberRecent(activeBrowserSelect,optionRecentKey(activeBrowserSelect,opt));
       updateTrigger(activeBrowserSelect);
 
       // Reuse each source select's normal change behavior.
@@ -3615,13 +3239,7 @@
       }
       return -1;
     }
-
-    function optionRecentKey(select, opt) {
-      var ix = optionIndexInSelect(select, opt);
-      return ix >= 0 ? "i:" + ix : "";
-    }
-
-    function renderBrowserGrid() {
+function renderBrowserGrid() {
       var host=document.getElementById("choiceGrid");
       host.innerHTML="";
       var opts=optionsForBrowserCategory(activeBrowserSelect,activeBrowserCategory);
@@ -3940,9 +3558,8 @@
       ]
     };
 
-    // Meter-specific style bundles. Percussion is the style leader:
-    // selecting a non-4/4 groove loads these recommended Guitar and Bass parts.
-    // Guitar and Bass remain independently editable afterward.
+    // Meter-specific accompaniment bundles used when a non-4/4 percussion groove is chosen manually.
+    // Progression/meter automation can choose the percussion groove separately; Guitar and Bass remain independently editable.
     var METER_STYLE_BUNDLES = {
       "3/4": {
         "waltz":          {guitar:"Waltz full", bass:"Waltz root–fifth–root"},
@@ -4987,7 +4604,7 @@
     // Every progression phrase has one deliberate guitar and percussion pairing.
     // Choosing a progression applies its pairing; the user may then override
     // Guitar or Percussion manually without changing the progression.
-    var progressionAccompanimentMap = {"Diatonic — Cadences & Core||I–IV–V–I":{"guitar":"Folk bass-strum","percussion":"Folk quarters"},"Diatonic — Cadences & Core||I–ii–V–I":{"guitar":"Jazz ballad","percussion":"Jazz ballad"},"Diatonic — Cadences & Core||ii–V–I":{"guitar":"Swing comp","percussion":"Swing comp"},"Diatonic — Cadences & Core||I–vi–ii–V–I":{"guitar":"Jazz bass/chord","percussion":"Swing sparse"},"Diatonic — Cadences & Core||iii–vi–ii–V–I":{"guitar":"Walking shell feel","percussion":"Four to the bar"},"Diatonic — Cadences & Core||I–V–vi–IV":{"guitar":"Pop bass/chord","percussion":"Pop groove (push)"},"Diatonic — Cadences & Core||vi–IV–I–V":{"guitar":"Driving eighths","percussion":"Driving pop"},"Diatonic — Cadences & Core||I–vi–IV–V":{"guitar":"Folk bass-strum","percussion":"Folk eighths"},"Diatonic — Cadences & Core||I–V–IV–I":{"guitar":"Rock backbeat","percussion":"Rock quarters"},"Diatonic — Cadences & Core||IV–I–ii–V":{"guitar":"Charleston","percussion":"Charleston"},"Mixolydian / ♭VII||I–♭VII–IV–I":{"guitar":"Rock backbeat","percussion":"Rock eighths"},"Mixolydian / ♭VII||I–♭VII–I":{"guitar":"Power pulse","percussion":"Rock quarters"},"Mixolydian / ♭VII||I–IV–♭VII–I":{"guitar":"Driving eighths","percussion":"Backbeat hits"},"Mixolydian / ♭VII||I–♭VII–IV–♭VII":{"guitar":"Syncopated rock","percussion":"Driving pop"},"Mixolydian / ♭VII||I–V–♭VII–IV":{"guitar":"Anthem","percussion":"Power ballad"},"Mixolydian / ♭VII||IV–♭VII–I":{"guitar":"Folk bass-strum","percussion":"Country drive"},"Dorian / Minor-Modal||i–IV–i":{"guitar":"Funk stabs","percussion":"Funk subdivision"},"Dorian / Minor-Modal||i–IV–♭VII–i":{"guitar":"Soul pocket","percussion":"Soul backbeat"},"Dorian / Minor-Modal||i–♭VII–IV–i":{"guitar":"Neo-soul space","percussion":"Neo-soul space"},"Dorian / Minor-Modal||i–IV–♭VII–IV":{"guitar":"Funk offbeats","percussion":"Funk push"},"Dorian / Minor-Modal||i–ii–IV–i":{"guitar":"R&B roll","percussion":"R&B pocket"},"Dorian / Minor-Modal||i–♭VII–i–IV":{"guitar":"Motown guitar","percussion":"Soul backbeat"},"Borrowed / Modal Mixture||I–iv–I":{"guitar":"Jazz ballad","percussion":"Jazz ballad"},"Borrowed / Modal Mixture||I–IV–iv–I":{"guitar":"Ballad roll","percussion":"Power ballad"},"Borrowed / Modal Mixture||I–♭VI–IV–I":{"guitar":"Neo-soul space","percussion":"Neo-soul space"},"Borrowed / Modal Mixture||I–♭VI–♭VII–I":{"guitar":"Anthem","percussion":"Arena sustain"},"Borrowed / Modal Mixture||I–♭III–IV–I":{"guitar":"Soul pocket","percussion":"R&B pocket"},"Borrowed / Modal Mixture||I–♭III–♭VII–IV":{"guitar":"Rock backbeat","percussion":"Backbeat hits"},"Borrowed / Modal Mixture||I–iv–♭VII–I":{"guitar":"Bossa sparse","percussion":"Bossa sparse"},"Borrowed / Modal Mixture||I–♭VI–iv–I":{"guitar":"R&B roll","percussion":"Neo-soul space"},"Secondary Dominants / Chromatic||I–V/ii–ii–V–I":{"guitar":"Swing comp","percussion":"Swing comp"},"Secondary Dominants / Chromatic||I–V/vi–vi–ii–V–I":{"guitar":"Jazz bass/chord","percussion":"Swing sparse"},"Secondary Dominants / Chromatic||I–V/V–V–I":{"guitar":"Four-to-bar comp","percussion":"Four to the bar"},"Secondary Dominants / Chromatic||I–III–vi–IV":{"guitar":"Soul pocket","percussion":"Soul backbeat"},"Secondary Dominants / Chromatic||I–VI–ii–V":{"guitar":"Charleston","percussion":"Charleston"},"Secondary Dominants / Chromatic||I–II–V–I":{"guitar":"Bossa basic","percussion":"Bossa-style groove"},"Secondary Dominants / Chromatic||iii–VI–ii–V–I":{"guitar":"Walking shell feel","percussion":"Four to the bar"},"Secondary Dominants / Chromatic||I–III–IV–iv–I":{"guitar":"Jazz ballad","percussion":"Jazz ballad"},"Minor / Aeolian Color||i–♭VI–♭III–♭VII":{"guitar":"Driving eighths","percussion":"Rock eighths"},"Minor / Aeolian Color||i–♭VII–♭VI–♭VII":{"guitar":"Syncopated rock","percussion":"Backbeat hits"},"Minor / Aeolian Color||i–♭VI–♭VII–i":{"guitar":"Anthem","percussion":"Power ballad"},"Minor / Aeolian Color||i–♭III–♭VII–iv":{"guitar":"R&B roll","percussion":"Neo-soul space"},"Minor / Aeolian Color||i–iv–♭VII–♭III":{"guitar":"Bossa arp","percussion":"Bossa syncopated"},"Minor / Aeolian Color||i–♭VII–♭VI–V":{"guitar":"Tango guitar","percussion":"Tango"},"Pop / Functional||I–V–vi–IV (2 bars each)":{"guitar":"Pop bass/chord","percussion":"Pop groove (push)"},"Pop / Functional||I–vi–ii–V":{"guitar":"Ballad roll","percussion":"Power ballad"},"Pop / Functional||ii–V–I (quick ii–V)":{"guitar":"Swing comp","percussion":"Swing push"},"Pop / Functional||I–iii–vi–ii–V–I":{"guitar":"Jazz bass/chord","percussion":"Four to the bar"},"Pop / Functional||vi–ii–V–I (quick)":{"guitar":"Four-to-bar comp","percussion":"Four to the bar"},"Pop / Functional||I–vi–IV–ii–V–I":{"guitar":"Bossa rolling","percussion":"Bossa-style groove"},"Modal Practice — Dorian||Dorian: i–IV–i":{"guitar":"Funk stabs","percussion":"Funk subdivision"},"Modal Practice — Dorian||Dorian: i–♭VII–IV–i":{"guitar":"Neo-soul space","percussion":"Neo-soul space"},"Modal Practice — Dorian||Dorian: i–ii–IV–i":{"guitar":"Soul pocket","percussion":"R&B pocket"},"Modal Practice — Phrygian||Phrygian: i–♭II–i":{"guitar":"Tango guitar","percussion":"Tango"},"Modal Practice — Phrygian||Phrygian: i–♭II–♭VII–i":{"guitar":"Latin tresillo","percussion":"Tresillo"},"Modal Practice — Phrygian||Phrygian: i–♭VII–♭II–i":{"guitar":"Tango guitar","percussion":"Latin offbeat"},"Modal Practice — Lydian||Lydian: I–II–I":{"guitar":"Jazz ballad","percussion":"Two feel"},"Modal Practice — Lydian||Lydian: I–II–V–I":{"guitar":"Swing arp","percussion":"Swing sparse"},"Modal Practice — Lydian||Lydian: I–V–II–I":{"guitar":"Bossa arp","percussion":"Bossa sparse"},"Modal Practice — Mixolydian||Mixolydian: I–♭VII–I":{"guitar":"Rock backbeat","percussion":"Rock quarters"},"Modal Practice — Mixolydian||Mixolydian: I–♭VII–IV–I":{"guitar":"Driving eighths","percussion":"Rock eighths"},"Modal Practice — Mixolydian||Mixolydian: I–IV–♭VII–I":{"guitar":"Folk bass-strum","percussion":"Country drive"}};
+    var progressionAccompanimentMap = {"Ionian||I–IV–V–I":{"guitar":"Folk bass-strum","percussion":"Folk quarters"},"Ionian||I–ii–V–I":{"guitar":"Jazz ballad","percussion":"Jazz ballad"},"Ionian||ii–V–I":{"guitar":"Swing comp","percussion":"Swing comp"},"Ionian||I–vi–ii–V–I":{"guitar":"Jazz bass/chord","percussion":"Swing sparse"},"Ionian||iii–vi–ii–V–I":{"guitar":"Walking shell feel","percussion":"Four to the bar"},"Ionian||I–V–vi–IV":{"guitar":"Pop bass/chord","percussion":"Pop groove (push)"},"Ionian||vi–IV–I–V":{"guitar":"Driving eighths","percussion":"Driving pop"},"Ionian||I–vi–IV–V":{"guitar":"Folk bass-strum","percussion":"Folk eighths"},"Ionian||I–V–IV–I":{"guitar":"Rock backbeat","percussion":"Rock quarters"},"Ionian||IV–I–ii–V":{"guitar":"Charleston","percussion":"Charleston"},"Mixolydian||I–♭VII–IV–I":{"guitar":"Rock backbeat","percussion":"Rock eighths"},"Mixolydian||I–♭VII–I":{"guitar":"Power pulse","percussion":"Rock quarters"},"Mixolydian||I–IV–♭VII–I":{"guitar":"Driving eighths","percussion":"Backbeat hits"},"Mixolydian||I–♭VII–IV–♭VII":{"guitar":"Syncopated rock","percussion":"Driving pop"},"Mixolydian||I–V–♭VII–IV":{"guitar":"Anthem","percussion":"Power ballad"},"Mixolydian||IV–♭VII–I":{"guitar":"Folk bass-strum","percussion":"Country drive"},"Dorian||i–IV–i":{"guitar":"Funk stabs","percussion":"Funk subdivision"},"Dorian||i–IV–♭VII–i":{"guitar":"Soul pocket","percussion":"Soul backbeat"},"Dorian||i–♭VII–IV–i":{"guitar":"Neo-soul space","percussion":"Neo-soul space"},"Dorian||i–IV–♭VII–IV":{"guitar":"Funk offbeats","percussion":"Funk push"},"Dorian||i–ii–IV–i":{"guitar":"R&B roll","percussion":"R&B pocket"},"Dorian||i–♭VII–i–IV":{"guitar":"Motown guitar","percussion":"Soul backbeat"},"Borrowed||I–iv–I":{"guitar":"Jazz ballad","percussion":"Jazz ballad"},"Borrowed||I–IV–iv–I":{"guitar":"Ballad roll","percussion":"Power ballad"},"Borrowed||I–♭VI–IV–I":{"guitar":"Neo-soul space","percussion":"Neo-soul space"},"Borrowed||I–♭VI–♭VII–I":{"guitar":"Anthem","percussion":"Arena sustain"},"Borrowed||I–♭III–IV–I":{"guitar":"Soul pocket","percussion":"R&B pocket"},"Borrowed||I–♭III–♭VII–IV":{"guitar":"Rock backbeat","percussion":"Backbeat hits"},"Borrowed||I–iv–♭VII–I":{"guitar":"Bossa sparse","percussion":"Bossa sparse"},"Borrowed||I–♭VI–iv–I":{"guitar":"R&B roll","percussion":"Neo-soul space"},"Secondary||I–V/ii–ii–V–I":{"guitar":"Swing comp","percussion":"Swing comp"},"Secondary||I–V/vi–vi–ii–V–I":{"guitar":"Jazz bass/chord","percussion":"Swing sparse"},"Secondary||I–V/V–V–I":{"guitar":"Four-to-bar comp","percussion":"Four to the bar"},"Secondary||I–III–vi–IV":{"guitar":"Soul pocket","percussion":"Soul backbeat"},"Secondary||I–VI–ii–V":{"guitar":"Charleston","percussion":"Charleston"},"Secondary||I–II–V–I":{"guitar":"Bossa basic","percussion":"Bossa-style groove"},"Secondary||iii–VI–ii–V–I":{"guitar":"Walking shell feel","percussion":"Four to the bar"},"Chromatic||I–III–IV–iv–I":{"guitar":"Jazz ballad","percussion":"Jazz ballad"},"Aeolian||i–♭VI–♭III–♭VII":{"guitar":"Driving eighths","percussion":"Rock eighths"},"Aeolian||i–♭VII–♭VI–♭VII":{"guitar":"Syncopated rock","percussion":"Backbeat hits"},"Aeolian||i–♭VI–♭VII–i":{"guitar":"Anthem","percussion":"Power ballad"},"Aeolian||i–♭III–♭VII–iv":{"guitar":"R&B roll","percussion":"Neo-soul space"},"Aeolian||i–iv–♭VII–♭III":{"guitar":"Bossa arp","percussion":"Bossa syncopated"},"Aeolian||i–♭VII–♭VI–V":{"guitar":"Tango guitar","percussion":"Tango"},"Ionian||I–V–vi–IV (2 bars each)":{"guitar":"Pop bass/chord","percussion":"Pop groove (push)"},"Ionian||I–vi–ii–V":{"guitar":"Ballad roll","percussion":"Power ballad"},"Ionian||ii–V–I (quick ii–V)":{"guitar":"Swing comp","percussion":"Swing push"},"Ionian||I–iii–vi–ii–V–I":{"guitar":"Jazz bass/chord","percussion":"Four to the bar"},"Ionian||vi–ii–V–I (quick)":{"guitar":"Four-to-bar comp","percussion":"Four to the bar"},"Ionian||I–vi–IV–ii–V–I":{"guitar":"Bossa rolling","percussion":"Bossa-style groove"},"Phrygian||i–♭II–i":{"guitar":"Tango guitar","percussion":"Tango"},"Phrygian||i–♭II–♭VII–i":{"guitar":"Latin tresillo","percussion":"Tresillo"},"Phrygian||i–♭VII–♭II–i":{"guitar":"Tango guitar","percussion":"Latin offbeat"},"Lydian||I–II–I":{"guitar":"Jazz ballad","percussion":"Two feel"},"Lydian||I–II–V–I":{"guitar":"Swing arp","percussion":"Swing sparse"},"Lydian||I–V–II–I":{"guitar":"Bossa arp","percussion":"Bossa sparse"}};
 
     function optionGroupLabel(opt) {
       return opt && opt.parentElement && opt.parentElement.tagName === "OPTGROUP"
@@ -5153,8 +4770,6 @@ function primeAudioSamples(){
         loadBassSamples(ctx);
         if (selectedInstrument() === "sampled") {
           loadGuitarSamples(ctx);
-        } else {
-          setGuitarSampleStatus("Guitar: synthetic selected", "fallback");
         }
       });
     }
