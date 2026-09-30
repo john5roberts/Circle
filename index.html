@@ -1251,7 +1251,14 @@
             <option value="I-II-V-I|4,4,4,8">I–II–V–I</option>
             <option value="iii-VI-ii-V-I|4,4,4,4,8">iii–VI–ii–V–I</option>
           </optgroup>
-          <optgroup label="Substitution"></optgroup>
+          <optgroup label="Substitution">
+            <option value="ii-bII7-I|4,4,8">ii–♭II7–I (tritone)</option>
+            <option value="I-vi-ii-bII7-I|4,4,4,4,8">I–vi–ii–♭II7–I (tritone)</option>
+            <option value="iv-bVII7-I|4,4,8">iv–♭VII7–I (backdoor)</option>
+            <option value="I-IV-iv-bVII7-I|4,4,4,4,8">I–IV–iv–♭VII7–I (backdoor)</option>
+            <option value="I-viiD7-I|4,4,8">I–vii°7–I (diminished)</option>
+            <option value="I-sID7-ii-V-I|4,4,4,4,8">I–♯I°7–ii–V–I (diminished)</option>
+          </optgroup>
           <optgroup label="Chromatic">
             <option value="I-III-IV-iv-I|4,4,4,4,8">I–III–IV–iv–I</option>
           </optgroup>
@@ -2525,6 +2532,10 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       if (deg === "V2") return "V/ii";
       if (deg === "V5") return "V/V";
       if (deg === "V6") return "V/vi";
+      if (deg === "bII7") return "♭II7";
+      if (deg === "bVII7") return "♭VII7";
+      if (deg === "viiD7") return "vii°7";
+      if (deg === "sID7") return "♯I°7";
       return deg.replace(/^b/, "♭");
     }
 
@@ -2788,10 +2799,16 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       var notes = KEY_NOTES[selectedMajorKey];
       var chroma = {C:0,"C#":1,Db:1,D:2,"D#":3,Eb:3,E:4,F:5,"F#":6,Gb:6,G:7,"G#":8,Ab:8,A:9,"A#":10,Bb:10,B:11};
       var tonicPC = chroma[notes[0]];
-      function make(offset, quality) {
+      function make(offset, quality, intervals) {
         var rootMidi = 60 + ((tonicPC + offset + 120) % 12);
-        var ints = quality === "minor" ? [0,3,7] : quality === "dim" ? [0,3,6] : [0,4,7];
-        return { midiNotes:[rootMidi+ints[0],rootMidi+ints[1],rootMidi+ints[2]], chordKey:null, chordRing:null, pitchClass:((tonicPC + offset + 120) % 12), quality:quality };
+        var ints = intervals || (quality === "minor" ? [0,3,7] : quality === "dim" ? [0,3,6] : [0,4,7]);
+        return {
+          midiNotes:ints.map(function(interval){ return rootMidi + interval; }),
+          chordKey:null,
+          chordRing:null,
+          pitchClass:((tonicPC + offset + 120) % 12),
+          quality:quality
+        };
       }
       var direct = {
         "I":[0,"major"], "i":[0,"minor"], "ii":[2,"minor"], "II":[2,"major"],
@@ -2802,6 +2819,10 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       if (degreeRoman === "V2") return make(9,"major");  // V/ii
       if (degreeRoman === "V5") return make(2,"major");  // V/V
       if (degreeRoman === "V6") return make(4,"major");  // V/vi
+      if (degreeRoman === "bII7") return make(1,"major",[0,4,7,10]);   // tritone-sub dominant
+      if (degreeRoman === "bVII7") return make(10,"major",[0,4,7,10]); // backdoor dominant
+      if (degreeRoman === "viiD7") return make(11,"dim",[0,3,6,9]);    // leading-tone diminished seventh
+      if (degreeRoman === "sID7") return make(1,"dim",[0,3,6,9]);      // #I diminished seventh -> ii
       if (direct[degreeRoman]) {
         var result = make(direct[degreeRoman][0], direct[degreeRoman][1]);
         // Preserve wheel highlighting for the ordinary diatonic degrees.
@@ -4621,7 +4642,7 @@ function renderBrowserGrid() {
     // Every progression phrase has one deliberate guitar and percussion pairing.
     // Choosing a progression applies its pairing; the user may then override
     // Guitar or Percussion manually without changing the progression.
-    var progressionAccompanimentMap = {"Ionian||I–IV–V–I":{"guitar":"Folk bass-strum","percussion":"Folk quarters"},"Ionian||I–ii–V–I":{"guitar":"Jazz ballad","percussion":"Jazz ballad"},"Ionian||ii–V–I":{"guitar":"Swing comp","percussion":"Swing comp"},"Ionian||I–vi–ii–V–I":{"guitar":"Jazz bass/chord","percussion":"Swing sparse"},"Ionian||iii–vi–ii–V–I":{"guitar":"Walking shell feel","percussion":"Four to the bar"},"Ionian||I–V–vi–IV":{"guitar":"Pop bass/chord","percussion":"Pop groove (push)"},"Ionian||vi–IV–I–V":{"guitar":"Driving eighths","percussion":"Driving pop"},"Ionian||I–vi–IV–V":{"guitar":"Folk bass-strum","percussion":"Folk eighths"},"Ionian||I–V–IV–I":{"guitar":"Rock backbeat","percussion":"Rock quarters"},"Ionian||IV–I–ii–V":{"guitar":"Charleston","percussion":"Charleston"},"Mixolydian||I–♭VII–IV–I":{"guitar":"Rock backbeat","percussion":"Rock eighths"},"Mixolydian||I–♭VII–I":{"guitar":"Power pulse","percussion":"Rock quarters"},"Mixolydian||I–IV–♭VII–I":{"guitar":"Driving eighths","percussion":"Backbeat hits"},"Mixolydian||I–♭VII–IV–♭VII":{"guitar":"Syncopated rock","percussion":"Driving pop"},"Mixolydian||I–V–♭VII–IV":{"guitar":"Anthem","percussion":"Power ballad"},"Mixolydian||IV–♭VII–I":{"guitar":"Folk bass-strum","percussion":"Country drive"},"Dorian||i–IV–i":{"guitar":"Funk stabs","percussion":"Funk subdivision"},"Dorian||i–IV–♭VII–i":{"guitar":"Soul pocket","percussion":"Soul backbeat"},"Dorian||i–♭VII–IV–i":{"guitar":"Neo-soul space","percussion":"Neo-soul space"},"Dorian||i–IV–♭VII–IV":{"guitar":"Funk offbeats","percussion":"Funk push"},"Dorian||i–ii–IV–i":{"guitar":"R&B roll","percussion":"R&B pocket"},"Dorian||i–♭VII–i–IV":{"guitar":"Motown guitar","percussion":"Soul backbeat"},"Borrowed||I–iv–I":{"guitar":"Jazz ballad","percussion":"Jazz ballad"},"Borrowed||I–IV–iv–I":{"guitar":"Ballad roll","percussion":"Power ballad"},"Borrowed||I–♭VI–IV–I":{"guitar":"Neo-soul space","percussion":"Neo-soul space"},"Borrowed||I–♭VI–♭VII–I":{"guitar":"Anthem","percussion":"Arena sustain"},"Borrowed||I–♭III–IV–I":{"guitar":"Soul pocket","percussion":"R&B pocket"},"Borrowed||I–♭III–♭VII–IV":{"guitar":"Rock backbeat","percussion":"Backbeat hits"},"Borrowed||I–iv–♭VII–I":{"guitar":"Bossa sparse","percussion":"Bossa sparse"},"Borrowed||I–♭VI–iv–I":{"guitar":"R&B roll","percussion":"Neo-soul space"},"Secondary||I–V/ii–ii–V–I":{"guitar":"Swing comp","percussion":"Swing comp"},"Secondary||I–V/vi–vi–ii–V–I":{"guitar":"Jazz bass/chord","percussion":"Swing sparse"},"Secondary||I–V/V–V–I":{"guitar":"Four-to-bar comp","percussion":"Four to the bar"},"Secondary||I–III–vi–IV":{"guitar":"Soul pocket","percussion":"Soul backbeat"},"Secondary||I–VI–ii–V":{"guitar":"Charleston","percussion":"Charleston"},"Secondary||I–II–V–I":{"guitar":"Bossa basic","percussion":"Bossa-style groove"},"Secondary||iii–VI–ii–V–I":{"guitar":"Walking shell feel","percussion":"Four to the bar"},"Chromatic||I–III–IV–iv–I":{"guitar":"Jazz ballad","percussion":"Jazz ballad"},"Aeolian||i–♭VI–♭III–♭VII":{"guitar":"Driving eighths","percussion":"Rock eighths"},"Aeolian||i–♭VII–♭VI–♭VII":{"guitar":"Syncopated rock","percussion":"Backbeat hits"},"Aeolian||i–♭VI–♭VII–i":{"guitar":"Anthem","percussion":"Power ballad"},"Aeolian||i–♭III–♭VII–iv":{"guitar":"R&B roll","percussion":"Neo-soul space"},"Aeolian||i–iv–♭VII–♭III":{"guitar":"Bossa arp","percussion":"Bossa syncopated"},"Aeolian||i–♭VII–♭VI–V":{"guitar":"Tango guitar","percussion":"Tango"},"Ionian||I–V–vi–IV (2 bars each)":{"guitar":"Pop bass/chord","percussion":"Pop groove (push)"},"Ionian||I–vi–ii–V":{"guitar":"Ballad roll","percussion":"Power ballad"},"Ionian||ii–V–I (quick ii–V)":{"guitar":"Swing comp","percussion":"Swing push"},"Ionian||I–iii–vi–ii–V–I":{"guitar":"Jazz bass/chord","percussion":"Four to the bar"},"Ionian||vi–ii–V–I (quick)":{"guitar":"Four-to-bar comp","percussion":"Four to the bar"},"Ionian||I–vi–IV–ii–V–I":{"guitar":"Bossa rolling","percussion":"Bossa-style groove"},"Phrygian||i–♭II–i":{"guitar":"Tango guitar","percussion":"Tango"},"Phrygian||i–♭II–♭VII–i":{"guitar":"Latin tresillo","percussion":"Tresillo"},"Phrygian||i–♭VII–♭II–i":{"guitar":"Tango guitar","percussion":"Latin offbeat"},"Lydian||I–II–I":{"guitar":"Jazz ballad","percussion":"Two feel"},"Lydian||I–II–V–I":{"guitar":"Swing arp","percussion":"Swing sparse"},"Lydian||I–V–II–I":{"guitar":"Bossa arp","percussion":"Bossa sparse"}};
+    var progressionAccompanimentMap = {"Ionian||I–IV–V–I":{"guitar":"Folk bass-strum","percussion":"Folk quarters"},"Ionian||I–ii–V–I":{"guitar":"Jazz ballad","percussion":"Jazz ballad"},"Ionian||ii–V–I":{"guitar":"Swing comp","percussion":"Swing comp"},"Ionian||I–vi–ii–V–I":{"guitar":"Jazz bass/chord","percussion":"Swing sparse"},"Ionian||iii–vi–ii–V–I":{"guitar":"Walking shell feel","percussion":"Four to the bar"},"Ionian||I–V–vi–IV":{"guitar":"Pop bass/chord","percussion":"Pop groove (push)"},"Ionian||vi–IV–I–V":{"guitar":"Driving eighths","percussion":"Driving pop"},"Ionian||I–vi–IV–V":{"guitar":"Folk bass-strum","percussion":"Folk eighths"},"Ionian||I–V–IV–I":{"guitar":"Rock backbeat","percussion":"Rock quarters"},"Ionian||IV–I–ii–V":{"guitar":"Charleston","percussion":"Charleston"},"Mixolydian||I–♭VII–IV–I":{"guitar":"Rock backbeat","percussion":"Rock eighths"},"Mixolydian||I–♭VII–I":{"guitar":"Power pulse","percussion":"Rock quarters"},"Mixolydian||I–IV–♭VII–I":{"guitar":"Driving eighths","percussion":"Backbeat hits"},"Mixolydian||I–♭VII–IV–♭VII":{"guitar":"Syncopated rock","percussion":"Driving pop"},"Mixolydian||I–V–♭VII–IV":{"guitar":"Anthem","percussion":"Power ballad"},"Mixolydian||IV–♭VII–I":{"guitar":"Folk bass-strum","percussion":"Country drive"},"Dorian||i–IV–i":{"guitar":"Funk stabs","percussion":"Funk subdivision"},"Dorian||i–IV–♭VII–i":{"guitar":"Soul pocket","percussion":"Soul backbeat"},"Dorian||i–♭VII–IV–i":{"guitar":"Neo-soul space","percussion":"Neo-soul space"},"Dorian||i–IV–♭VII–IV":{"guitar":"Funk offbeats","percussion":"Funk push"},"Dorian||i–ii–IV–i":{"guitar":"R&B roll","percussion":"R&B pocket"},"Dorian||i–♭VII–i–IV":{"guitar":"Motown guitar","percussion":"Soul backbeat"},"Borrowed||I–iv–I":{"guitar":"Jazz ballad","percussion":"Jazz ballad"},"Borrowed||I–IV–iv–I":{"guitar":"Ballad roll","percussion":"Power ballad"},"Borrowed||I–♭VI–IV–I":{"guitar":"Neo-soul space","percussion":"Neo-soul space"},"Borrowed||I–♭VI–♭VII–I":{"guitar":"Anthem","percussion":"Arena sustain"},"Borrowed||I–♭III–IV–I":{"guitar":"Soul pocket","percussion":"R&B pocket"},"Borrowed||I–♭III–♭VII–IV":{"guitar":"Rock backbeat","percussion":"Backbeat hits"},"Borrowed||I–iv–♭VII–I":{"guitar":"Bossa sparse","percussion":"Bossa sparse"},"Borrowed||I–♭VI–iv–I":{"guitar":"R&B roll","percussion":"Neo-soul space"},"Secondary||I–V/ii–ii–V–I":{"guitar":"Swing comp","percussion":"Swing comp"},"Secondary||I–V/vi–vi–ii–V–I":{"guitar":"Jazz bass/chord","percussion":"Swing sparse"},"Secondary||I–V/V–V–I":{"guitar":"Four-to-bar comp","percussion":"Four to the bar"},"Secondary||I–III–vi–IV":{"guitar":"Soul pocket","percussion":"Soul backbeat"},"Secondary||I–VI–ii–V":{"guitar":"Charleston","percussion":"Charleston"},"Secondary||I–II–V–I":{"guitar":"Bossa basic","percussion":"Bossa-style groove"},"Secondary||iii–VI–ii–V–I":{"guitar":"Walking shell feel","percussion":"Four to the bar"},"Chromatic||I–III–IV–iv–I":{"guitar":"Jazz ballad","percussion":"Jazz ballad"},"Aeolian||i–♭VI–♭III–♭VII":{"guitar":"Driving eighths","percussion":"Rock eighths"},"Aeolian||i–♭VII–♭VI–♭VII":{"guitar":"Syncopated rock","percussion":"Backbeat hits"},"Aeolian||i–♭VI–♭VII–i":{"guitar":"Anthem","percussion":"Power ballad"},"Aeolian||i–♭III–♭VII–iv":{"guitar":"R&B roll","percussion":"Neo-soul space"},"Aeolian||i–iv–♭VII–♭III":{"guitar":"Bossa arp","percussion":"Bossa syncopated"},"Aeolian||i–♭VII–♭VI–V":{"guitar":"Tango guitar","percussion":"Tango"},"Ionian||I–V–vi–IV (2 bars each)":{"guitar":"Pop bass/chord","percussion":"Pop groove (push)"},"Ionian||I–vi–ii–V":{"guitar":"Ballad roll","percussion":"Power ballad"},"Ionian||ii–V–I (quick ii–V)":{"guitar":"Swing comp","percussion":"Swing push"},"Ionian||I–iii–vi–ii–V–I":{"guitar":"Jazz bass/chord","percussion":"Four to the bar"},"Ionian||vi–ii–V–I (quick)":{"guitar":"Four-to-bar comp","percussion":"Four to the bar"},"Ionian||I–vi–IV–ii–V–I":{"guitar":"Bossa rolling","percussion":"Bossa-style groove"},"Phrygian||i–♭II–i":{"guitar":"Tango guitar","percussion":"Tango"},"Phrygian||i–♭II–♭VII–i":{"guitar":"Latin tresillo","percussion":"Tresillo"},"Phrygian||i–♭VII–♭II–i":{"guitar":"Tango guitar","percussion":"Latin offbeat"},"Lydian||I–II–I":{"guitar":"Jazz ballad","percussion":"Two feel"},"Lydian||I–II–V–I":{"guitar":"Swing arp","percussion":"Swing sparse"},"Lydian||I–V–II–I":{"guitar":"Bossa arp","percussion":"Bossa sparse"},"Substitution||ii–♭II7–I (tritone)":{"guitar":"Swing comp","percussion":"Swing comp"},"Substitution||I–vi–ii–♭II7–I (tritone)":{"guitar":"Jazz bass/chord","percussion":"Swing sparse"},"Substitution||iv–♭VII7–I (backdoor)":{"guitar":"Soul pocket","percussion":"Soul backbeat"},"Substitution||I–IV–iv–♭VII7–I (backdoor)":{"guitar":"Jazz ballad","percussion":"Jazz ballad"},"Substitution||I–vii°7–I (diminished)":{"guitar":"Jazz ballad","percussion":"Jazz ballad"},"Substitution||I–♯I°7–ii–V–I (diminished)":{"guitar":"Walking shell feel","percussion":"Four to the bar"}};
 
     function optionGroupLabel(opt) {
       return opt && opt.parentElement && opt.parentElement.tagName === "OPTGROUP"
