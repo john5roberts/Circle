@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Circle v1.54</title>
+  <title>Circle v1.60</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -788,12 +788,214 @@
       }
     }
 
+  
+    /* v1.55: icon transport + outline-only mix controls */
+    .play-stack #playProgressionBtn {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-width: 0;
+      min-height: 48px;
+      padding: 0 !important;
+      border-radius: 10px;
+      background: #000 !important;
+      color: #fff !important;
+      border: 1px solid #4a5056 !important;
+      cursor: pointer;
+    }
+
+    .play-stack #playProgressionBtn:disabled {
+      opacity: .72;
+      cursor: default;
+    }
+
+    .transport-icon {
+      display: block;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+    }
+
+    .transport-icon.play-icon {
+      border-top: 10px solid transparent;
+      border-bottom: 10px solid transparent;
+      border-left: 17px solid #fff;
+      margin-left: 3px;
+    }
+
+    .transport-icon.stop-icon {
+      width: 17px;
+      height: 17px;
+      background: #fff;
+    }
+
+    .progression-stack .mix-row label {
+      position: relative;
+      min-height: 36px;
+      padding: 6px 4px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #202428;
+      border: 1.5px solid #6a7076;
+      color: #f2f4f5;
+      font-size: 11px;
+      font-weight: 750;
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: border-color 140ms ease, background 140ms ease, opacity 140ms ease;
+    }
+
+    .progression-stack .mix-row label.mix-active {
+      border-color: #fff;
+    }
+
+    .progression-stack .mix-row label:not(.mix-active) {
+      border-color: #6a7076;
+    }
+
+    .progression-stack .mix-row input[type="checkbox"] {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      margin: -1px !important;
+      padding: 0 !important;
+      overflow: hidden !important;
+      clip: rect(0 0 0 0) !important;
+      clip-path: inset(50%) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+
+    .progression-stack .mix-row label:focus-within {
+      outline: 2px solid #fff;
+      outline-offset: 2px;
+    }
+
+  
+    /* v1.57: mixer columns align exactly with Bass/Chords/Drums/Click */
+    .play-stack #playProgressionBtn {
+      background: #202428 !important;
+      border-color: #4a5056 !important;
+    }
+
+    .playback-mixer {
+      width: 100%;
+      height: 0;
+      max-height: 0;
+      margin: 0;
+      opacity: 0;
+      visibility: hidden;
+      overflow: hidden;
+      pointer-events: none;
+      transform: translateY(-5px);
+      transition:
+        opacity 260ms ease,
+        transform 260ms ease,
+        height 340ms ease,
+        max-height 340ms ease,
+        margin 340ms ease,
+        visibility 0s linear 340ms;
+    }
+
+    .playback-mixer.active {
+      height: 202px;
+      max-height: 202px;
+      margin: -3px 0 0;
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateY(0);
+      transition:
+        opacity 280ms ease 60ms,
+        transform 280ms ease 60ms,
+        height 340ms ease,
+        max-height 340ms ease,
+        margin 340ms ease,
+        visibility 0s linear 0s;
+    }
+
+    .mixer-inner {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-start;
+    }
+
+    .mixer-faders {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 5px; /* exactly matches the four-button row */
+      align-items: start;
+      justify-items: center;
+    }
+
+    .mixer-channel {
+      width: 100%;
+      height: 174px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      color: #f2f4f5;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .mixer-fader-wrap {
+      height: 174px;
+      width: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .mixer-fader {
+      width: 158px;
+      height: 26px;
+      margin: 0;
+      transform: rotate(-90deg);
+      transform-origin: center;
+      accent-color: #f2f4f5;
+      cursor: pointer;
+    }
+
+    .mixer-title {
+      margin-top: -1px;
+      text-align: center;
+      color: #747b81;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .04em;
+      line-height: 1;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .playback-mixer,
+      .playback-mixer.active {
+        transition-duration: 1ms !important;
+        transition-delay: 0ms !important;
+      }
+    }
+
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="panel">
-      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.54"></svg>
+      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.60"></svg>
       <div id="progressionStrip" class="progression-strip" aria-label="Progression map"></div>
       <div class="top-arrangement">
         <div class="progression-stack">
@@ -894,9 +1096,36 @@
             <label><input type="checkbox" id="percussionToggle" checked /><span>Drums</span></label>
             <label><input type="checkbox" id="metronomeToggle" checked /><span>Click</span></label>
           </div>
+          <div id="playbackMixer" class="playback-mixer" aria-hidden="true">
+            <div class="mixer-inner" role="group" aria-label="Playback mixer">
+              <div class="mixer-faders">
+                <label class="mixer-channel">
+                  <div class="mixer-fader-wrap">
+                    <input id="bassFader" class="mixer-fader" type="range" min="0" max="100" value="100" aria-label="Bass volume">
+                  </div>
+                </label>
+                <label class="mixer-channel">
+                  <div class="mixer-fader-wrap">
+                    <input id="chordsFader" class="mixer-fader" type="range" min="0" max="100" value="100" aria-label="Chords volume">
+                  </div>
+                </label>
+                <label class="mixer-channel">
+                  <div class="mixer-fader-wrap">
+                    <input id="drumsFader" class="mixer-fader" type="range" min="0" max="100" value="100" aria-label="Drums volume">
+                  </div>
+                </label>
+                <label class="mixer-channel">
+                  <div class="mixer-fader-wrap">
+                    <input id="clickFader" class="mixer-fader" type="range" min="0" max="100" value="100" aria-label="Click volume">
+                  </div>
+                </label>
+              </div>
+              <div class="mixer-title">Mixer</div>
+            </div>
+          </div>
         </div>
         <div class="play-stack">
-          <button id="playProgressionBtn">Play</button>
+          <button id="playProgressionBtn" type="button" aria-label="Play" title="Play"><span class="transport-icon play-icon" aria-hidden="true"></span></button>
           <div class="tempo-row">
             <select id="tempoSelect">
               <option value="60">60 BPM</option>
@@ -1121,10 +1350,15 @@
     };
 
     var audioCtx = null, masterGain = null;
+    var bassChannelGain = null, chordsChannelGain = null,
+        drumsChannelGain = null, clickChannelGain = null;
     var activeOscillators = [], progressionOscillators = [];
     var arpIntervalId = null;
     var progressionPlaying = false;
     var selectedMajor = "C";
+    // Center analysis toggle: false = tonic + mode (e.g. G-Mixolydian);
+    // true = mode number and parent-major reference (e.g. 5-Mode).
+    var modeReferenceView = false;
     var activeRoman = null, activeChordKey = null, activeChordRing = null, activePitchClass = null, activeQuality = null, activeIsDiatonic = null;
     var cuePitchClass = null, cueQuality = null, cueIsDiatonic = null, cueLitOnWheel = false;
 
@@ -1176,12 +1410,63 @@
       if (normalized.slice(-1) !== "m") normalized += "m";
       return REL_MAJOR[normalized] || "C";
     }
+    function mixerValue(id) {
+      var el = document.getElementById(id);
+      if (!el) return 1;
+      var v = parseFloat(el.value);
+      if (!isFinite(v)) v = 100;
+      return Math.max(0, Math.min(1, v / 100));
+    }
+
+    function setChannelGainSmooth(node, value) {
+      if (!node || !audioCtx) return;
+      var now = audioCtx.currentTime;
+      try {
+        node.gain.cancelScheduledValues(now);
+        node.gain.setTargetAtTime(value, now, 0.015);
+      } catch (e) {
+        node.gain.value = value;
+      }
+    }
+
+    function applyMixerLevels() {
+      setChannelGainSmooth(bassChannelGain, mixerValue("bassFader"));
+      setChannelGainSmooth(chordsChannelGain, mixerValue("chordsFader"));
+      setChannelGainSmooth(drumsChannelGain, mixerValue("drumsFader"));
+      setChannelGainSmooth(clickChannelGain, mixerValue("clickFader"));
+    }
+
+    function audioOutputForRole(role, ctx) {
+      if (role === "bass") return bassChannelGain || masterGain || ctx.destination;
+      if (role === "drums") return drumsChannelGain || masterGain || ctx.destination;
+      if (role === "click" || role === "metro") return clickChannelGain || masterGain || ctx.destination;
+      return chordsChannelGain || masterGain || ctx.destination;
+    }
+
     function getAudioCtx() {
       if (!audioCtx) {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
         masterGain = audioCtx.createGain();
         masterGain.gain.value = 0.9;
         masterGain.connect(audioCtx.destination);
+
+        bassChannelGain = audioCtx.createGain();
+        chordsChannelGain = audioCtx.createGain();
+        drumsChannelGain = audioCtx.createGain();
+        clickChannelGain = audioCtx.createGain();
+
+        bassChannelGain.gain.value = 1;
+        chordsChannelGain.gain.value = 1;
+        drumsChannelGain.gain.value = 1;
+        clickChannelGain.gain.value = 1;
+
+        bassChannelGain.connect(masterGain);
+        chordsChannelGain.connect(masterGain);
+        drumsChannelGain.connect(masterGain);
+        clickChannelGain.connect(masterGain);
+
+        applyMixerLevels();
       }
       return audioCtx;
     }
@@ -1371,7 +1656,7 @@
       gain.gain.linearRampToValueAtTime(0.0001, when + noteDuration);
 
       src.connect(gain);
-      gain.connect(masterGain || ctx.destination);
+      gain.connect(audioOutputForRole("bass", ctx));
       src.start(when);
       try { src.stop(stopAt); } catch(e) {}
 
@@ -1549,7 +1834,7 @@
       gain.gain.setValueAtTime(level, when);
 
       src.connect(gain);
-      gain.connect(masterGain || ctx.destination);
+      gain.connect(audioOutputForRole("drums", ctx));
       src.start(when);
 
       trackPercussionSource(src, gain, ctx);
@@ -1588,7 +1873,7 @@
       gain.gain.linearRampToValueAtTime(0.0001, when + noteDuration);
 
       src.connect(gain);
-      gain.connect(masterGain || ctx.destination);
+      gain.connect(audioOutputForRole("chords", ctx));
       src.start(when);
       try { src.stop(stopAt); } catch(e) {}
 
@@ -1685,11 +1970,11 @@
       mix2.connect(filter);
       mix3.connect(filter);
       filter.connect(gain);
-      gain.connect(masterGain || ctx.destination);
+      gain.connect(audioOutputForRole(noteRole === "bass" ? "bass" : (noteRole === "metro" ? "click" : "chords"), ctx));
 
       overtone1.connect(pickFilter);
       pickFilter.connect(pickGain);
-      pickGain.connect(masterGain || ctx.destination);
+      pickGain.connect(audioOutputForRole(noteRole === "bass" ? "bass" : (noteRole === "metro" ? "click" : "chords"), ctx));
 
       fundamental.start(now);
       overtone1.start(now);
@@ -1747,7 +2032,7 @@
       var btn = document.getElementById("playProgressionBtn");
       if (btn) {
         btn.disabled = false;
-        btn.textContent = "Play";
+        setTransportButtonState("play");
         btn.classList.remove("playing");
       }
 
@@ -1997,7 +2282,7 @@
       var osc = ctx.createOscillator(), gain = ctx.createGain();
       osc.type = "square"; osc.frequency.setValueAtTime(accent ? 1600 : 1100, when);
       gain.gain.setValueAtTime(0.0001, when); gain.gain.linearRampToValueAtTime(accent ? 0.12 : 0.08, when + 0.002); gain.gain.exponentialRampToValueAtTime(0.001, when + 0.06);
-      osc.connect(gain); gain.connect(masterGain || ctx.destination); gain.gain.value = accent ? 0.035 : 0.025; osc.start(when); osc.stop(when + 0.07);
+      osc.connect(gain); gain.connect(audioOutputForRole("click", ctx)); gain.gain.value = accent ? 0.035 : 0.025; osc.start(when); osc.stop(when + 0.07);
       trackPercussionSource(osc, gain, ctx);
     }
 
@@ -2033,7 +2318,7 @@
 
         src.connect(filter);
         filter.connect(gain);
-        gain.connect(masterGain || ctx.destination);
+        gain.connect(audioOutputForRole("drums", ctx));
         src.start(when);
         src.stop(when + duration);
         trackPercussionSource(src, gain, ctx);
@@ -2052,7 +2337,7 @@
         gain.gain.exponentialRampToValueAtTime(0.001, when + duration);
 
         osc.connect(gain);
-        gain.connect(masterGain || ctx.destination);
+        gain.connect(audioOutputForRole("drums", ctx));
         osc.start(when);
         osc.stop(when + duration + .01);
         progressionOscillators.push({osc:osc,gain:gain,ctx:ctx});
@@ -2086,7 +2371,7 @@
         g.gain.setValueAtTime(.055,when);
         g.gain.exponentialRampToValueAtTime(.001,when+.035);
         osc.connect(g);
-        g.connect(masterGain || ctx.destination);
+        g.connect(audioOutputForRole("drums", ctx));
         osc.start(when);
         osc.stop(when+.04);
         progressionOscillators.push({osc:osc,gain:g,ctx:ctx});
@@ -2145,31 +2430,98 @@
       return deg.replace(/^b/, "♭");
     }
 
+    function progressionModeForSelection() {
+      var select = document.getElementById("progressionSelect");
+      var opt = select && select.options ? select.options[select.selectedIndex] : null;
+      var group = (opt && opt.parentElement && opt.parentElement.tagName === "OPTGROUP")
+        ? opt.parentElement.label : "";
+      var text = ((group || "") + " " + (opt ? opt.textContent : "")).toLowerCase();
+
+      // The selected progression defines the active modal collection.
+      // The clicked note remains the tonal center; the parent major key is
+      // derived from center + mode rather than the other way around.
+      if (text.indexOf("dorian") !== -1) return "dorian";
+      if (text.indexOf("phrygian") !== -1) return "phrygian";
+      // Test Mixolydian before Lydian because "mixolydian" contains
+      // the substring "lydian".
+      if (text.indexOf("mixolydian") !== -1) return "mixolydian";
+      if (text.indexOf("lydian") !== -1) return "lydian";
+      if (text.indexOf("locrian") !== -1) return "locrian";
+      if (text.indexOf("aeolian") !== -1 || group.toLowerCase().indexOf("minor /") !== -1) return "aeolian";
+      return "ionian";
+    }
+
     function progressionModeForDegrees(degrees) {
-      // Circle uses only two diatonic reference frames:
-      // Major for major-tonic phrases and Minor/Aeolian for minor-tonic phrases.
-      // Mixolydian, Dorian, secondary dominants and modal mixture are colors
-      // relative to those frames, not replacement "keys."
-      return degrees.indexOf("i") !== -1 ? "aeolian" : "major";
+      // Keep the old argument for callers, but mode now comes from the
+      // selected progression family. This prevents a modal progression from
+      // being colored against parallel major/minor by mistake.
+      return progressionModeForSelection();
     }
 
-    function diatonicDegreesForMode(mode) {
-      if (mode === "aeolian") return ["i","ii","bIII","iv","v","bVI","bVII"];
-      return ["I","ii","iii","IV","V","vi"];
+    function modeDisplayName(mode) {
+      var names = {
+        ionian:"Major / Ionian", dorian:"Dorian", phrygian:"Phrygian",
+        lydian:"Lydian", mixolydian:"Mixolydian", aeolian:"Minor / Aeolian",
+        locrian:"Locrian"
+      };
+      return names[mode] || "Major / Ionian";
     }
 
-    function isDegreeDiatonic(deg, mode) {
-      return diatonicDegreesForMode(mode || "major").indexOf(deg) !== -1;
+    function canonicalMajorForPitchClass(pc) {
+      var byPC = ["C","Db","D","Eb","E","F","F#","G","Ab","A","Bb","B"];
+      return byPC[((pc % 12) + 12) % 12];
+    }
+
+    function parentMajorForMode(tonicKey, mode) {
+      var tonicName = KEY_NOTES[tonicKey] ? KEY_NOTES[tonicKey][0] : tonicKey;
+      var tonicPC = PC_MAP[tonicName];
+      var modalDegreeOffset = {
+        ionian:0, dorian:2, phrygian:4, lydian:5,
+        mixolydian:7, aeolian:9, locrian:11
+      };
+      var offset = modalDegreeOffset.hasOwnProperty(mode) ? modalDegreeOffset[mode] : 0;
+      return canonicalMajorForPitchClass(tonicPC - offset);
+    }
+
+    function modeNumber(mode) {
+      var numbers = {ionian:1, dorian:2, phrygian:3, lydian:4, mixolydian:5, aeolian:6, locrian:7};
+      return numbers[mode] || 1;
+    }
+
+    function shortModeName(mode) {
+      var names = {
+        ionian:"Ionian", dorian:"Dorian", phrygian:"Phrygian",
+        lydian:"Lydian", mixolydian:"Mixolydian", aeolian:"Aeolian", locrian:"Locrian"
+      };
+      return names[mode] || "Ionian";
+    }
+
+    function centerModeLabel() {
+      var mode = progressionModeForSelection();
+      if (modeReferenceView) return modeNumber(mode) + "-Mode";
+      return displayMajorForCanonical(selectedMajor) + "-" + shortModeName(mode);
+    }
+
+    function romanLabelForChordRelativeToParent(deg, mode) {
+      var info = chordInfoForDegree(selectedMajor, deg);
+      if (!info || !info.midiNotes || !info.midiNotes.length) return normalizedDegreeLabel(deg);
+      var parent = parentMajorForMode(selectedMajor, mode);
+      var parentTonicPC = PC_MAP[KEY_NOTES[parent][0]];
+      var rootPC = ((info.midiNotes[0] % 12) + 12) % 12;
+      var offset = (rootPC - parentTonicPC + 12) % 12;
+      var roots = ["I","♭II","II","♭III","III","IV","♯IV","V","♭VI","VI","♭VII","VII"];
+      var label = roots[offset];
+      if (info.quality === "minor" || info.quality === "dim") {
+        label = label.replace(/[IV]+/g, function(x){ return x.toLowerCase(); });
+      }
+      if (info.quality === "dim") label += "°";
+      return label;
     }
 
     function progressionContext() {
       var prog = getSelectedProgression();
       var mode = progressionModeForDegrees(prog.degrees);
-      return {prog:prog, mode:mode};
-    }
-
-    function modeDisplayName(mode) {
-      return mode === "aeolian" ? "Minor / Aeolian" : "Major";
+      return {prog:prog, mode:mode, parentMajor:parentMajorForMode(selectedMajor, mode)};
     }
 
     function scaledProgressionBeats(baseBeats) {
@@ -2195,8 +2547,31 @@
     }
 
     function modeScalePitchClasses(tonicPC, mode) {
-      var ints = mode==="aeolian" ? [0,2,3,5,7,8,10] : [0,2,4,5,7,9,11];
-      var out={}; for(var i=0;i<ints.length;i++) out[(tonicPC+ints[i])%12]=true; return out;
+      var intervalsByMode = {
+        ionian:     [0,2,4,5,7,9,11],
+        dorian:     [0,2,3,5,7,9,10],
+        phrygian:   [0,1,3,5,7,8,10],
+        lydian:     [0,2,4,6,7,9,11],
+        mixolydian: [0,2,4,5,7,9,10],
+        aeolian:    [0,2,3,5,7,8,10],
+        locrian:    [0,1,3,5,6,8,10]
+      };
+      var ints = intervalsByMode[mode] || intervalsByMode.ionian;
+      var out={};
+      for(var i=0;i<ints.length;i++) out[(tonicPC+ints[i])%12]=true;
+      return out;
+    }
+
+    function isDegreeDiatonic(deg, mode) {
+      var info = chordInfoForDegree(selectedMajor, deg);
+      if (!info || !info.midiNotes || !info.midiNotes.length) return false;
+      var tonicPC = PC_MAP[KEY_NOTES[selectedMajor][0]];
+      var allowed = modeScalePitchClasses(tonicPC, mode || "ionian");
+      for (var i=0; i<info.midiNotes.length; i++) {
+        var pc = ((info.midiNotes[i] % 12) + 12) % 12;
+        if (!allowed[pc]) return false;
+      }
+      return true;
     }
     function intervalLabelFromTonic(n, preferSharp, referenceMode) {
       var pc=((n%12)+12)%12;
@@ -2236,8 +2611,19 @@
         C:0,"C#":1,Db:1,D:2,"D#":3,Eb:3,E:4,F:5,
         "F#":6,Gb:6,G:7,"G#":8,Ab:8,A:9,"A#":10,Bb:10,B:11
       };
-      var tonic = chroma[KEY_NOTES[selectedMajor][0]];
-      var allowed = modeScalePitchClasses(tonic, mode);
+      var modalTonic = chroma[KEY_NOTES[selectedMajor][0]];
+      var allowed = modeScalePitchClasses(modalTonic, mode);
+      var referenceTonic = modalTonic;
+      var referenceMode = mode;
+
+      // In the tapped 1–7 Mode view, interval numbers are referenced to
+      // the parent major key while the green/red test remains the active
+      // modal collection. Example: G Mixolydian -> C-major interval numbers.
+      if (modeReferenceView) {
+        var parent = parentMajorForMode(selectedMajor, mode);
+        referenceTonic = chroma[KEY_NOTES[parent][0]];
+        referenceMode = "ionian";
+      }
 
       // Preserve Circle's established functional spelling:
       // raised tones in major-function chromatic chords use sharps;
@@ -2247,7 +2633,7 @@
       return info.midiNotes.map(function(midi){
         var pc = ((midi % 12) + 12) % 12;
         return {
-          label: intervalLabelFromTonic(pc - tonic, preferSharp, mode),
+          label: intervalLabelFromTonic(pc - referenceTonic, preferSharp, referenceMode),
           diatonic: !!allowed[pc]
         };
       });
@@ -2282,7 +2668,9 @@
         }
 
         var roman=document.createElement("div");
-        roman.textContent=normalizedDegreeLabel(d);
+        roman.textContent = modeReferenceView
+          ? romanLabelForChordRelativeToParent(d, mode)
+          : normalizedDegreeLabel(d);
         chip.appendChild(roman);
 
         var triadIntervals = triadIntervalDisplayForDegree(d,mode);
@@ -2360,6 +2748,7 @@
     function setLowerControlsPlaybackHidden(hidden) {
       var lower = document.getElementById("lowerControls");
       var meter = document.querySelector(".top-arrangement > .meter-row");
+      var mixer = document.getElementById("playbackMixer");
 
       if (lower) {
         lower.classList.toggle("playback-hidden", !!hidden);
@@ -2370,6 +2759,35 @@
         meter.classList.toggle("playback-hidden", !!hidden);
         meter.setAttribute("aria-hidden", hidden ? "true" : "false");
       }
+
+      if (mixer) {
+        mixer.classList.toggle("active", !!hidden);
+        mixer.setAttribute("aria-hidden", hidden ? "false" : "true");
+      }
+    }
+
+    function setTransportButtonState(state) {
+      var btn = document.getElementById("playProgressionBtn");
+      if (!btn) return;
+
+      var isStop = state === "stop";
+      btn.setAttribute("aria-label", isStop ? "Stop" : (state === "loading" ? "Loading" : "Play"));
+      btn.setAttribute("title", isStop ? "Stop" : "Play");
+      btn.innerHTML =
+        '<span class="transport-icon ' +
+        (isStop ? "stop-icon" : "play-icon") +
+        '" aria-hidden="true"></span>';
+    }
+
+    function syncMixButtonStates() {
+      ["bassToggle","chordToggle","percussionToggle","metronomeToggle"].forEach(function(id){
+        var input = document.getElementById(id);
+        if (!input) return;
+        var label = input.closest ? input.closest("label") : input.parentElement;
+        if (!label) return;
+        label.classList.toggle("mix-active", !!input.checked);
+        label.setAttribute("aria-pressed", input.checked ? "true" : "false");
+      });
     }
 
     function startProgressionLoop() {
@@ -2380,7 +2798,7 @@
         var btn = document.getElementById("playProgressionBtn");
         if (btn) {
           btn.disabled = true;
-          btn.textContent = "Loading…";
+          setTransportButtonState("loading");
         }
 
         var startupLoads = [
@@ -2397,7 +2815,7 @@
           progressionPlaying = true;
           if (btn) {
             btn.disabled = false;
-            btn.textContent = "Stop";
+            setTransportButtonState("stop");
             btn.classList.add("playing");
           }
 
@@ -2425,7 +2843,17 @@
 
       circle(svg, cx, cy, outerOuterR, "#171a1d", "#454b51", 2);
       circle(svg, cx, cy, innerOuterR, "#15181a", "#454b51", 2);
-      circle(svg, cx, cy, innerInnerR, "#111315", "#454b51", 1.5); // center intentionally blank
+      var centerDisk = circle(svg, cx, cy, innerInnerR, "#111315", "#454b51", 1.5);
+      centerDisk.setAttribute("class", "clickable");
+      centerDisk.setAttribute("role", "button");
+      centerDisk.setAttribute("aria-label", "Toggle modal analysis reference");
+      centerDisk.addEventListener("click", function(){
+        modeReferenceView = !modeReferenceView;
+        render(selectedMajor);
+        renderProgressionStrip(null, null, false);
+      });
+      var centerLabel = text(svg, cx, cy + 5, centerModeLabel(), { size: 14, weight: 700, fill: "#f2f4f5" });
+      centerLabel.setAttribute("pointer-events", "none");
 
       for (var i = 0; i < MAJOR_KEYS.length; i++) {
         var major = MAJOR_KEYS[i], minor = REL_MINOR[major];
@@ -2481,14 +2909,31 @@
         else if (majorIsCue) outer.setAttribute("class", "clickable next-cue-wedge");
         var majorTextR = 165, majorX = cx + Math.cos(centerAngle) * majorTextR, majorY = cy + Math.sin(centerAngle) * majorTextR + 8, majorDx = 0;
 
-        // Persistent selected-key marker. Keep it independent of the
-        // current/next chord playback highlighting.
-        if (major === selectedMajor) {
+        // The white circle marks the parent major collection, not the modal
+        // center. Example: A Mixolydian -> D major circled; D Dorian -> C.
+        var activeMode = progressionModeForSelection();
+        var parentMajor = parentMajorForMode(selectedMajor, activeMode);
+        if (major === parentMajor) {
           circle(svg, majorX + majorDx, majorY - 7, 24, "none", "#f2f4f5", 2.5);
         }
 
         text(svg, majorX + majorDx, majorY, majorDisplay, { size: majorSize, weight: 800, fill: majorText });
         (function(m,md){ outer.addEventListener("click", function(){
+          var mode = progressionModeForSelection();
+
+          // In an explicit modal progression, clicking a note chooses that
+          // pitch as the modal center. The mode stays fixed, and the parent
+          // major collection (white circle) is recalculated automatically.
+          if (mode !== "ionian") {
+            stopProgressionPlayback();
+            stopArpeggioOnly();
+            setSpellingFromSelectedDisplay(md,m);
+            selectedMajor = m;
+            render(m);
+            renderProgressionStrip(null, null, false);
+            return;
+          }
+
           var info = romanInfoForWedge(selectedMajor, m, "outer");
           if (info.playable) handleChordClick(info.root, info.quality, info.roman, m, "outer");
           else {
@@ -2506,6 +2951,23 @@
         var minorTextR = 98, minorX = cx + Math.cos(centerAngle) * minorTextR, minorY = cy + Math.sin(centerAngle) * minorTextR + 7, minorDx = 0;
         text(svg, minorX + minorDx, minorY, minorDisplay, { size: minorSize, weight: 800, fill: minorText });
         (function(mn,md,relMaj){ inner.addEventListener("click", function(){
+          var mode = progressionModeForSelection();
+
+          // A modal center is a pitch, not a major/minor chord label. Clicking
+          // an inner-ring minor chord therefore selects its root as the same
+          // modal center (e.g. Dm -> D Dorian when Dorian is active).
+          if (mode !== "ionian") {
+            stopProgressionPlayback();
+            stopArpeggioOnly();
+            var rootName = mn.slice(0,-1);
+            var centerKey = canonicalMajorForPitchClass(PC_MAP[rootName]);
+            setSpellingFromSelectedDisplay(md.slice(0,-1), centerKey);
+            selectedMajor = centerKey;
+            render(centerKey);
+            renderProgressionStrip(null, null, false);
+            return;
+          }
+
           var info = romanInfoForWedge(selectedMajor, mn, "inner");
           if (info.playable) handleChordClick(info.root, info.quality, info.roman, mn, "inner");
           else {
@@ -4109,8 +4571,62 @@
       return "Two-feel roots";
     }
 
+    // v1.57+: Progression is the accompaniment style leader in every meter.
+    // Assignments are distributed through the available guitar/percussion/bass
+    // libraries before repeating. Musical matches are preferred when possible,
+    // but coverage of the available palette is the primary automation goal.
+    var progressionStyleCursor = {};
+
+    function availableSelectNames(select) {
+      if(!select) return [];
+      return Array.prototype.map.call(select.options, function(o){ return o.textContent.trim(); });
+    }
+
+    function styleKeywordsForProgression(text) {
+      var t=(text||"").toLowerCase();
+      if(/bossa|latin|phrygian|tango/.test(t)) return ["bossa","latin","tango"];
+      if(/jazz|ii|v|cadence|secondary/.test(t)) return ["jazz","swing","charleston"];
+      if(/minor|dorian|soul|r&b/.test(t)) return ["soul","funk","neo","r&b"];
+      if(/rock|mixolydian|anthem|power/.test(t)) return ["rock","driving","power"];
+      if(/pop/.test(t)) return ["pop","ballad"];
+      return ["folk","two","straight"];
+    }
+
+    function chooseDistributedStyle(select, preferred, meter) {
+      var options=availableSelectNames(select);
+      if(!options.length) return null;
+      var pool=options.filter(function(n){ return preferred.some(function(k){return n.toLowerCase().indexOf(k)!==-1;}); });
+      if(!pool.length) pool=options;
+      var key=meter+"|"+(select.id||"style");
+      var i=progressionStyleCursor[key]||0;
+      var choice=pool[i % pool.length];
+      progressionStyleCursor[key]=i+1;
+      return choice;
+    }
+
+    function getProgressionStyleAssignment(key, meter, phraseText) {
+      var explicit=progressionAccompanimentMap[key];
+      var prefs=styleKeywordsForProgression((phraseText||"")+" "+(key||""));
+      var guitar=explicit && explicit.guitar;
+      var percussion=explicit && explicit.percussion;
+
+      // Retain logical historical choices where they exist, but repair obsolete
+      // names by falling through to the distributed library selection.
+      var guitarSelect=document.getElementById("guitarPatternSelect");
+      var percussionSelect=document.getElementById("rhythmSelect");
+      var bassSelect=document.getElementById("bassPatternSelect");
+      if(!guitar || !availableSelectNames(guitarSelect).includes(guitar))
+        guitar=chooseDistributedStyle(guitarSelect,prefs,meter);
+      if(!percussion || !availableSelectNames(percussionSelect).includes(percussion))
+        percussion=chooseDistributedStyle(percussionSelect,prefs,meter);
+
+      var bass=associatedBassPatternFor(percussion);
+      if(!availableSelectNames(bassSelect).includes(bass))
+        bass=chooseDistributedStyle(bassSelect,prefs,meter);
+      return {guitar:guitar, percussion:percussion, bass:bass};
+    }
+
     function applyAssociatedAccompanimentForProgression() {
-      if (currentTimeSignature !== "4/4") return;
       var progressionSelect=document.getElementById("progressionSelect");
       var guitarSelect=document.getElementById("guitarPatternSelect");
       var bassSelect=document.getElementById("bassPatternSelect");
@@ -4119,12 +4635,12 @@
       if(!opt) return;
 
       var key=optionGroupLabel(opt)+"||"+opt.textContent.trim();
-      var pairing=progressionAccompanimentMap[key];
-      if(!pairing) return;
+      var assignment=getProgressionStyleAssignment(key,currentTimeSignature,opt.textContent.trim());
+      if(!assignment) return;
 
-      selectOptionByVisibleText(guitarSelect,pairing.guitar);
-      selectOptionByVisibleText(percussionSelect,pairing.percussion);
-      selectOptionByVisibleText(bassSelect,associatedBassPatternFor(pairing.percussion));
+      selectOptionByVisibleText(guitarSelect,assignment.guitar);
+      selectOptionByVisibleText(percussionSelect,assignment.percussion);
+      selectOptionByVisibleText(bassSelect,assignment.bass);
 
       updateTrigger(guitarSelect);
       updateTrigger(bassSelect);
@@ -4132,6 +4648,17 @@
     }
 
     document.getElementById("playProgressionBtn").addEventListener("click", function(){ if (progressionPlaying) stopProgressionPlayback(); else startProgressionLoop(); });
+    ["bassToggle","chordToggle","percussionToggle","metronomeToggle"].forEach(function(id){
+      var input = document.getElementById(id);
+      if (!input) return;
+      input.addEventListener("change", syncMixButtonStates);
+    });
+    ["bassFader","chordsFader","drumsFader","clickFader"].forEach(function(id){
+      var fader = document.getElementById(id);
+      if (!fader) return;
+      fader.addEventListener("input", applyMixerLevels);
+      fader.addEventListener("change", applyMixerLevels);
+    });
     document.getElementById("progressionSelect").addEventListener("change", function(){
       if (progressionPlaying) stopProgressionPlayback();
       applyAssociatedAccompanimentForProgression();
@@ -4179,6 +4706,9 @@ function primeAudioSamples(){
     }, { once: true });
 
     selectedSpellingPreference = "conventional";
+    setTransportButtonState("play");
+    syncMixButtonStates();
+    applyMixerLevels();
     setLowerControlsPlaybackHidden(false);
     render("C");
     renderProgressionStrip(null, null, false);
