@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Circle v1.72</title>
+  <title>Circle v1.81</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -278,7 +278,9 @@
     .choice-overlay.open { display:flex; }
     .choice-sheet {
       width:min(100%,520px);
-      max-height:min(82vh,760px);
+      height:440px;
+      min-height:440px;
+      max-height:440px;
       position:relative;
       /* v1.71: true transparent glass.  Apply the blur directly to the
          dialog instead of a pseudo-element/isolated stacking context so
@@ -305,15 +307,32 @@
       font-size:17px;
       font-weight:900;
       color:#f2f4f5;
+      min-width:0;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
     }
-    .choice-close {
+    .choice-head-actions {
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex:0 0 auto;
+    }
+    .choice-head-actions button {
       border:1px solid #565d63;
       background:#202428;
       color:#f2f4f5;
       border-radius:9px;
       padding:7px 11px;
       font:inherit;
-      font-weight:800;
+      font-weight:850;
+      white-space:nowrap;
+      opacity:1;
+    }
+    .choice-head-actions .choice-done {
+      background:#e6e8ea;
+      color:#111315;
+      border-color:#fff;
     }
     .choice-tabs {
       display:flex;
@@ -324,13 +343,15 @@
       scrollbar-width:none;
     }
     .choice-tabs::-webkit-scrollbar { display:none; }
-    .choice-tabs.percussion-four-four {
+    .choice-tabs.percussion-four-four,
+    .choice-tabs.guitar-four-four {
       display:grid;
       grid-template-columns:repeat(4,minmax(0,1fr));
       gap:7px;
       overflow-x:visible;
     }
-    .choice-tabs.percussion-four-four .choice-tab {
+    .choice-tabs.percussion-four-four .choice-tab,
+    .choice-tabs.guitar-four-four .choice-tab {
       width:100%;
       min-width:0;
       padding-left:4px;
@@ -338,15 +359,136 @@
       text-align:center;
     }
 
-    /* v1.67+: Keep the 4/4 percussion choice area the same height as the
-       three Accompaniment controls (3 x 40px controls + 2 x 5px gaps).
-       Larger categories scroll inside this fixed viewport; smaller ones leave
-       quiet empty space so the chooser never jumps in size between tabs. */
+    .choice-tabs.bass-four-four {
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:7px;
+      overflow-x:visible;
+    }
+    .choice-tabs.bass-four-four .choice-tab {
+      width:100%;
+      min-width:0;
+      padding-left:4px;
+      padding-right:4px;
+      text-align:center;
+    }
+
+    .choice-tabs.percussion-three-four {
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:7px;
+      overflow-x:visible;
+    }
+    .choice-tabs.guitar-three-four {
+      display:grid;
+      grid-template-columns:repeat(5,minmax(0,1fr));
+      gap:7px;
+      overflow-x:visible;
+    }
+    .choice-tabs.bass-three-four {
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:7px;
+      overflow-x:visible;
+    }
+    .choice-tabs.percussion-three-four .choice-tab,
+    .choice-tabs.guitar-three-four .choice-tab,
+    .choice-tabs.bass-three-four .choice-tab {
+      width:100%;
+      min-width:0;
+      padding-left:4px;
+      padding-right:4px;
+      text-align:center;
+    }
+
+    .choice-tabs.percussion-six-eight {
+      display:grid;
+      grid-template-columns:repeat(5,minmax(0,1fr));
+      gap:7px;
+      overflow-x:visible;
+    }
+    .choice-tabs.guitar-six-eight {
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:7px;
+      overflow-x:visible;
+    }
+    .choice-tabs.bass-six-eight {
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:7px;
+      overflow-x:visible;
+    }
+    .choice-tabs.percussion-six-eight .choice-tab,
+    .choice-tabs.guitar-six-eight .choice-tab,
+    .choice-tabs.bass-six-eight .choice-tab {
+      width:100%;
+      min-width:0;
+      padding-left:4px;
+      padding-right:4px;
+      text-align:center;
+    }
+
+    .choice-tabs.percussion-twelve-eight {
+      display:grid;
+      grid-template-columns:repeat(5,minmax(0,1fr));
+      gap:7px;
+      overflow-x:visible;
+    }
+    .choice-tabs.guitar-twelve-eight {
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:7px;
+      overflow-x:visible;
+    }
+    .choice-tabs.bass-twelve-eight {
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:7px;
+      overflow-x:visible;
+    }
+    .choice-tabs.percussion-twelve-eight .choice-tab,
+    .choice-tabs.guitar-twelve-eight .choice-tab,
+    .choice-tabs.bass-twelve-eight .choice-tab {
+      width:100%;
+      min-width:0;
+      padding-left:4px;
+      padding-right:4px;
+      text-align:center;
+    }
+
+    .choice-tabs.percussion-two-four {
+      display:grid;
+      grid-template-columns:repeat(5,minmax(0,1fr));
+      gap:7px;
+      overflow-x:visible;
+    }
+    .choice-tabs.guitar-two-four {
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:7px;
+      overflow-x:visible;
+    }
+    .choice-tabs.bass-two-four {
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:7px;
+      overflow-x:visible;
+    }
+    .choice-tabs.percussion-two-four .choice-tab,
+    .choice-tabs.guitar-two-four .choice-tab,
+    .choice-tabs.bass-two-four .choice-tab {
+      width:100%;
+      min-width:0;
+      padding-left:4px;
+      padding-right:4px;
+      text-align:center;
+    }
+
+    /* v1.80: Every chooser uses the same fixed outer height, doubled to match the requested popup footprint.  The choice
+       viewport consumes whatever space remains below the header/tabs and
+       scrolls internally when its choices exceed that space. */
     .choice-tabs.percussion-four-four + .choice-grid {
-      box-sizing:border-box;
-      height:130px;
-      min-height:130px;
-      max-height:130px;
       overflow-y:auto;
       overscroll-behavior:contain;
       align-content:start;
@@ -374,25 +516,30 @@
       padding:12px;
       display:grid;
       grid-template-columns:repeat(2,minmax(0,1fr));
+      grid-auto-rows:62px;
+      align-content:start;
       gap:9px;
-      min-height:180px;
+      flex:1 1 auto;
+      min-height:0;
+      overscroll-behavior:contain;
     }
     /* Popup interior remains transparent; interactive controls stay solid. */
     .choice-head,
     .choice-tabs,
-    .choice-grid,
-    .choice-foot {
+    .choice-grid {
       background:transparent;
     }
     .choice-tab,
     .choice-item,
-    .choice-close,
-    .choice-foot button {
+    .choice-head-actions button {
       opacity:1;
     }
 
     .choice-item {
+      box-sizing:border-box;
+      height:62px;
       min-height:62px;
+      max-height:62px;
       border:1px solid #454b51;
       background:#1b1f22;
       color:#f2f4f5;
@@ -422,27 +569,7 @@
       color:#aeb4b9;
       font-weight:700;
     }
-    .choice-foot {
-      display:flex;
-      gap:8px;
-      padding:10px 12px 12px;
-      border-top:1px solid rgba(80,88,95,.55);
-    }
-    .choice-foot button {
-      flex:1;
-      border-radius:10px;
-      padding:11px 12px;
-      font:inherit;
-      font-weight:850;
-      background:#202428;
-      color:#f2f4f5;
-      border:1px solid #565d63;
-    }
-    .choice-foot .done {
-      background:#e6e8ea;
-      color:#111315;
-      border-color:#fff;
-    }
+
     @media (max-width:380px) {
       .choice-grid { grid-template-columns:1fr; }
     }
@@ -1234,7 +1361,7 @@
 <body>
   <div class="wrap">
     <div class="panel">
-      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.68"></svg>
+      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.81"></svg>
       <div id="progressionStrip" class="progression-strip" aria-label="Progression map"></div>
       <div class="top-arrangement">
         <div class="progression-stack">
@@ -1471,7 +1598,7 @@
           </optgroup>
         </select>
       </div>
-<div class="controls accompaniment-control"><select id="guitarPatternSelect" class="source-select" aria-label="Guitar pattern"><optgroup label="Straight / Foundation">
+<div class="controls accompaniment-control"><select id="guitarPatternSelect" class="source-select" aria-label="Guitar pattern"><optgroup label="Basic">
 <option value="C@0,C@1,C@2,C@3">Quarter chords</option>
 <option value="C@0,C@2">Half-note chords</option>
 <option value="C@1,C@3">Backbeat chords</option>
@@ -1491,7 +1618,7 @@
 <option value="A0@0,A1@1,A2@2,C@3">Arp then chord</option>
 <option value="C@0,A0@1,A1@2,A2@3">Chord then arp</option>
 </optgroup>
-<optgroup label="Pop / Rock">
+<optgroup label="Pop">
 <option value="C@0.75,C@1.5,C@2.75,C@3.5">Pop push</option>
 <option value="C@1,C@1.5,C@3,C@3.5">Pop chord pocket</option>
 <option value="C@0.5,C@1,C@1.5,C@2.5,C@3,C@3.5">Driving eighths</option>
@@ -1501,17 +1628,7 @@
 <option value="C@0,C@1,C@2,C@3">Power pulse</option>
 <option value="C@0.5,C@1.5,C@2.5,C@3.5">Syncopated rock</option>
 </optgroup>
-<optgroup label="Brazilian / Latin">
-<option value="C@0.5,C@1.5,C@2.5,C@3.5">Bossa basic</option>
-<option value="C@1.5,C@3.5">Bossa sparse</option>
-<option value="A1@0.5,C@1.5,A2@2.5,C@3.5">Bossa arp</option>
-<option value="A1@0.5,A2@1,C@1.5,A1@2.5,A2@3,C@3.5">Bossa rolling</option>
-<option value="C@0.5,C@1,C@2,C@2.5,C@3.5">Samba pulse</option>
-<option value="A1@0.5,C@1,A2@1.5,A1@2.5,C@3,A2@3.5">Samba arp</option>
-<option value="C@0.75,C@1.5,C@2.75,C@3.5">Latin tresillo</option>
-<option value="C@1,C@2,C@3">Tango guitar</option>
-</optgroup>
-<optgroup label="Jazz / Swing">
+<optgroup label="Jazz">
 <option value="C@0.67,C@2,C@2.67">Swing comp</option>
 <option value="C@0,C@1.5,C@3">Charleston</option>
 <option value="C@0.5,C@2,C@3.5">Reverse Charleston</option>
@@ -1521,7 +1638,7 @@
 <option value="A1@1,A2@2,C@3">Jazz ballad</option>
 <option value="C@0,C@1,C@2,C@3">Four-to-bar comp</option>
 </optgroup>
-<optgroup label="Funk / Soul / R&B">
+<optgroup label="Funk">
 <option value="C@0.5,C@1.5,C@2.5,C@3.5">Funk stabs</option>
 <option value="C@0.5,C@1.5,C@2.5,C@3.5">Funk offbeats</option>
 <option value="C@1,C@1.5,C@3">Soul pocket</option>
@@ -1529,43 +1646,57 @@
 <option value="C@0.75,A1@1.5,C@3.25">Neo-soul space</option>
 <option value="C@0.5,C@1.5,C@2.5,C@3.5">Motown guitar</option>
 </optgroup>
-<optgroup label="Folk / Country / Other">
+<optgroup label="Latin">
+<option value="C@0.5,C@1.5,C@2.5,C@3.5">Bossa basic</option>
+<option value="C@1.5,C@3.5">Bossa sparse</option>
+<option value="A1@0.5,C@1.5,A2@2.5,C@3.5">Bossa arp</option>
+<option value="A1@0.5,A2@1,C@1.5,A1@2.5,A2@3,C@3.5">Bossa rolling</option>
+<option value="C@0.5,C@1,C@2,C@2.5,C@3.5">Samba pulse</option>
+<option value="A1@0.5,C@1,A2@1.5,A1@2.5,C@3,A2@3.5">Samba arp</option>
+<option value="C@0.75,C@1.5,C@2.75,C@3.5">Latin tresillo</option>
+<option value="C@1,C@2,C@3">Tango guitar</option>
+</optgroup>
+<optgroup label="Roots">
 <option value="C@1,C@3">Folk strum</option>
 <option value="C@1,C@3">Country chord pulse</option>
+</optgroup>
+<optgroup label="Fingerstyle">
 <option value="A1@0.5,A2@1,A1@1.5,A1@2.5,A2@3,A1@3.5">Fingerpick 1</option>
 <option value="A2@0.5,A1@1,A2@1.5,A2@2.5,A1@3,A2@3.5">Fingerpick 2</option>
 </optgroup></select></div>
 
 <div class="controls accompaniment-control">
 <select id="bassPatternSelect" class="source-select" aria-label="Bass pattern">
-  <optgroup label="Straight / Foundation">
+  <optgroup label="Basic">
     <option value="R@0">Root on 1</option>
     <option value="R@0,R@2" selected>Two-feel roots</option>
     <option value="R@0,5@2">Root–fifth</option>
     <option value="R@0,R@1,R@2,R@3">Four roots</option>
     <option value="R@0,5@1,R@2,5@3">Alternating root–fifth</option>
   </optgroup>
-  <optgroup label="Brazilian / Latin">
-    <option value="R@0,5@1.5,R@2,5@3.5">Bossa basic</option>
-    <option value="R@0,5@2.5">Bossa sparse</option>
-    <option value="R@0,5@0.75,R@1.5,5@2,R@2.75,5@3.5">Samba pulse</option>
-    <option value="R@0,5@1.5,R@2.5">Latin tresillo</option>
-  </optgroup>
-  <optgroup label="Jazz / Swing">
+  <optgroup label="Jazz">
     <option value="R@0,5@2">Jazz two-feel</option>
     <option value="R@0,3@1,5@2,3@3">Walking chord tones</option>
     <option value="R@0,5@1.5,R@3">Charleston bass</option>
   </optgroup>
-  <optgroup label="Funk / Soul / R&amp;B">
+  <optgroup label="Funk">
     <option value="R@0,R@0.75,5@1.5,R@2.5,5@3.25">Funk syncopated</option>
     <option value="R@0,5@2,R@3">Soul pocket</option>
     <option value="R@0,5@1,R@2,3@3">Motown movement</option>
     <option value="R@0,5@2.5">Neo-soul sparse</option>
   </optgroup>
-  <optgroup label="Folk / Country / Other">
+  <optgroup label="Latin">
+    <option value="R@0,5@1.5,R@2,5@3.5">Bossa basic</option>
+    <option value="R@0,5@2.5">Bossa sparse</option>
+    <option value="R@0,5@0.75,R@1.5,5@2,R@2.75,5@3.5">Samba pulse</option>
+    <option value="R@0,5@1.5,R@2.5">Latin tresillo</option>
+  </optgroup>
+  <optgroup label="Roots">
     <option value="R@0,5@2">Country boom-chuck</option>
     <option value="R@0,3@1,5@2,3@3">Country walk</option>
     <option value="R@0,R@2">Folk two-feel</option>
+  </optgroup>
+  <optgroup label="Reggae">
     <option value="R@0,5@2.5">Reggae sparse</option>
   </optgroup>
 </select>
@@ -3240,9 +3371,9 @@
     // ---------- Compact category browsers ----------
     var selectorBrowserConfig = {
       progressionSelect: { label:"Progression", title:"Choose Progression", recentKey:"circle_recent_progressions" },
-      guitarPatternSelect: { label:"Guitar", title:"Choose Guitar Pattern", recentKey:"circle_recent_guitar" },
-      bassPatternSelect: { label:"Bass", title:"Choose Bass Pattern", recentKey:"circle_recent_bass" },
-      rhythmSelect: { label:"Percussion", title:"Choose Percussion Rhythm", recentKey:"circle_recent_percussion" }
+      guitarPatternSelect: { label:"Guitar", title:"Guitar Pattern", recentKey:"circle_recent_guitar" },
+      bassPatternSelect: { label:"Bass", title:"Bass Pattern", recentKey:"circle_recent_bass" },
+      rhythmSelect: { label:"Percussion", title:"Percussion Rhythm", recentKey:"circle_recent_percussion" }
     };
     var activeBrowserSelect = null;
     var activeBrowserCategory = null;
@@ -3374,7 +3505,8 @@
         if(!seen[c]) { seen[c]=true; cats.push(c); }
       });
       var cfg=selectorBrowserConfig[select.id];
-      var suppressRecent = (select.id === "rhythmSelect" && currentTimeSignature === "4/4");
+      var suppressRecent = ((currentTimeSignature === "4/4" || currentTimeSignature === "3/4" || currentTimeSignature === "6/8" || currentTimeSignature === "12/8" || currentTimeSignature === "2/4") &&
+        (select.id === "rhythmSelect" || select.id === "guitarPatternSelect" || select.id === "bassPatternSelect"));
       if(!suppressRecent && readRecentValues(cfg.recentKey).length) cats.unshift("Recent");
       return cats;
     }
@@ -3405,7 +3537,35 @@
       var host=document.getElementById("choiceTabs");
       host.innerHTML="";
       var fourFourPercussion = !!(activeBrowserSelect && activeBrowserSelect.id === "rhythmSelect" && currentTimeSignature === "4/4");
+      var fourFourGuitar = !!(activeBrowserSelect && activeBrowserSelect.id === "guitarPatternSelect" && currentTimeSignature === "4/4");
+      var fourFourBass = !!(activeBrowserSelect && activeBrowserSelect.id === "bassPatternSelect" && currentTimeSignature === "4/4");
       host.classList.toggle("percussion-four-four", fourFourPercussion);
+      host.classList.toggle("guitar-four-four", fourFourGuitar);
+      host.classList.toggle("bass-four-four", fourFourBass);
+      var threeFourPercussion = !!(activeBrowserSelect && activeBrowserSelect.id === "rhythmSelect" && currentTimeSignature === "3/4");
+      var threeFourGuitar = !!(activeBrowserSelect && activeBrowserSelect.id === "guitarPatternSelect" && currentTimeSignature === "3/4");
+      var threeFourBass = !!(activeBrowserSelect && activeBrowserSelect.id === "bassPatternSelect" && currentTimeSignature === "3/4");
+      host.classList.toggle("percussion-three-four", threeFourPercussion);
+      host.classList.toggle("guitar-three-four", threeFourGuitar);
+      host.classList.toggle("bass-three-four", threeFourBass);
+      var sixEightPercussion = !!(activeBrowserSelect && activeBrowserSelect.id === "rhythmSelect" && currentTimeSignature === "6/8");
+      var sixEightGuitar = !!(activeBrowserSelect && activeBrowserSelect.id === "guitarPatternSelect" && currentTimeSignature === "6/8");
+      var sixEightBass = !!(activeBrowserSelect && activeBrowserSelect.id === "bassPatternSelect" && currentTimeSignature === "6/8");
+      host.classList.toggle("percussion-six-eight", sixEightPercussion);
+      host.classList.toggle("guitar-six-eight", sixEightGuitar);
+      host.classList.toggle("bass-six-eight", sixEightBass);
+      var twelveEightPercussion = !!(activeBrowserSelect && activeBrowserSelect.id === "rhythmSelect" && currentTimeSignature === "12/8");
+      var twelveEightGuitar = !!(activeBrowserSelect && activeBrowserSelect.id === "guitarPatternSelect" && currentTimeSignature === "12/8");
+      var twelveEightBass = !!(activeBrowserSelect && activeBrowserSelect.id === "bassPatternSelect" && currentTimeSignature === "12/8");
+      host.classList.toggle("percussion-twelve-eight", twelveEightPercussion);
+      host.classList.toggle("guitar-twelve-eight", twelveEightGuitar);
+      host.classList.toggle("bass-twelve-eight", twelveEightBass);
+      var twoFourPercussion = !!(activeBrowserSelect && activeBrowserSelect.id === "rhythmSelect" && currentTimeSignature === "2/4");
+      var twoFourGuitar = !!(activeBrowserSelect && activeBrowserSelect.id === "guitarPatternSelect" && currentTimeSignature === "2/4");
+      var twoFourBass = !!(activeBrowserSelect && activeBrowserSelect.id === "bassPatternSelect" && currentTimeSignature === "2/4");
+      host.classList.toggle("percussion-two-four", twoFourPercussion);
+      host.classList.toggle("guitar-two-four", twoFourGuitar);
+      host.classList.toggle("bass-two-four", twoFourBass);
       var cats=browserCategories(activeBrowserSelect);
       if(!activeBrowserCategory || cats.indexOf(activeBrowserCategory)===-1) {
         activeBrowserCategory=optionCategory(selectedOptionFor(activeBrowserSelect));
@@ -3520,12 +3680,10 @@
         if(s && !document.getElementById(id+"Trigger")) makeTrigger(s);
       });
 
-      var closeBtn=document.getElementById("choiceClose");
       var doneBtn=document.getElementById("choiceDone");
       var previewBtn=document.getElementById("choicePreview");
       var overlay=document.getElementById("choiceOverlay");
 
-      if(closeBtn) closeBtn.addEventListener("click",closeChoiceBrowser);
       if(doneBtn) doneBtn.addEventListener("click",closeChoiceBrowser);
       if(previewBtn) previewBtn.addEventListener("click",toggleBrowserPreview);
       if(overlay) overlay.addEventListener("click",function(e){
@@ -3632,152 +3790,152 @@
     // three notated eighth-note beats are grouped into one Circle pulse.
     var METER_RHYTHMS = {
       "3/4": [
-        {id:"waltz",name:"Waltz",subdivisions:4,kick:[0],snare:[4,8],hat:[0,4,8]},
-        {id:"rock-waltz",name:"Rock waltz",subdivisions:4,kick:[0,7],snare:[4,8],hat:[0,2,4,6,8,10]},
-        {id:"pop-34",name:"Pop 3/4",subdivisions:4,kick:[0,7],snare:[4,10],hat:[0,2,4,6,8,10]},
-        {id:"country-waltz",name:"Country waltz",subdivisions:4,kick:[0],snare:[4,8],hat:[0,2,4,6,8,10]},
-        {id:"jazz-waltz",name:"Jazz waltz",subdivisions:3,kick:[0,6],snare:[4,8],hat:[0,2,3,5,6,8]},
-        {id:"brush-waltz",name:"Brush waltz",subdivisions:3,kick:[0],snare:[2,5,8],hat:[0,1,2,3,4,5,6,7,8]},
-        {id:"half-34",name:"Half-time 3/4",subdivisions:4,kick:[0,8],snare:[6],hat:[0,2,4,6,8,10]},
-        {id:"folk-waltz",name:"Folk waltz",subdivisions:4,kick:[0],snare:[4,8],hat:[0,4,8]},
-        {id:"heavy-34",name:"Heavy 3/4",subdivisions:4,kick:[0,6,8],snare:[4,10],hat:[0,2,4,6,8,10]},
-        {id:"sync-34",name:"Syncopated 3/4",subdivisions:4,kick:[0,3,7,10],snare:[4,8],hat:[0,2,4,6,8,10]}
+        {group:"Basic",id:"waltz",name:"Waltz",subdivisions:4,kick:[0],snare:[4,8],hat:[0,4,8]},
+        {group:"Pop",id:"rock-waltz",name:"Rock waltz",subdivisions:4,kick:[0,7],snare:[4,8],hat:[0,2,4,6,8,10]},
+        {group:"Pop",id:"pop-34",name:"Pop 3/4",subdivisions:4,kick:[0,7],snare:[4,10],hat:[0,2,4,6,8,10]},
+        {group:"Roots",id:"country-waltz",name:"Country waltz",subdivisions:4,kick:[0],snare:[4,8],hat:[0,2,4,6,8,10]},
+        {group:"Jazz",id:"jazz-waltz",name:"Jazz waltz",subdivisions:3,kick:[0,6],snare:[4,8],hat:[0,2,3,5,6,8]},
+        {group:"Jazz",id:"brush-waltz",name:"Brush waltz",subdivisions:3,kick:[0],snare:[2,5,8],hat:[0,1,2,3,4,5,6,7,8]},
+        {group:"Basic",id:"half-34",name:"Half-time 3/4",subdivisions:4,kick:[0,8],snare:[6],hat:[0,2,4,6,8,10]},
+        {group:"Roots",id:"folk-waltz",name:"Folk waltz",subdivisions:4,kick:[0],snare:[4,8],hat:[0,4,8]},
+        {group:"Pop",id:"heavy-34",name:"Heavy 3/4",subdivisions:4,kick:[0,6,8],snare:[4,10],hat:[0,2,4,6,8,10]},
+        {group:"Basic",id:"sync-34",name:"Syncopated 3/4",subdivisions:4,kick:[0,3,7,10],snare:[4,8],hat:[0,2,4,6,8,10]}
       ],
       "6/8": [
-        {id:"basic-68",name:"Basic 6/8",subdivisions:2,kick:[0],snare:[6],hat:[0,2,4,6,8,10]},
-        {id:"rock-ballad-68",name:"6/8 rock ballad",subdivisions:2,kick:[0,4,8],snare:[6],hat:[0,2,4,6,8,10]},
-        {id:"blues-68",name:"6/8 blues",subdivisions:2,kick:[0,8],snare:[6],hat:[0,2,4,6,8,10]},
-        {id:"shuffle-68",name:"6/8 shuffle",subdivisions:2,kick:[0,5,8],snare:[6],hat:[0,2,4,6,8,10]},
-        {id:"soul-68",name:"6/8 soul",subdivisions:2,kick:[0,3,8,11],snare:[6],hat:[0,2,4,6,8,10]},
-        {id:"gospel-68",name:"6/8 gospel",subdivisions:2,kick:[0,3,5,8,11],snare:[6],hat:[0,2,4,6,8,10]},
-        {id:"half-68",name:"Half-time 6/8",subdivisions:2,kick:[0,8],snare:[6],hat:[0,4,6,10]},
-        {id:"afro-cuban-68",name:"Afro-Cuban 6/8",subdivisions:2,kick:[0,5,8],snare:[3,6,10],hat:[0,2,4,6,8,10]},
-        {id:"african-68",name:"African 6/8",subdivisions:2,kick:[0,4,8],snare:[3,7,11],hat:[0,2,4,6,8,10]},
-        {id:"march-68",name:"6/8 march",subdivisions:2,kick:[0,6],snare:[4,10],hat:[0,2,4,6,8,10]}
+        {group:"Basic",id:"basic-68",name:"Basic 6/8",subdivisions:2,kick:[0],snare:[6],hat:[0,2,4,6,8,10]},
+        {group:"Pop",id:"rock-ballad-68",name:"6/8 rock ballad",subdivisions:2,kick:[0,4,8],snare:[6],hat:[0,2,4,6,8,10]},
+        {group:"Roots",id:"blues-68",name:"6/8 blues",subdivisions:2,kick:[0,8],snare:[6],hat:[0,2,4,6,8,10]},
+        {group:"Basic",id:"shuffle-68",name:"6/8 shuffle",subdivisions:2,kick:[0,5,8],snare:[6],hat:[0,2,4,6,8,10]},
+        {group:"Funk",id:"soul-68",name:"6/8 soul",subdivisions:2,kick:[0,3,8,11],snare:[6],hat:[0,2,4,6,8,10]},
+        {group:"Roots",id:"gospel-68",name:"6/8 gospel",subdivisions:2,kick:[0,3,5,8,11],snare:[6],hat:[0,2,4,6,8,10]},
+        {group:"Basic",id:"half-68",name:"Half-time 6/8",subdivisions:2,kick:[0,8],snare:[6],hat:[0,4,6,10]},
+        {group:"Latin",id:"afro-cuban-68",name:"Afro-Cuban 6/8",subdivisions:2,kick:[0,5,8],snare:[3,6,10],hat:[0,2,4,6,8,10]},
+        {group:"Roots",id:"african-68",name:"African 6/8",subdivisions:2,kick:[0,4,8],snare:[3,7,11],hat:[0,2,4,6,8,10]},
+        {group:"Roots",id:"march-68",name:"6/8 march",subdivisions:2,kick:[0,6],snare:[4,10],hat:[0,2,4,6,8,10]}
       ],
       "12/8": [
-        {id:"blues-128",name:"12/8 blues",subdivisions:2,kick:[0,12],snare:[6,18],hat:[0,2,4,6,8,10,12,14,16,18,20,22]},
-        {id:"rock-ballad-128",name:"12/8 rock ballad",subdivisions:2,kick:[0,8,12,20],snare:[6,18],hat:[0,2,4,6,8,10,12,14,16,18,20,22]},
-        {id:"slow-blues-128",name:"12/8 slow blues",subdivisions:2,kick:[0,12,20],snare:[6,18],hat:[0,4,6,10,12,16,18,22]},
-        {id:"shuffle-128",name:"12/8 shuffle",subdivisions:2,kick:[0,5,12,17],snare:[6,18],hat:[0,2,4,6,8,10,12,14,16,18,20,22]},
-        {id:"soul-128",name:"12/8 soul",subdivisions:2,kick:[0,5,10,12,17,22],snare:[6,18],hat:[0,2,4,6,8,10,12,14,16,18,20,22]},
-        {id:"gospel-128",name:"12/8 gospel",subdivisions:2,kick:[0,4,10,12,16,22],snare:[6,18],hat:[0,2,4,6,8,10,12,14,16,18,20,22]},
-        {id:"rnb-128",name:"12/8 R&B ballad",subdivisions:2,kick:[0,10,12,22],snare:[6,18],hat:[0,2,4,6,8,10,12,14,16,18,20,22]},
-        {id:"half-128",name:"12/8 half-time",subdivisions:2,kick:[0,12],snare:[12],hat:[0,4,8,12,16,20]},
-        {id:"triplet-rock-128",name:"12/8 triplet rock",subdivisions:2,kick:[0,8,12,20],snare:[6,18],hat:[0,2,4,6,8,10,12,14,16,18,20,22]},
-        {id:"afro-128",name:"12/8 Afro-derived",subdivisions:2,kick:[0,5,10,14,20],snare:[3,8,12,17,22],hat:[0,2,4,6,8,10,12,14,16,18,20,22]}
+        {group:"Roots",id:"blues-128",name:"12/8 blues",subdivisions:2,kick:[0,12],snare:[6,18],hat:[0,2,4,6,8,10,12,14,16,18,20,22]},
+        {group:"Pop",id:"rock-ballad-128",name:"12/8 rock ballad",subdivisions:2,kick:[0,8,12,20],snare:[6,18],hat:[0,2,4,6,8,10,12,14,16,18,20,22]},
+        {group:"Roots",id:"slow-blues-128",name:"12/8 slow blues",subdivisions:2,kick:[0,12,20],snare:[6,18],hat:[0,4,6,10,12,16,18,22]},
+        {group:"Roots",id:"shuffle-128",name:"12/8 shuffle",subdivisions:2,kick:[0,5,12,17],snare:[6,18],hat:[0,2,4,6,8,10,12,14,16,18,20,22]},
+        {group:"Funk",id:"soul-128",name:"12/8 soul",subdivisions:2,kick:[0,5,10,12,17,22],snare:[6,18],hat:[0,2,4,6,8,10,12,14,16,18,20,22]},
+        {group:"Roots",id:"gospel-128",name:"12/8 gospel",subdivisions:2,kick:[0,4,10,12,16,22],snare:[6,18],hat:[0,2,4,6,8,10,12,14,16,18,20,22]},
+        {group:"Funk",id:"rnb-128",name:"12/8 R&B ballad",subdivisions:2,kick:[0,10,12,22],snare:[6,18],hat:[0,2,4,6,8,10,12,14,16,18,20,22]},
+        {group:"Basic",id:"half-128",name:"12/8 half-time",subdivisions:2,kick:[0,12],snare:[12],hat:[0,4,8,12,16,20]},
+        {group:"Pop",id:"triplet-rock-128",name:"12/8 triplet rock",subdivisions:2,kick:[0,8,12,20],snare:[6,18],hat:[0,2,4,6,8,10,12,14,16,18,20,22]},
+        {group:"Latin",id:"afro-128",name:"12/8 Afro-derived",subdivisions:2,kick:[0,5,10,14,20],snare:[3,8,12,17,22],hat:[0,2,4,6,8,10,12,14,16,18,20,22]}
       ],
       "2/4": [
-        {id:"basic-24",name:"Basic 2/4",subdivisions:4,kick:[0],snare:[4],hat:[0,2,4,6]},
-        {id:"march-24",name:"March",subdivisions:4,kick:[0,4],snare:[2,6],hat:[0,2,4,6]},
-        {id:"polka",name:"Polka",subdivisions:4,kick:[0],snare:[4],hat:[0,2,4,6]},
-        {id:"country-two",name:"Country two-beat",subdivisions:4,kick:[0,6],snare:[4],hat:[0,2,4,6]},
-        {id:"train",name:"Train beat",subdivisions:4,kick:[0,4],snare:[0,1,2,3,4,5,6,7],hat:[0,2,4,6]},
-        {id:"fast-rock-24",name:"Fast rock 2/4",subdivisions:4,kick:[0,6],snare:[4],hat:[0,2,4,6]},
-        {id:"samba",name:"Samba",subdivisions:4,kick:[0,3,4,7],snare:[2,5],hat:[0,2,4,6]},
-        {id:"baiao",name:"Baião",subdivisions:4,kick:[0,3,6],snare:[4,7],hat:[0,2,4,6]},
-        {id:"frevo",name:"Frevo",subdivisions:4,kick:[0,4],snare:[1,2,3,5,6,7],hat:[0,2,4,6]},
-        {id:"funk-24",name:"Two-beat funk",subdivisions:4,kick:[0,3,6],snare:[4,7],hat:[0,1,2,3,4,5,6,7]}
+        {group:"Basic",id:"basic-24",name:"Basic 2/4",subdivisions:4,kick:[0],snare:[4],hat:[0,2,4,6]},
+        {group:"Roots",id:"march-24",name:"March",subdivisions:4,kick:[0,4],snare:[2,6],hat:[0,2,4,6]},
+        {group:"Roots",id:"polka",name:"Polka",subdivisions:4,kick:[0],snare:[4],hat:[0,2,4,6]},
+        {group:"Roots",id:"country-two",name:"Country two-beat",subdivisions:4,kick:[0,6],snare:[4],hat:[0,2,4,6]},
+        {group:"Roots",id:"train",name:"Train beat",subdivisions:4,kick:[0,4],snare:[0,1,2,3,4,5,6,7],hat:[0,2,4,6]},
+        {group:"Pop",id:"fast-rock-24",name:"Fast rock 2/4",subdivisions:4,kick:[0,6],snare:[4],hat:[0,2,4,6]},
+        {group:"Latin",id:"samba",name:"Samba",subdivisions:4,kick:[0,3,4,7],snare:[2,5],hat:[0,2,4,6]},
+        {group:"Latin",id:"baiao",name:"Baião",subdivisions:4,kick:[0,3,6],snare:[4,7],hat:[0,2,4,6]},
+        {group:"Latin",id:"frevo",name:"Frevo",subdivisions:4,kick:[0,4],snare:[1,2,3,5,6,7],hat:[0,2,4,6]},
+        {group:"Funk",id:"funk-24",name:"Two-beat funk",subdivisions:4,kick:[0,3,6],snare:[4,7],hat:[0,1,2,3,4,5,6,7]}
       ]
     };
 
     var METER_GUITAR_PATTERNS = {
       "3/4":[
-        {group:"Waltz / Folk",name:"Waltz full",value:"C@0,C@1,C@2"},
-        {group:"Waltz / Folk",name:"Waltz oom-pah",value:"C@1,C@2"},
-        {group:"Waltz / Folk",name:"Folk waltz",value:"C@0,C@1.5,C@2"},
-        {group:"Pop / Rock",name:"Pop waltz",value:"C@0,C@1,C@2.5"},
-        {group:"Pop / Rock",name:"Rock waltz",value:"C@0,C@1.5,C@2.5"},
+        {group:"Basic",name:"Waltz full",value:"C@0,C@1,C@2"},
+        {group:"Basic",name:"Waltz oom-pah",value:"C@1,C@2"},
+        {group:"Roots",name:"Folk waltz",value:"C@0,C@1.5,C@2"},
+        {group:"Pop",name:"Pop waltz",value:"C@0,C@1,C@2.5"},
+        {group:"Pop",name:"Rock waltz",value:"C@0,C@1.5,C@2.5"},
         {group:"Jazz",name:"Jazz waltz offbeats",value:"C@0.5,C@1.5,C@2.5"},
         {group:"Jazz",name:"Sparse jazz waltz",value:"C@0,C@1.5"},
-        {group:"Syncopated",name:"Syncopated 3/4",value:"C@0,C@0.75,C@1.5,C@2.5"},
+        {group:"Basic",name:"Syncopated 3/4",value:"C@0,C@0.75,C@1.5,C@2.5"},
         {group:"Arpeggio",name:"Waltz arpeggio",value:"A0@0,A1@1,A2@2"},
         {group:"Arpeggio",name:"Rolling waltz arpeggio",value:"A0@0,A1@0.5,A2@1,A1@1.5,A0@2,A2@2.5"}
       ],
       "6/8":[
-        {group:"Foundation",name:"6/8 chord pulse",value:"C@0,C@1"},
-        {group:"Foundation",name:"6/8 beat one",value:"C@0"},
-        {group:"Foundation",name:"6/8 offbeat chords",value:"C@0.667,C@1.667"},
-        {group:"Pop / Rock",name:"6/8 rock ballad",value:"C@0,C@0.667,C@1,C@1.667"},
-        {group:"Blues / Shuffle",name:"6/8 blues comp",value:"C@0,C@0.667,C@1.333"},
-        {group:"Blues / Shuffle",name:"6/8 shuffle comp",value:"C@0,C@0.667,C@1,C@1.667"},
-        {group:"Soul / Gospel",name:"6/8 soul push",value:"C@0,C@0.667,C@1.333,C@1.667"},
-        {group:"Soul / Gospel",name:"6/8 gospel push",value:"C@0,C@0.667,C@1,C@1.333,C@1.667"},
-        {group:"Afro / Latin",name:"Afro 6/8 cross accents",value:"C@0,C@0.667,C@1.333"},
-        {group:"March / Folk",name:"6/8 march chords",value:"C@0,C@0.667,C@1,C@1.667"},
+        {group:"Basic",name:"6/8 chord pulse",value:"C@0,C@1"},
+        {group:"Basic",name:"6/8 beat one",value:"C@0"},
+        {group:"Basic",name:"6/8 offbeat chords",value:"C@0.667,C@1.667"},
+        {group:"Pop",name:"6/8 rock ballad",value:"C@0,C@0.667,C@1,C@1.667"},
+        {group:"Roots",name:"6/8 blues comp",value:"C@0,C@0.667,C@1.333"},
+        {group:"Roots",name:"6/8 shuffle comp",value:"C@0,C@0.667,C@1,C@1.667"},
+        {group:"Funk",name:"6/8 soul push",value:"C@0,C@0.667,C@1.333,C@1.667"},
+        {group:"Funk",name:"6/8 gospel push",value:"C@0,C@0.667,C@1,C@1.333,C@1.667"},
+        {group:"Latin",name:"Afro 6/8 cross accents",value:"C@0,C@0.667,C@1.333"},
+        {group:"Roots",name:"6/8 march chords",value:"C@0,C@0.667,C@1,C@1.667"},
         {group:"Arpeggio",name:"6/8 triplet arpeggio",value:"A0@0,A1@0.333,A2@0.667,A0@1,A1@1.333,A2@1.667"},
         {group:"Arpeggio",name:"6/8 rolling guitar",value:"C@0,A1@0.667,C@1,A2@1.667"}
       ],
       "12/8":[
-        {group:"Foundation",name:"12/8 four-pulse chords",value:"C@0,C@1,C@2,C@3"},
-        {group:"Foundation",name:"12/8 half-time ballad",value:"C@0,C@2"},
-        {group:"Foundation",name:"12/8 backbeat chords",value:"C@1,C@3"},
-        {group:"Blues / Shuffle",name:"12/8 blues comp",value:"C@0,C@0.667,C@1.667,C@2,C@2.667,C@3.667"},
-        {group:"Blues / Shuffle",name:"12/8 shuffle comp",value:"C@0,C@0.667,C@1,C@1.667,C@2,C@2.667,C@3,C@3.667"},
-        {group:"Pop / Rock",name:"12/8 rock ballad roll",value:"C@0,A1@0.667,A2@1.333,C@2,A1@2.667,A2@3.333"},
-        {group:"Soul / R&B",name:"12/8 soul push",value:"C@0,C@0.667,C@1.667,C@2,C@2.667,C@3.667"},
-        {group:"Soul / R&B",name:"12/8 R&B space",value:"C@0,C@1.667,C@2,C@3.667"},
-        {group:"Gospel",name:"12/8 gospel push",value:"C@0,C@0.667,C@1.333,C@2,C@2.667,C@3.333"},
-        {group:"Afro",name:"Afro 12/8 cross accents",value:"C@0,C@0.667,C@1.667,C@2.333,C@3.333"},
+        {group:"Basic",name:"12/8 four-pulse chords",value:"C@0,C@1,C@2,C@3"},
+        {group:"Basic",name:"12/8 half-time ballad",value:"C@0,C@2"},
+        {group:"Basic",name:"12/8 backbeat chords",value:"C@1,C@3"},
+        {group:"Roots",name:"12/8 blues comp",value:"C@0,C@0.667,C@1.667,C@2,C@2.667,C@3.667"},
+        {group:"Roots",name:"12/8 shuffle comp",value:"C@0,C@0.667,C@1,C@1.667,C@2,C@2.667,C@3,C@3.667"},
+        {group:"Pop",name:"12/8 rock ballad roll",value:"C@0,A1@0.667,A2@1.333,C@2,A1@2.667,A2@3.333"},
+        {group:"Funk",name:"12/8 soul push",value:"C@0,C@0.667,C@1.667,C@2,C@2.667,C@3.667"},
+        {group:"Funk",name:"12/8 R&B space",value:"C@0,C@1.667,C@2,C@3.667"},
+        {group:"Roots",name:"12/8 gospel push",value:"C@0,C@0.667,C@1.333,C@2,C@2.667,C@3.333"},
+        {group:"Latin",name:"Afro 12/8 cross accents",value:"C@0,C@0.667,C@1.667,C@2.333,C@3.333"},
         {group:"Arpeggio",name:"12/8 triplet arpeggio",value:"A0@0,A1@0.333,A2@0.667,A0@1,A1@1.333,A2@1.667,A0@2,A1@2.333,A2@2.667,A0@3,A1@3.333,A2@3.667"},
         {group:"Arpeggio",name:"12/8 sparse arpeggio",value:"A0@0,A1@0.667,A2@1.333,A0@2,A1@2.667,A2@3.333"}
       ],
       "2/4":[
-        {group:"Foundation",name:"Two-beat chords",value:"C@0,C@1"},
-        {group:"Foundation",name:"Chord on one",value:"C@0"},
-        {group:"Foundation",name:"2/4 offbeats",value:"C@0.5,C@1.5"},
-        {group:"Country / Folk",name:"Country boom-chuck",value:"C@0.5,C@1.5"},
-        {group:"Country / Folk",name:"Train drive",value:"C@0,C@0.5,C@1,C@1.5"},
-        {group:"March / Polka",name:"March chords",value:"C@0,C@1"},
-        {group:"March / Polka",name:"Polka oom-pah",value:"C@0.5,C@1.5"},
-        {group:"Brazilian",name:"Samba sync",value:"C@0,C@0.75,C@1,C@1.75"},
-        {group:"Brazilian",name:"Baião sync",value:"C@0,C@0.75,C@1.5"},
-        {group:"Brazilian",name:"Frevo drive",value:"C@0,C@0.5,C@1,C@1.25,C@1.5,C@1.75"},
-        {group:"Funk / Rock",name:"Fast rock 2/4",value:"C@0,C@0.5,C@1,C@1.5"},
-        {group:"Funk / Rock",name:"Two-beat funk",value:"C@0,C@0.75,C@1.5,C@1.75"},
+        {group:"Basic",name:"Two-beat chords",value:"C@0,C@1"},
+        {group:"Basic",name:"Chord on one",value:"C@0"},
+        {group:"Basic",name:"2/4 offbeats",value:"C@0.5,C@1.5"},
+        {group:"Roots",name:"Country boom-chuck",value:"C@0.5,C@1.5"},
+        {group:"Roots",name:"Train drive",value:"C@0,C@0.5,C@1,C@1.5"},
+        {group:"Roots",name:"March chords",value:"C@0,C@1"},
+        {group:"Roots",name:"Polka oom-pah",value:"C@0.5,C@1.5"},
+        {group:"Latin",name:"Samba sync",value:"C@0,C@0.75,C@1,C@1.75"},
+        {group:"Latin",name:"Baião sync",value:"C@0,C@0.75,C@1.5"},
+        {group:"Latin",name:"Frevo drive",value:"C@0,C@0.5,C@1,C@1.25,C@1.5,C@1.75"},
+        {group:"Pop",name:"Fast rock 2/4",value:"C@0,C@0.5,C@1,C@1.5"},
+        {group:"Funk",name:"Two-beat funk",value:"C@0,C@0.75,C@1.5,C@1.75"},
         {group:"Arpeggio",name:"2/4 arpeggio",value:"A0@0,A1@0.5,A2@1,A1@1.5"}
       ]
     };
 
     var METER_BASS_PATTERNS = {
       "3/4":[
-        {group:"Foundation",name:"Root on one",value:"R@0"},
-        {group:"Foundation",name:"Waltz root–fifth",value:"R@0,5@1"},
-        {group:"Foundation",name:"Waltz root–fifth–root",value:"R@0,5@1,R@2"},
+        {group:"Basic",name:"Root on one",value:"R@0"},
+        {group:"Basic",name:"Waltz root–fifth",value:"R@0,5@1"},
+        {group:"Basic",name:"Waltz root–fifth–root",value:"R@0,5@1,R@2"},
         {group:"Movement",name:"Waltz chord-tone walk",value:"R@0,3@1,5@2"},
-        {group:"Movement",name:"Sparse root–third",value:"R@0,3@2"},
-        {group:"Country / Folk",name:"Country alternating",value:"R@0,5@1,R@2"},
-        {group:"Syncopated",name:"3/4 pickup bass",value:"R@0,5@1.5,R@2.5"}
+        {group:"Basic",name:"Sparse root–third",value:"R@0,3@2"},
+        {group:"Roots",name:"Country alternating",value:"R@0,5@1,R@2"},
+        {group:"Movement",name:"3/4 pickup bass",value:"R@0,5@1.5,R@2.5"}
       ],
       "6/8":[
-        {group:"Foundation",name:"6/8 root on one",value:"R@0"},
-        {group:"Foundation",name:"6/8 roots",value:"R@0,R@1"},
-        {group:"Foundation",name:"6/8 root–fifth",value:"R@0,5@1"},
+        {group:"Basic",name:"6/8 root on one",value:"R@0"},
+        {group:"Basic",name:"6/8 roots",value:"R@0,R@1"},
+        {group:"Basic",name:"6/8 root–fifth",value:"R@0,5@1"},
         {group:"Movement",name:"6/8 pickup bass",value:"R@0,5@0.667,R@1,5@1.667"},
-        {group:"Blues / Shuffle",name:"6/8 blues walk",value:"R@0,3@0.667,5@1,3@1.667"},
-        {group:"Soul / Gospel",name:"6/8 gospel movement",value:"R@0,3@0.667,5@1.333,3@1.667"},
-        {group:"Afro / Latin",name:"Afro 6/8 cross bass",value:"R@0,5@0.667,R@1.333"}
+        {group:"Roots",name:"6/8 blues walk",value:"R@0,3@0.667,5@1,3@1.667"},
+        {group:"Roots",name:"6/8 gospel movement",value:"R@0,3@0.667,5@1.333,3@1.667"},
+        {group:"Latin",name:"Afro 6/8 cross bass",value:"R@0,5@0.667,R@1.333"}
       ],
       "12/8":[
-        {group:"Foundation",name:"12/8 root only",value:"R@0"},
-        {group:"Foundation",name:"12/8 two-feel",value:"R@0,R@2"},
-        {group:"Foundation",name:"12/8 four roots",value:"R@0,R@1,R@2,R@3"},
-        {group:"Foundation",name:"12/8 root–fifth",value:"R@0,5@2"},
+        {group:"Basic",name:"12/8 root only",value:"R@0"},
+        {group:"Basic",name:"12/8 two-feel",value:"R@0,R@2"},
+        {group:"Basic",name:"12/8 four roots",value:"R@0,R@1,R@2,R@3"},
+        {group:"Basic",name:"12/8 root–fifth",value:"R@0,5@2"},
         {group:"Movement",name:"12/8 alternating root–fifth",value:"R@0,5@1,R@2,5@3"},
         {group:"Movement",name:"12/8 chord-tone walk",value:"R@0,3@1,5@2,3@3"},
-        {group:"Blues / R&B",name:"12/8 pickup bass",value:"R@0,5@1.667,R@2,5@3.667"},
-        {group:"Soul / Gospel",name:"12/8 gospel movement",value:"R@0,3@1.333,5@2,3@3.333"},
-        {group:"Afro",name:"Afro 12/8 cross bass",value:"R@0,5@0.667,R@1.667,5@2.333,R@3.333"}
+        {group:"Movement",name:"12/8 pickup bass",value:"R@0,5@1.667,R@2,5@3.667"},
+        {group:"Roots",name:"12/8 gospel movement",value:"R@0,3@1.333,5@2,3@3.333"},
+        {group:"Latin",name:"Afro 12/8 cross bass",value:"R@0,5@0.667,R@1.667,5@2.333,R@3.333"}
       ],
       "2/4":[
-        {group:"Foundation",name:"Two-beat roots",value:"R@0,R@1"},
-        {group:"Foundation",name:"Two-beat root–fifth",value:"R@0,5@1"},
-        {group:"Foundation",name:"Root on one",value:"R@0"},
-        {group:"Country",name:"Country pickup bass",value:"R@0,5@0.75,R@1,5@1.75"},
+        {group:"Basic",name:"Two-beat roots",value:"R@0,R@1"},
+        {group:"Basic",name:"Two-beat root–fifth",value:"R@0,5@1"},
+        {group:"Basic",name:"Root on one",value:"R@0"},
+        {group:"Movement",name:"Country pickup bass",value:"R@0,5@0.75,R@1,5@1.75"},
         {group:"Movement",name:"Two-beat walk",value:"R@0,3@0.5,5@1,3@1.5"},
-        {group:"Brazilian",name:"Samba bass",value:"R@0,5@0.75,R@1,5@1.75"},
-        {group:"Brazilian",name:"Baião bass",value:"R@0,5@0.75,R@1.5"},
-        {group:"Brazilian",name:"Frevo bass",value:"R@0,5@0.5,R@1,5@1.5"},
+        {group:"Latin",name:"Samba bass",value:"R@0,5@0.75,R@1,5@1.75"},
+        {group:"Latin",name:"Baião bass",value:"R@0,5@0.75,R@1.5"},
+        {group:"Latin",name:"Frevo bass",value:"R@0,5@0.5,R@1,5@1.5"},
         {group:"Funk",name:"Two-beat funk bass",value:"R@0,5@0.75,R@1.25,3@1.75"}
       ]
     };
@@ -4218,9 +4376,15 @@
       meterSelections[currentTimeSignature] = saved;
     }
 
-    function buildGroupedOptions(select, items, fallbackGroup) {
+    function buildGroupedOptions(select, items, fallbackGroup, categoryOrder) {
       select.innerHTML = "";
       var groups = {};
+      (categoryOrder || []).forEach(function(groupName){
+        var g = document.createElement("optgroup");
+        g.label = groupName;
+        select.appendChild(g);
+        groups[groupName] = g;
+      });
       items.forEach(function(item){
         var groupName = item.group || fallbackGroup;
         if (!groups[groupName]) {
@@ -4239,14 +4403,29 @@
     function buildMeterRhythmOptions(select, signature) {
       var rhythms = METER_RHYTHMS[signature] || [];
       select.innerHTML = "";
-      var g = document.createElement("optgroup");
-      g.label = signature + " Rhythms";
-      select.appendChild(g);
+      var groups = {};
+      var categoryOrder = signature === "3/4" ? ["Basic","Pop","Jazz","Roots"] :
+        (signature === "6/8" ? ["Basic","Pop","Funk","Latin","Roots"] :
+        (signature === "12/8" ? ["Basic","Pop","Funk","Roots","Latin"] :
+        (signature === "2/4" ? ["Basic","Pop","Funk","Latin","Roots"] : [])));
+      categoryOrder.forEach(function(groupName){
+        var g = document.createElement("optgroup");
+        g.label = groupName;
+        select.appendChild(g);
+        groups[groupName] = g;
+      });
       rhythms.forEach(function(rhythm){
+        var groupName = rhythm.group || (signature + " Rhythms");
+        if (!groups[groupName]) {
+          var g = document.createElement("optgroup");
+          g.label = groupName;
+          select.appendChild(g);
+          groups[groupName] = g;
+        }
         var opt = document.createElement("option");
         opt.value = "meter:" + rhythm.id;
         opt.textContent = rhythm.name;
-        g.appendChild(opt);
+        groups[groupName].appendChild(opt);
       });
     }
 
@@ -4281,8 +4460,16 @@
         bass.innerHTML = fourFourMenuMarkup.bass;
       } else {
         buildMeterRhythmOptions(rhythm, signature);
-        buildGroupedOptions(guitar, METER_GUITAR_PATTERNS[signature] || [], signature + " Guitar");
-        buildGroupedOptions(bass, METER_BASS_PATTERNS[signature] || [], signature + " Bass");
+        var guitarCategoryOrder = signature === "3/4" ? ["Basic","Arpeggio","Pop","Jazz","Roots"] :
+          (signature === "6/8" ? ["Basic","Arpeggio","Pop","Funk","Latin","Roots"] :
+          (signature === "12/8" ? ["Basic","Arpeggio","Pop","Funk","Roots","Latin"] :
+          (signature === "2/4" ? ["Basic","Arpeggio","Pop","Funk","Latin","Roots"] : null)));
+        var bassCategoryOrder = signature === "3/4" ? ["Basic","Movement","Roots"] :
+          (signature === "6/8" ? ["Basic","Movement","Roots","Latin"] :
+          (signature === "12/8" ? ["Basic","Movement","Roots","Latin"] :
+          (signature === "2/4" ? ["Basic","Movement","Latin","Funk"] : null)));
+        buildGroupedOptions(guitar, METER_GUITAR_PATTERNS[signature] || [], signature + " Guitar", guitarCategoryOrder);
+        buildGroupedOptions(bass, METER_BASS_PATTERNS[signature] || [], signature + " Bass", bassCategoryOrder);
       }
 
       var saved = meterSelections[signature] || {};
@@ -5003,14 +5190,13 @@ function primeAudioSamples(){
     <div class="choice-sheet" role="dialog" aria-modal="true" aria-labelledby="choiceTitle">
       <div class="choice-head">
         <div id="choiceTitle" class="choice-title">Choose</div>
-        <button type="button" id="choiceClose" class="choice-close">Close</button>
+        <div class="choice-head-actions">
+          <button type="button" id="choicePreview" class="choice-preview">Preview</button>
+          <button type="button" id="choiceDone" class="choice-done">Done</button>
+        </div>
       </div>
       <div id="choiceTabs" class="choice-tabs"></div>
       <div id="choiceGrid" class="choice-grid"></div>
-      <div class="choice-foot">
-        <button type="button" id="choicePreview">Preview</button>
-        <button type="button" id="choiceDone" class="done">Done</button>
-      </div>
     </div>
   </div>
 
