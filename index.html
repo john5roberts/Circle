@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Circle v1.64</title>
+  <title>Circle v1.72</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -269,7 +269,7 @@
       position:fixed;
       inset:0;
       z-index:5000;
-      background:rgba(0,0,0,.68);
+      background:transparent;
       display:none;
       align-items:flex-end;
       justify-content:center;
@@ -279,10 +279,16 @@
     .choice-sheet {
       width:min(100%,520px);
       max-height:min(82vh,760px);
-      background:#111315;
-      border:1px solid #454b51;
+      position:relative;
+      /* v1.71: true transparent glass.  Apply the blur directly to the
+         dialog instead of a pseudo-element/isolated stacking context so
+         Safari and embedded WebViews composite the live app behind it. */
+      background:rgba(14,17,19,.08) !important;
+      -webkit-backdrop-filter:blur(14px) saturate(115%);
+      backdrop-filter:blur(14px) saturate(115%);
+      border:1px solid rgba(120,128,136,.72);
       border-radius:18px;
-      box-shadow:0 16px 42px rgba(0,0,0,.55);
+      box-shadow:0 16px 42px rgba(0,0,0,.34);
       display:flex;
       flex-direction:column;
       overflow:hidden;
@@ -293,7 +299,7 @@
       justify-content:space-between;
       gap:10px;
       padding:13px 14px 10px;
-      border-bottom:1px solid #30353a;
+      border-bottom:1px solid rgba(80,88,95,.55);
     }
     .choice-title {
       font-size:17px;
@@ -314,10 +320,37 @@
       gap:7px;
       overflow-x:auto;
       padding:10px 12px;
-      border-bottom:1px solid #30353a;
+      border-bottom:1px solid rgba(80,88,95,.55);
       scrollbar-width:none;
     }
     .choice-tabs::-webkit-scrollbar { display:none; }
+    .choice-tabs.percussion-four-four {
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:7px;
+      overflow-x:visible;
+    }
+    .choice-tabs.percussion-four-four .choice-tab {
+      width:100%;
+      min-width:0;
+      padding-left:4px;
+      padding-right:4px;
+      text-align:center;
+    }
+
+    /* v1.67+: Keep the 4/4 percussion choice area the same height as the
+       three Accompaniment controls (3 x 40px controls + 2 x 5px gaps).
+       Larger categories scroll inside this fixed viewport; smaller ones leave
+       quiet empty space so the chooser never jumps in size between tabs. */
+    .choice-tabs.percussion-four-four + .choice-grid {
+      box-sizing:border-box;
+      height:130px;
+      min-height:130px;
+      max-height:130px;
+      overflow-y:auto;
+      overscroll-behavior:contain;
+      align-content:start;
+    }
     .choice-tab {
       flex:0 0 auto;
       border:1px solid #4b5258;
@@ -344,6 +377,20 @@
       gap:9px;
       min-height:180px;
     }
+    /* Popup interior remains transparent; interactive controls stay solid. */
+    .choice-head,
+    .choice-tabs,
+    .choice-grid,
+    .choice-foot {
+      background:transparent;
+    }
+    .choice-tab,
+    .choice-item,
+    .choice-close,
+    .choice-foot button {
+      opacity:1;
+    }
+
     .choice-item {
       min-height:62px;
       border:1px solid #454b51;
@@ -379,7 +426,7 @@
       display:flex;
       gap:8px;
       padding:10px 12px 12px;
-      border-top:1px solid #30353a;
+      border-top:1px solid rgba(80,88,95,.55);
     }
     .choice-foot button {
       flex:1;
@@ -1151,12 +1198,43 @@
       }
     }
 
+    /* v1.72: reserve the full detail-control height at all times so the
+       outer app frame never changes height when Mixer, Meter, or
+       Accompaniment is opened or closed. The three panels share one
+       fixed stage instead of contributing variable height to document flow. */
+    .detail-stage {
+      position: relative;
+      height: 180px;
+      margin: 0 4px;
+      overflow: hidden;
+    }
+
+    .detail-stage > .disclosure-panel {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 180px;
+      margin: 0;
+      max-height: none;
+    }
+
+    .detail-stage > .disclosure-panel.open {
+      margin: 5px 0 0;
+      max-height: none;
+    }
+
+    .detail-stage > .meter-panel.open,
+    .detail-stage > .mixer-panel.open,
+    .detail-stage > .accompaniment-panel.open {
+      max-height: none;
+    }
+
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="panel">
-      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.64"></svg>
+      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.68"></svg>
       <div id="progressionStrip" class="progression-strip" aria-label="Progression map"></div>
       <div class="top-arrangement">
         <div class="progression-stack">
@@ -1282,6 +1360,7 @@
         <button type="button" class="detail-tab" data-panel="accompanimentPanel" aria-controls="accompanimentPanel" aria-expanded="false">Accompaniment</button>
       </div>
 
+      <div id="detailStage" class="detail-stage" aria-label="Additional control panel">
       <div id="mixerPanel" class="disclosure-panel mixer-panel" aria-hidden="true">
         <div class="mixer-inner" role="group" aria-label="Playback mixer">
               <div class="mixer-faders">
@@ -1324,7 +1403,7 @@
       <div id="accompanimentPanel" class="disclosure-panel accompaniment-panel" aria-hidden="true">
       <div class="controls accompaniment-control">
         <select id="rhythmSelect" class="source-select">
-          <optgroup label="Straight / Basic">
+          <optgroup label="Basic">
             <option value="quarter|1,1,1,1">Simple quarters</option>
             <option value="eighths|0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5">Eighth pulse</option>
             <option value="ballad|2,2">Half-note pulse</option>
@@ -1334,7 +1413,7 @@
             <option value="offbeats|0.5,1,1,1">Offbeat drive</option>
             <option value="ballad|1,3">Sparse quarters</option>
           </optgroup>
-          <optgroup label="Pop / Rock">
+          <optgroup label="Pop">
             <option value="groove1|1,0.75,0.25,1">Pop groove (push)</option>
             <option value="groove2|0.75,0.25,0.75,0.25,1">Syncopated pop</option>
             <option value="groove4|0.5,1,0.5,1">Driving pop</option>
@@ -1344,17 +1423,7 @@
             <option value="ballad|2,2">Power ballad</option>
             <option value="ballad|4">Arena sustain</option>
           </optgroup>
-          <optgroup label="Brazilian / Latin">
-            <option value="bossa|1.5,0.5,1,1">Bossa-style groove</option>
-            <option value="bossa|2,2">Bossa sparse</option>
-            <option value="bossa|0.75,0.75,0.5,1">Bossa syncopated</option>
-            <option value="groove7|1,0.5,0.5,0.5,0.5">Samba light</option>
-            <option value="groove5|0.75,0.75,0.5,1">Samba drive</option>
-            <option value="groove5|0.75,0.75,0.5,1">Tresillo</option>
-            <option value="tango|1,1,1,1">Tango</option>
-            <option value="offbeats|0.5,0.5,1,1,1">Latin offbeat</option>
-          </optgroup>
-          <optgroup label="Jazz / Swing">
+          <optgroup label="Jazz">
             <option value="swing|1.5,0.5,1,1">Swing comp</option>
             <option value="swing|2,1,1">Swing sparse</option>
             <option value="swing|0.75,0.25,1,2">Swing push</option>
@@ -1364,7 +1433,7 @@
             <option value="ballad|2,2">Two feel</option>
             <option value="four_on_floor|1,1,1,1">Four to the bar</option>
           </optgroup>
-          <optgroup label="Funk / Soul / R&B">
+          <optgroup label="Funk">
             <option value="groove7|1,0.5,0.5,0.5,0.5">Funk subdivision</option>
             <option value="groove2|0.75,0.25,0.75,0.25,1">Funk push</option>
             <option value="groove4|0.5,1,0.5,2">Funk sparse</option>
@@ -1372,7 +1441,17 @@
             <option value="groove3|1,0.5,0.5,1">R&B pocket</option>
             <option value="groove6|1.5,0.5,1,1">Neo-soul space</option>
           </optgroup>
-          <optgroup label="Folk / Country">
+          <optgroup label="Latin">
+            <option value="bossa|1.5,0.5,1,1">Bossa-style groove</option>
+            <option value="bossa|2,2">Bossa sparse</option>
+            <option value="bossa|0.75,0.75,0.5,1">Bossa syncopated</option>
+            <option value="groove7|1,0.5,0.5,0.5,0.5">Samba light</option>
+            <option value="groove5|0.75,0.75,0.5,1">Samba drive</option>
+            <option value="groove5|0.75,0.75,0.5,1">Tresillo</option>
+            <option value="tango|1,1,1,1">Tango</option>
+            <option value="offbeats|0.5,0.5,1,1,1">Latin offbeat</option>
+          </optgroup>
+          <optgroup label="Roots">
             <option value="quarter|1,1,1,1">Folk quarters</option>
             <option value="eighths|0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5">Folk eighths</option>
             <option value="ballad|2,2">Country two-step</option>
@@ -1380,9 +1459,11 @@
             <option value="ballad|2,2">Ballad strum</option>
             <option value="groove4|0.5,1,0.5,1">Train pulse</option>
           </optgroup>
-          <optgroup label="Reggae / Other">
+          <optgroup label="Reggae">
             <option value="reggae|1,1,1,1">Reggae skank</option>
             <option value="reggaeish|1,1,1,1">Reggae-ish push</option>
+          </optgroup>
+          <optgroup label="Studies">
             <option value="groove6|1.5,0.5,1,1">Long-short practice</option>
             <option value="groove4|0.5,1.5,1,1">Short-long practice</option>
             <option value="swing|0.67,0.33,0.67,0.33,2">Triplet-like push</option>
@@ -1489,6 +1570,7 @@
   </optgroup>
 </select>
 </div>
+      </div>
       </div>
     </div>
   </div>
@@ -3292,7 +3374,8 @@
         if(!seen[c]) { seen[c]=true; cats.push(c); }
       });
       var cfg=selectorBrowserConfig[select.id];
-      if(readRecentValues(cfg.recentKey).length) cats.unshift("Recent");
+      var suppressRecent = (select.id === "rhythmSelect" && currentTimeSignature === "4/4");
+      if(!suppressRecent && readRecentValues(cfg.recentKey).length) cats.unshift("Recent");
       return cats;
     }
 
@@ -3321,6 +3404,8 @@
     function renderBrowserTabs() {
       var host=document.getElementById("choiceTabs");
       host.innerHTML="";
+      var fourFourPercussion = !!(activeBrowserSelect && activeBrowserSelect.id === "rhythmSelect" && currentTimeSignature === "4/4");
+      host.classList.toggle("percussion-four-four", fourFourPercussion);
       var cats=browserCategories(activeBrowserSelect);
       if(!activeBrowserCategory || cats.indexOf(activeBrowserCategory)===-1) {
         activeBrowserCategory=optionCategory(selectedOptionFor(activeBrowserSelect));
@@ -4278,10 +4363,21 @@
 
     function selectedPercussionFamily() {
       var select = document.getElementById("rhythmSelect");
-      if (!select || select.selectedIndex < 0) return "Straight / Basic";
+      if (!select || select.selectedIndex < 0) return "Basic";
       var opt = select.options[select.selectedIndex];
       var parent = opt ? opt.parentElement : null;
-      return (parent && parent.tagName === "OPTGROUP") ? parent.label : "Straight / Basic";
+      var label = (parent && parent.tagName === "OPTGROUP") ? parent.label : "Basic";
+      // Keep playback behavior independent from user-facing taxonomy names.
+      var aliases = {
+        "Straight / Basic":"Basic",
+        "Pop / Rock":"Pop",
+        "Brazilian / Latin":"Latin",
+        "Jazz / Swing":"Jazz",
+        "Funk / Soul / R&B":"Funk",
+        "Folk / Country":"Roots",
+        "Reggae / Other":"Reggae"
+      };
+      return aliases[label] || label;
     }
 
     function scheduleTurnaroundHit(ctx, baseWhen, beatSeconds, fraction, kind) {
@@ -4302,15 +4398,15 @@
       if (subtle) {
         if (beatsLeft !== 1) return;
 
-        if (family === "Brazilian / Latin") {
+        if (family === "Latin") {
           scheduleTurnaroundHit(ctx,when,beatSeconds,0.50,"hat");
           scheduleTurnaroundHit(ctx,when,beatSeconds,0.75,"snare");
-        } else if (family === "Jazz / Swing") {
+        } else if (family === "Jazz") {
           scheduleTurnaroundHit(ctx,when,beatSeconds,0.67,"hat");
           scheduleTurnaroundHit(ctx,when,beatSeconds,0.83,"snare");
-        } else if (family === "Funk / Soul / R&B") {
+        } else if (family === "Funk") {
           scheduleTurnaroundHit(ctx,when,beatSeconds,0.75,"snare");
-        } else if (family === "Reggae / Other") {
+        } else if (family === "Reggae") {
           scheduleTurnaroundHit(ctx,when,beatSeconds,0.75,"hat");
         } else {
           scheduleTurnaroundHit(ctx,when,beatSeconds,0.75,"snare");
@@ -4320,45 +4416,45 @@
 
       // Stronger turnaround spans the final two beats of every second pass.
       if (beatsLeft === 2) {
-        if (family === "Brazilian / Latin") {
+        if (family === "Latin") {
           scheduleTurnaroundHit(ctx,when,beatSeconds,0.50,"snare");
           scheduleTurnaroundHit(ctx,when,beatSeconds,0.75,"hat");
-        } else if (family === "Jazz / Swing") {
+        } else if (family === "Jazz") {
           scheduleTurnaroundHit(ctx,when,beatSeconds,0.67,"snare");
-        } else if (family === "Funk / Soul / R&B") {
+        } else if (family === "Funk") {
           scheduleTurnaroundHit(ctx,when,beatSeconds,0.50,"snare");
           scheduleTurnaroundHit(ctx,when,beatSeconds,0.75,"hat");
-        } else if (family === "Pop / Rock") {
+        } else if (family === "Pop") {
           scheduleTurnaroundHit(ctx,when,beatSeconds,0.50,"snare");
-        } else if (family === "Folk / Country") {
+        } else if (family === "Roots") {
           scheduleTurnaroundHit(ctx,when,beatSeconds,0.50,"hat");
           scheduleTurnaroundHit(ctx,when,beatSeconds,0.75,"snare");
         } else {
           scheduleTurnaroundHit(ctx,when,beatSeconds,0.50,"snare");
         }
       } else if (beatsLeft === 1) {
-        if (family === "Brazilian / Latin") {
+        if (family === "Latin") {
           scheduleTurnaroundHit(ctx,when,beatSeconds,0.25,"snare");
           scheduleTurnaroundHit(ctx,when,beatSeconds,0.50,"hat");
           scheduleTurnaroundHit(ctx,when,beatSeconds,0.75,"snare");
           scheduleTurnaroundHit(ctx,when,beatSeconds,0.875,"hat");
-        } else if (family === "Jazz / Swing") {
+        } else if (family === "Jazz") {
           scheduleTurnaroundHit(ctx,when,beatSeconds,0.33,"snare");
           scheduleTurnaroundHit(ctx,when,beatSeconds,0.67,"snare");
           scheduleTurnaroundHit(ctx,when,beatSeconds,0.83,"hat");
-        } else if (family === "Funk / Soul / R&B") {
+        } else if (family === "Funk") {
           scheduleTurnaroundHit(ctx,when,beatSeconds,0.25,"snare");
           scheduleTurnaroundHit(ctx,when,beatSeconds,0.50,"snare");
           scheduleTurnaroundHit(ctx,when,beatSeconds,0.75,"snare");
-        } else if (family === "Pop / Rock") {
+        } else if (family === "Pop") {
           scheduleTurnaroundHit(ctx,when,beatSeconds,0.25,"snare");
           scheduleTurnaroundHit(ctx,when,beatSeconds,0.50,"snare");
           scheduleTurnaroundHit(ctx,when,beatSeconds,0.75,"snare");
           scheduleTurnaroundHit(ctx,when,beatSeconds,0.875,"kick");
-        } else if (family === "Folk / Country") {
+        } else if (family === "Roots") {
           scheduleTurnaroundHit(ctx,when,beatSeconds,0.50,"snare");
           scheduleTurnaroundHit(ctx,when,beatSeconds,0.75,"snare");
-        } else if (family === "Reggae / Other") {
+        } else if (family === "Reggae") {
           scheduleTurnaroundHit(ctx,when,beatSeconds,0.50,"hat");
           scheduleTurnaroundHit(ctx,when,beatSeconds,0.75,"snare");
         } else {
