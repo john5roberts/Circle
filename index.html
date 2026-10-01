@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Circle v1.104</title>
+  <title>Circle v1.105</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -153,6 +153,8 @@
       gap:5px;
       margin:8px 4px 2px 4px;
       min-height:54px;
+      position:relative;
+      overflow:visible;
     }
     .prog-chip {
       flex:1 1 0;
@@ -171,7 +173,51 @@
       flex-direction:column;
       gap:5px;
       transition:filter .08s, box-shadow .08s, transform .08s;
+      position:relative;
+      -webkit-touch-callout:none;
+      user-select:none;
     }
+    .beat-editor {
+      position:absolute;
+      left:50%;
+      bottom:calc(100% + 7px);
+      transform:translateX(-50%);
+      width:108px;
+      height:34px;
+      display:grid;
+      grid-template-columns:34px 40px 34px;
+      align-items:stretch;
+      border:1px solid #596168;
+      border-radius:9px;
+      background:#171a1d;
+      box-shadow:0 4px 14px rgba(0,0,0,.42);
+      overflow:hidden;
+      z-index:60;
+    }
+    .prog-chip:first-child .beat-editor { left:0; transform:none; }
+    .prog-chip:last-child .beat-editor { left:auto; right:0; transform:none; }
+    .prog-chip:only-child .beat-editor { left:50%; right:auto; transform:translateX(-50%); }
+    .beat-editor button {
+      appearance:none;
+      -webkit-appearance:none;
+      border:0;
+      border-right:1px solid #3d4348;
+      border-radius:0;
+      background:#202428;
+      color:#d8dcdf;
+      font:800 18px/1 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      padding:0;
+      margin:0;
+      min-width:0;
+      touch-action:manipulation;
+    }
+    .beat-editor button:last-child { border-right:0; }
+    .beat-editor .beat-count {
+      font-size:15px;
+      background:#2a2f34;
+      color:#f0f2f3;
+    }
+    .beat-editor button:active { filter:brightness(1.35); }
     /* Progression strip: all inactive chords stay neutral.
        Green/red is reserved for the chord that is sounding now. */
     .prog-chip.in-key,
@@ -1359,7 +1405,7 @@
 <body>
   <div class="wrap">
     <div class="panel">
-      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.104"></svg>
+      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.105"></svg>
       <div id="progressionStrip" class="progression-strip" aria-label="Progression map"></div>
       <div class="top-arrangement">
         <div class="progression-stack">
@@ -1758,6 +1804,13 @@
     var chordAuditionInfo = null;
     var chordAuditionChordKey = null;
     var chordAuditionChordRing = null;
+
+    // Session-only progression edits. Keys include meter + selected progression,
+    // so edits survive switching away and back during this page session but
+    // disappear on reload. Beat values are the actual beats for that meter.
+    var sessionProgressionEdits = Object.create(null);
+    var beatEditorState = null;
+    var beatEditorLongPressMs = 575;
 
     var PC_MAP = {C:0,"C#":1,Db:1,D:2,"D#":3,Eb:3,E:4,F:5,"F#":6,Gb:6,G:7,"G#":8,Ab:8,A:9,"A#":10,Bb:10,B:11};
     var SHARP_PC_NAMES = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
@@ -2854,16 +2907,160 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       });
     }
 
+    function progressionSessionEditKey() {
+      var s = document.getElementById("progressionSelect");
+      if (!s || s.selectedIndex < 0) return currentTimeSignature + "||none";
+      var opt = s.options[s.selectedIndex];
+      var parent = opt ? opt.parentElement : null;
+      var group = (parent && parent.tagName === "OPTGROUP") ? parent.label : "";
+      return [currentTimeSignature, group, opt ? opt.textContent.trim() : "", s.value].join("||");
+    }
+
     function getSelectedProgression() {
       var s = document.getElementById("progressionSelect");
       if (!s) return {degrees:[], beats:[], baseBeats:[]};
+
+      var edit = sessionProgressionEdits[progressionSessionEditKey()];
+      if (edit) {
+        return {
+          degrees:edit.degrees.slice(),
+          baseBeats:edit.beats.slice(),
+          beats:edit.beats.slice(),
+          sessionEdited:true
+        };
+      }
+
       var p = s.value.split("|");
       var base = (p[1] || "").split(",");
       return {
-        degrees:p[0].split("-"),
+        degrees:p[0] ? p[0].split("-") : [],
         baseBeats:base,
-        beats:scaledProgressionBeats(base)
+        beats:scaledProgressionBeats(base),
+        sessionEdited:false
       };
+    }
+
+    function commitProgressionBeatEdit(index, beats) {
+      if (progressionPlaying) return;
+      var prog = getSelectedProgression();
+      if (!prog || index < 0 || index >= prog.degrees.length) return;
+
+      var degrees = prog.degrees.slice();
+      var counts = prog.beats.map(function(value){
+        var n = parseInt(value,10);
+        return isFinite(n) && n >= 0 ? n : 1;
+      });
+      beats = Math.max(0, parseInt(beats,10) || 0);
+
+      if (beats === 0) {
+        degrees.splice(index,1);
+        counts.splice(index,1);
+      } else {
+        counts[index] = beats;
+      }
+
+      sessionProgressionEdits[progressionSessionEditKey()] = {
+        degrees:degrees,
+        beats:counts
+      };
+      beatEditorState = null;
+      transportVisualStateKey = "";
+      render(selectedMajor);
+      renderProgressionStrip(null, null, false);
+    }
+
+    function closeBeatEditorWithoutCommit() {
+      if (!beatEditorState) return;
+      beatEditorState = null;
+      renderProgressionStrip(null, null, false);
+    }
+
+    function openBeatEditor(index, chip) {
+      if (progressionPlaying) return;
+      var prog = getSelectedProgression();
+      if (!prog || index < 0 || index >= prog.degrees.length) return;
+      var count = parseInt(prog.beats[index],10);
+      if (!isFinite(count) || count < 1) count = 1;
+      beatEditorState = { index:index, draft:count };
+      renderProgressionStrip(null, null, false);
+    }
+
+    function bindProgressionBeatLongPress(chip, index) {
+      if (!chip || progressionPlaying) return;
+      var timer = null;
+      var startX = 0, startY = 0;
+
+      function clearTimer() {
+        if (timer !== null) { clearTimeout(timer); timer = null; }
+      }
+
+      chip.addEventListener("pointerdown", function(ev){
+        if (ev.button !== undefined && ev.button !== 0) return;
+        if (ev.target && ev.target.closest && ev.target.closest(".beat-editor")) return;
+        startX = ev.clientX || 0;
+        startY = ev.clientY || 0;
+        clearTimer();
+        timer = setTimeout(function(){
+          timer = null;
+          chip._suppressNextClick = true;
+          openBeatEditor(index, chip);
+        }, beatEditorLongPressMs);
+      });
+      chip.addEventListener("pointermove", function(ev){
+        if (timer === null) return;
+        if (Math.abs((ev.clientX || 0) - startX) > 12 ||
+            Math.abs((ev.clientY || 0) - startY) > 12) clearTimer();
+      });
+      ["pointerup","pointercancel","pointerleave"].forEach(function(type){
+        chip.addEventListener(type, clearTimer);
+      });
+      chip.addEventListener("contextmenu", function(ev){ ev.preventDefault(); });
+    }
+
+    function attachBeatEditor(chip, index) {
+      if (!beatEditorState || beatEditorState.index !== index || progressionPlaying) return;
+      var editor = document.createElement("div");
+      editor.className = "beat-editor";
+      editor.setAttribute("role", "group");
+      editor.setAttribute("aria-label", "Adjust beats");
+
+      var minus = document.createElement("button");
+      minus.type = "button";
+      minus.textContent = "−";
+      minus.setAttribute("aria-label", "Reduce beats");
+
+      var count = document.createElement("button");
+      count.type = "button";
+      count.className = "beat-count";
+      count.textContent = String(beatEditorState.draft);
+      count.setAttribute("aria-label", "Use " + beatEditorState.draft + " beats and close");
+
+      var plus = document.createElement("button");
+      plus.type = "button";
+      plus.textContent = "+";
+      plus.setAttribute("aria-label", "Increase beats");
+
+      minus.addEventListener("click", function(ev){
+        ev.stopPropagation();
+        beatEditorState.draft = Math.max(0, beatEditorState.draft - 1);
+        count.textContent = String(beatEditorState.draft);
+        count.setAttribute("aria-label", "Use " + beatEditorState.draft + " beats and close");
+      });
+      plus.addEventListener("click", function(ev){
+        ev.stopPropagation();
+        beatEditorState.draft += 1;
+        count.textContent = String(beatEditorState.draft);
+        count.setAttribute("aria-label", "Use " + beatEditorState.draft + " beats and close");
+      });
+      count.addEventListener("click", function(ev){
+        ev.stopPropagation();
+        commitProgressionBeatEdit(index, beatEditorState.draft);
+      });
+      editor.addEventListener("pointerdown", function(ev){ ev.stopPropagation(); });
+      editor.appendChild(minus);
+      editor.appendChild(count);
+      editor.appendChild(plus);
+      chip.appendChild(editor);
     }
 
     function modeScalePitchClasses(tonicPC, mode) {
@@ -3215,6 +3412,7 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       // Third stopped-state view: keep the lower progression area blank except
       // for a square Back button that returns directly to Roman numerals.
       if (!progressionPlaying && stoppedDisplayState === 2) {
+        beatEditorState = null;
         var backButton = document.createElement("button");
         backButton.type = "button";
         backButton.className = "progression-back-button";
@@ -3239,12 +3437,19 @@ function fetchAndDecodePercussionSample(ctx, urls) {
           chip.className += " view-toggle";
           chip.setAttribute("role", "button");
           chip.setAttribute("aria-label", stoppedDisplayState === 0 ? "Show chord names" : "Show independent circle");
+          bindProgressionBeatLongPress(chip, i);
           chip.addEventListener("click", function(ev){
+            // A completed long press opens the beat editor and must not also
+            // advance the three-state notation view when the finger lifts.
+            if (ev.currentTarget._suppressNextClick) {
+              ev.currentTarget._suppressNextClick = false;
+              ev.stopPropagation();
+              return;
+            }
             // Prevent this same click from bubbling to the progression-strip
             // handler that is installed when state 2 (blank/independent) renders.
-            // Without this, the second click advances 1 -> 2 and then
-            // immediately 2 -> 0 during the same event.
             ev.stopPropagation();
+            beatEditorState = null;
             toggleChordLetterView();
           });
         }
@@ -3303,6 +3508,7 @@ function fetchAndDecodePercussionSample(ctx, urls) {
 
           chip.appendChild(intervalRow);
         }
+        attachBeatEditor(chip, i);
         host.appendChild(chip);
       }
     }
@@ -3412,6 +3618,9 @@ function setTransportButtonState(state) {
     }
 
     function startProgressionLoop() {
+      var editableProgression = getSelectedProgression();
+      if (!editableProgression || !editableProgression.degrees.length) return;
+      beatEditorState = null;
       stopChordAudition(true);
       stoppedDisplayState = 0;
       chordLetterView = false;
@@ -4790,6 +4999,7 @@ function renderBrowserGrid() {
 
     function setCircleTimeSignature(signature) {
       if (!TIME_SIGNATURES[signature] || signature === currentTimeSignature) return;
+      beatEditorState = null;
       stopChordAudition(true);
       if (progressionPlaying) stopProgressionPlayback();
 
@@ -5509,6 +5719,7 @@ function renderBrowserGrid() {
       fader.addEventListener("change", applyMixerLevels);
     });
     document.getElementById("progressionSelect").addEventListener("change", function(){
+      beatEditorState = null;
       stopChordAudition(true);
       if (progressionPlaying) stopProgressionPlayback();
       applyAssociatedAccompanimentForProgression();
