@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Circle v1.100</title>
+  <title>Circle v1.104</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -200,6 +200,31 @@
     }
     .prog-chip.hold-target { cursor:pointer; touch-action:manipulation; }
     .prog-chip.view-toggle { cursor:pointer; touch-action:manipulation; }
+    .progression-strip.blank-view { touch-action:manipulation; }
+    .progression-back-button {
+      flex:0 0 54px;
+      width:54px;
+      height:54px;
+      aspect-ratio:1;
+      border-radius:9px;
+      border:1px solid #3d4348;
+      background:#202428;
+      color:#d8dcdf;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:0;
+      font-size:24px;
+      font-weight:700;
+      line-height:1;
+      cursor:pointer;
+      touch-action:manipulation;
+      transition:filter .08s, box-shadow .08s, transform .08s;
+    }
+    .progression-back-button:active {
+      filter:brightness(1.25);
+      transform:translateY(1px);
+    }
     .active-wedge {
       filter:brightness(1.5) drop-shadow(0 0 8px currentColor) !important;
     }
@@ -1334,7 +1359,7 @@
 <body>
   <div class="wrap">
     <div class="panel">
-      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.99"></svg>
+      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.104"></svg>
       <div id="progressionStrip" class="progression-strip" aria-label="Progression map"></div>
       <div class="top-arrangement">
         <div class="progression-stack">
@@ -1717,10 +1742,15 @@
     var activeRoman = null, activeChordKey = null, activeChordRing = null, activePitchClass = null, activeQuality = null, activeIsDiatonic = null;
     var cuePitchClass = null, cueQuality = null, cueIsDiatonic = null, cueLitOnWheel = false;
 
-    // Stopped-state chord view. Roman view keeps the wheel in key-selection
-    // mode; letter view locks the current tonal center and turns the diatonic
-    // wheel chords into Bass+Guitar audition buttons.
-    var chordLetterView = false;
+    // Stopped-state display cycle:
+    // 0 = Roman strip / letter-name wheel (linked)
+    // 1 = letter-name strip / Roman-numeral wheel (linked)
+    // 2 = blank strip / independent circle with Diatonic + Sound modes.
+    var stoppedDisplayState = 0;
+    var chordLetterView = false; // compatibility shorthand for state 1
+    var independentCircleMode = "diatonic";
+    var independentDiatonicRootPC = null;
+    var independentDiatonicQuality = "major";
     var chordAuditionRunning = false;
     var chordAuditionTimer = null;
     var chordAuditionNextBeatTime = 0;
@@ -2930,14 +2960,48 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       return root + suffix;
     }
 
-    function diatonicWheelChordClasses() {
+    function romanLabelForWheelChord(rootPC, quality) {
+      var mode = progressionModeForSelection();
+      var referenceKey = modeReferenceView ? parentMajorForMode(selectedMajor, mode) : selectedMajor;
+      var referenceTonicPC = PC_MAP[KEY_NOTES[referenceKey][0]];
+      var offset = ((rootPC - referenceTonicPC) % 12 + 12) % 12;
+      var roots = ["I","♭II","II","♭III","III","IV","♯IV","V","♭VI","VI","♭VII","VII"];
+      var label = roots[offset];
+      if (quality === "minor" || quality === "dim") {
+        label = label.replace(/[IV]+/g, function(x){ return x.toLowerCase(); });
+      }
+      if (quality === "dim") label += "°";
+      return label;
+    }
+
+    function isIndependentCircleView() {
+      return !progressionPlaying && stoppedDisplayState === 2;
+    }
+
+    function independentDiatonicChordClasses() {
       var inPC = {}, outPC = {};
-      var tonicPC = PC_MAP[KEY_NOTES[selectedMajor][0]];
-      var allowed = modeScalePitchClasses(tonicPC, progressionModeForSelection());
+      var tonicPC = independentDiatonicRootPC;
+      if (tonicPC === null || tonicPC === undefined) {
+        tonicPC = PC_MAP[KEY_NOTES[selectedMajor][0]];
+      }
+      tonicPC = ((tonicPC % 12) + 12) % 12;
+
+      // Major centers use Ionian, minor centers use natural minor/Aeolian,
+      // and a diminished center uses Locrian. This makes the selected chord
+      // a genuine modal center while keeping the palette strictly diatonic.
+      var scaleIntervals = independentDiatonicQuality === "minor"
+        ? [0,2,3,5,7,8,10]
+        : independentDiatonicQuality === "dim"
+          ? [0,1,3,5,6,8,10]
+          : [0,2,4,5,7,9,11];
+      var allowed = {};
+      for (var i=0; i<scaleIntervals.length; i++) {
+        allowed[(tonicPC + scaleIntervals[i]) % 12] = true;
+      }
 
       function allAllowed(rootPC, intervals) {
-        for (var i=0; i<intervals.length; i++) {
-          if (!allowed[(rootPC + intervals[i]) % 12]) return false;
+        for (var j=0; j<intervals.length; j++) {
+          if (!allowed[(rootPC + intervals[j]) % 12]) return false;
         }
         return true;
       }
@@ -2948,6 +3012,11 @@ function fetchAndDecodePercussionSample(ctx, urls) {
         if (allAllowed(pc,[0,3,6])) inPC[pc + ":dim"] = true;
       }
       return {inPC:inPC,outPC:outPC};
+    }
+
+    function independentChordIsDiatonic(rootPC, quality) {
+      var map = independentDiatonicChordClasses();
+      return !!map.inPC[(((rootPC % 12) + 12) % 12) + ":" + quality];
     }
 
     function clearProgressionVoiceArray() {
@@ -3048,15 +3117,22 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       var ctx = getAudioCtx();
       var beatSeconds = getTransportBeatSeconds();
       while (chordAuditionNextBeatTime < ctx.currentTime + transportScheduleAheadSec) {
-        scheduleAuditionBassBeat(ctx, chordAuditionNextBeatTime, chordAuditionBeatNumber, beatSeconds);
-        scheduleAuditionGuitarBeat(ctx, chordAuditionNextBeatTime, chordAuditionBeatNumber, beatSeconds);
+        var bassToggle = document.getElementById("bassToggle");
+        var guitarToggle = document.getElementById("chordToggle");
+        if (!bassToggle || bassToggle.checked) {
+          scheduleAuditionBassBeat(ctx, chordAuditionNextBeatTime, chordAuditionBeatNumber, beatSeconds);
+        }
+        if (!guitarToggle || guitarToggle.checked) {
+          scheduleAuditionGuitarBeat(ctx, chordAuditionNextBeatTime, chordAuditionBeatNumber, beatSeconds);
+        }
+        // Deliberately no percussion or click in independent Sound mode.
         chordAuditionBeatNumber += 1;
         chordAuditionNextBeatTime += beatSeconds;
       }
     }
 
     function startChordAudition(rootPC, quality, chordKey, chordRing) {
-      if (progressionPlaying || !chordLetterView) return;
+      if (progressionPlaying || !isIndependentCircleView() || independentCircleMode !== "sound") return;
 
       if (chordAuditionRunning &&
           chordAuditionInfo &&
@@ -3071,7 +3147,7 @@ function fetchAndDecodePercussionSample(ctx, urls) {
 
       ensureAudioReady(function(ctx){
         Promise.all([loadBassSamples(ctx), loadGuitarSamples(ctx)]).then(function(){
-          if (progressionPlaying || !chordLetterView) return;
+          if (progressionPlaying || !isIndependentCircleView() || independentCircleMode !== "sound") return;
           chordAuditionInfo = wheelChordInfo(rootPC, quality);
           chordAuditionChordKey = chordKey;
           chordAuditionChordRing = chordRing;
@@ -3084,7 +3160,7 @@ function fetchAndDecodePercussionSample(ctx, urls) {
           activeChordRing = chordRing;
           activePitchClass = rootPC;
           activeQuality = quality;
-          activeIsDiatonic = true;
+          activeIsDiatonic = independentChordIsDiatonic(rootPC, quality);
 
           render(selectedMajor);
           runChordAuditionScheduler();
@@ -3093,17 +3169,35 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       });
     }
 
-    function setChordLetterView(on) {
+    function setStoppedDisplayState(state) {
       if (progressionPlaying) return;
       stopChordAudition(true);
       stopArpeggioOnly();
-      chordLetterView = !!on;
+
+      var next = ((state % 3) + 3) % 3;
+      stoppedDisplayState = next;
+      chordLetterView = (next === 1);
+
+      if (next === 2) {
+        // Each entry into the independent view begins from the app's current
+        // key as a major/Ionian diatonic palette. Diatonic and Sound then share
+        // that palette until the user chooses another center in Diatonic mode.
+        independentCircleMode = "diatonic";
+        independentDiatonicRootPC = PC_MAP[KEY_NOTES[selectedMajor][0]];
+        independentDiatonicQuality = "major";
+      }
+
       render(selectedMajor);
       renderProgressionStrip(null, null, false);
     }
 
+    function setChordLetterView(on) {
+      setStoppedDisplayState(on ? 1 : 0);
+    }
+
     function toggleChordLetterView() {
-      setChordLetterView(!chordLetterView);
+      if (progressionPlaying) return;
+      setStoppedDisplayState((stoppedDisplayState + 1) % 3);
     }
 
 
@@ -3113,6 +3207,26 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       var prog = getSelectedProgression();
       var mode = progressionModeForDegrees(prog.degrees);
       host.innerHTML = "";
+      host.classList.toggle("blank-view", !progressionPlaying && stoppedDisplayState === 2);
+      host.onclick = null;
+      host.removeAttribute("role");
+      host.removeAttribute("aria-label");
+
+      // Third stopped-state view: keep the lower progression area blank except
+      // for a square Back button that returns directly to Roman numerals.
+      if (!progressionPlaying && stoppedDisplayState === 2) {
+        var backButton = document.createElement("button");
+        backButton.type = "button";
+        backButton.className = "progression-back-button";
+        backButton.textContent = "←";
+        backButton.setAttribute("aria-label", "Back to Roman numerals");
+        backButton.addEventListener("click", function(ev){
+          ev.stopPropagation();
+          setStoppedDisplayState(0);
+        });
+        host.appendChild(backButton);
+        return;
+      }
 
       for (var i=0; i<prog.degrees.length; i++) {
         var d = prog.degrees[i];
@@ -3124,8 +3238,15 @@ function fetchAndDecodePercussionSample(ctx, urls) {
         if (!progressionPlaying) {
           chip.className += " view-toggle";
           chip.setAttribute("role", "button");
-          chip.setAttribute("aria-label", chordLetterView ? "Show Roman numerals" : "Show chord names");
-          chip.addEventListener("click", toggleChordLetterView);
+          chip.setAttribute("aria-label", stoppedDisplayState === 0 ? "Show chord names" : "Show independent circle");
+          chip.addEventListener("click", function(ev){
+            // Prevent this same click from bubbling to the progression-strip
+            // handler that is installed when state 2 (blank/independent) renders.
+            // Without this, the second click advances 1 -> 2 and then
+            // immediately 2 -> 0 during the same event.
+            ev.stopPropagation();
+            toggleChordLetterView();
+          });
         }
 
         // Current chord remains steadily highlighted.
@@ -3292,7 +3413,9 @@ function setTransportButtonState(state) {
 
     function startProgressionLoop() {
       stopChordAudition(true);
+      stoppedDisplayState = 0;
       chordLetterView = false;
+      independentCircleMode = "diatonic";
       stopArpeggioOnly();
       stopProgressionPlayback();
       closeDetailPanels();
@@ -3343,20 +3466,59 @@ function setTransportButtonState(state) {
 
       circle(svg, cx, cy, outerOuterR, "#171a1d", "#454b51", 2);
       circle(svg, cx, cy, innerOuterR, "#15181a", "#454b51", 2);
+      var independentView = isIndependentCircleView();
       var centerDisk = circle(svg, cx, cy, innerInnerR, "#111315", "#454b51", 1.5);
-      centerDisk.setAttribute("class", "clickable");
-      centerDisk.setAttribute("role", "button");
-      centerDisk.setAttribute("aria-label", "Toggle modal analysis reference");
-      centerDisk.addEventListener("click", function(){
-        modeReferenceView = !modeReferenceView;
-        render(selectedMajor);
-        renderProgressionStrip(null, null, false);
-      });
-      var centerLabel = text(svg, cx, cy + 5, centerModeLabel(), { size: 14, weight: 700, fill: "#f2f4f5" });
-      centerLabel.setAttribute("pointer-events", "none");
 
-      var harmonicMapForRender = (chordLetterView && !progressionPlaying)
-        ? diatonicWheelChordClasses()
+      if (independentView) {
+        function addCenterModeControl(label, y, modeName) {
+          var NS = "http://www.w3.org/2000/svg";
+          var hit = document.createElementNS(NS, "rect");
+          hit.setAttribute("x", cx - 46);
+          hit.setAttribute("y", y - 16);
+          hit.setAttribute("width", 92);
+          hit.setAttribute("height", 25);
+          hit.setAttribute("rx", 10);
+          hit.setAttribute("fill", "transparent");
+          hit.setAttribute("class", "clickable");
+          hit.setAttribute("role", "button");
+          hit.setAttribute("aria-label", modeName === "diatonic" ? "Diatonic selection mode" : "Sound chord mode");
+          hit.addEventListener("click", function(ev){
+            ev.stopPropagation();
+            if (independentCircleMode === modeName) return;
+            stopChordAudition(true);
+            independentCircleMode = modeName;
+            render(selectedMajor);
+          });
+          svg.appendChild(hit);
+
+          var active = independentCircleMode === modeName;
+          var t = text(svg, cx, y, label, {
+            size: 14,
+            weight: active ? 850 : 700,
+            fill: active ? "#f2f4f5" : "#777e84"
+          });
+          t.setAttribute("pointer-events", "none");
+        }
+        addCenterModeControl("Diatonic", cy - 5, "diatonic");
+        addCenterModeControl("Sound", cy + 20, "sound");
+      } else {
+        centerDisk.setAttribute("class", "clickable");
+        centerDisk.setAttribute("role", "button");
+        centerDisk.setAttribute("aria-label", "Toggle modal analysis reference");
+        centerDisk.addEventListener("click", function(){
+          modeReferenceView = !modeReferenceView;
+          render(selectedMajor);
+          renderProgressionStrip(null, null, false);
+        });
+        var centerLabel = text(svg, cx, cy + 5, centerModeLabel(), { size: 14, weight: 700, fill: "#f2f4f5" });
+        centerLabel.setAttribute("pointer-events", "none");
+      }
+
+      // Linked views use progression harmony. The third stopped-state view is
+      // intentionally independent and shows the diatonic palette selected in
+      // the center's Diatonic mode; Sound preserves that same palette.
+      var harmonicMapForRender = independentView
+        ? independentDiatonicChordClasses()
         : progressionChordClasses();
 
       for (var i = 0; i < MAJOR_KEYS.length; i++) {
@@ -3430,15 +3592,21 @@ function setTransportButtonState(state) {
         // the wedge neutral but make the chord name + "key" label green so the
         // tonal reference remains easy to find without restoring the old circle.
         var parentKeyChordIsInProgression = !!(harmonicMap.inPC[majorKey] || harmonicMap.outPC[majorKey]);
-        if (major === parentMajor && !parentKeyChordIsInProgression) {
+        if (!independentView && major === parentMajor && !parentKeyChordIsInProgression) {
           majorText = "#65e69b";
         }
 
-        text(svg, majorX + majorDx, majorY, majorDisplay, { size: majorSize, weight: 800, fill: majorText });
-        if (major === parentMajor) {
+        var majorLabelForWheel = (!independentView && chordLetterView && !progressionPlaying)
+          ? romanLabelForWheelChord(renderChroma[major], "major")
+          : majorDisplay;
+        text(svg, majorX + majorDx, majorY, majorLabelForWheel, { size: majorSize, weight: 800, fill: majorText });
+        if (!independentView && major === parentMajor) {
           text(svg, majorX + majorDx, majorY + 10, "key", { size: roleLabelSize, weight: 700, fill: majorText });
         }
-        if (activeMode !== "ionian" && modalCenterIsMajor && renderChroma[major] === modalTonicPC) {
+        if (!independentView && activeMode !== "ionian" && modalCenterIsMajor && renderChroma[major] === modalTonicPC) {
+          text(svg, majorX + majorDx, majorY + 10, "center", { size: roleLabelSize, weight: 700, fill: majorText });
+        }
+        if (independentView && independentDiatonicQuality === "major" && renderChroma[major] === independentDiatonicRootPC) {
           text(svg, majorX + majorDx, majorY + 10, "center", { size: roleLabelSize, weight: 700, fill: majorText });
         }
         (function(m,md,rootPC){ outer.addEventListener("click", function(){
@@ -3450,16 +3618,19 @@ function setTransportButtonState(state) {
             return;
           }
 
-          // Letter view locks the key/center. Only diatonic wheel chords are
-          // auditionable, using Bass + Guitar with the current patterns.
-          if (chordLetterView) {
-            if (harmonicMap.inPC[rootPC + ":major"]) {
+          if (independentView) {
+            if (independentCircleMode === "diatonic") {
+              stopChordAudition(true);
+              independentDiatonicRootPC = rootPC;
+              independentDiatonicQuality = "major";
+              render(selectedMajor);
+            } else {
               startChordAudition(rootPC, "major", m, "outer");
             }
             return;
           }
 
-          // Roman view is exclusively the key/center selector.
+          // Linked stopped-state views keep the circle as the key/center selector.
           var mode = progressionModeForSelection();
           stopChordAudition(true);
           stopArpeggioOnly();
@@ -3473,8 +3644,14 @@ function setTransportButtonState(state) {
         if (minorIsActive) inner.setAttribute("class", "clickable active-wedge");
         else if (minorIsCue) inner.setAttribute("class", "clickable next-cue-wedge");
         var minorTextR = 98, minorX = cx + Math.cos(centerAngle) * minorTextR, minorY = cy + Math.sin(centerAngle) * minorTextR + 7, minorDx = 0;
-        text(svg, minorX + minorDx, minorY, minorDisplayForWheel, { size: minorSize, weight: 800, fill: minorText });
-        if (activeMode !== "ionian" && !modalCenterIsMajor && renderChroma[minorRootName] === modalTonicPC) {
+        var minorLabelForWheel = (!independentView && chordLetterView && !progressionPlaying)
+          ? romanLabelForWheelChord(minorRootPC, minorQualityForWheel)
+          : minorDisplayForWheel;
+        text(svg, minorX + minorDx, minorY, minorLabelForWheel, { size: minorSize, weight: 800, fill: minorText });
+        if (!independentView && activeMode !== "ionian" && !modalCenterIsMajor && renderChroma[minorRootName] === modalTonicPC) {
+          text(svg, minorX + minorDx, minorY + 9, "center", { size: roleLabelSize, weight: 700, fill: minorText });
+        }
+        if (independentView && independentDiatonicQuality === minorQualityForWheel && minorRootPC === independentDiatonicRootPC) {
           text(svg, minorX + minorDx, minorY + 9, "center", { size: roleLabelSize, weight: 700, fill: minorText });
         }
         (function(mn,md,relMaj,rootPC,isDimOnRoot){ inner.addEventListener("click", function(){
@@ -3487,17 +3664,19 @@ function setTransportButtonState(state) {
             return;
           }
 
-          if (chordLetterView) {
-            var auditionQuality = null;
-            if (harmonicMap.inPC[rootPC + ":dim"]) auditionQuality = "dim";
-            else if (harmonicMap.inPC[rootPC + ":minor"]) auditionQuality = "minor";
-            if (auditionQuality) {
-              startChordAudition(rootPC, auditionQuality, mn, "inner");
+          if (independentView) {
+            if (independentCircleMode === "diatonic") {
+              stopChordAudition(true);
+              independentDiatonicRootPC = rootPC;
+              independentDiatonicQuality = isDimOnRoot ? "dim" : "minor";
+              render(selectedMajor);
+            } else {
+              startChordAudition(rootPC, isDimOnRoot ? "dim" : "minor", mn, "inner");
             }
             return;
           }
 
-          // Roman view keeps the wheel in key/center-selection mode.
+          // Linked stopped-state views keep the circle as the key/center selector.
           var mode = progressionModeForSelection();
           stopChordAudition(true);
           stopArpeggioOnly();
