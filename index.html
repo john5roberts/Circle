@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Circle v1.108</title>
+  <title>Circle v1.109</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -147,15 +147,56 @@
     }
     input[type="checkbox"] { accent-color:#d8dcdf; }
 
+    .progression-strip-shell {
+      position:relative;
+      margin:8px 4px 2px 4px;
+      min-height:54px;
+    }
     .progression-strip {
       display:flex;
       align-items:stretch;
       gap:5px;
-      margin:8px 4px 2px 4px;
+      margin:0;
       min-height:54px;
       position:relative;
       overflow:visible;
     }
+    /* Long progressions keep the current four-across button size and scroll
+       horizontally. Extra vertical room lives above the buttons so the
+       long-press beat editor can still open without being clipped. */
+    .progression-strip.long-strip {
+      height:96px;
+      min-height:96px;
+      margin-top:-42px;
+      padding-top:42px;
+      box-sizing:border-box;
+      overflow-x:auto;
+      overflow-y:hidden;
+      -webkit-overflow-scrolling:touch;
+      scrollbar-width:none;
+      touch-action:pan-x;
+      overscroll-behavior-x:contain;
+    }
+    .progression-strip.long-strip::-webkit-scrollbar { display:none; }
+    .progression-strip.long-strip .prog-chip {
+      flex:0 0 calc((100% - 15px) / 4);
+      min-width:0;
+    }
+    .progression-playhead {
+      display:none;
+      position:absolute;
+      left:37.5%;
+      top:0;
+      width:34px;
+      height:3px;
+      border-radius:999px;
+      transform:translateX(-50%);
+      background:#f2f4f5;
+      box-shadow:0 0 6px rgba(242,244,245,.7);
+      pointer-events:none;
+      z-index:70;
+    }
+    .progression-strip-shell.following .progression-playhead { display:block; }
     .prog-chip {
       flex:1 1 0;
       min-width:0;
@@ -1416,8 +1457,11 @@
 <body>
   <div class="wrap">
     <div class="panel">
-      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.108"></svg>
-      <div id="progressionStrip" class="progression-strip" aria-label="Progression map"></div>
+      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.109"></svg>
+      <div class="progression-strip-shell">
+        <div id="progressionStrip" class="progression-strip" aria-label="Progression map"></div>
+        <div id="progressionPlayhead" class="progression-playhead" aria-hidden="true"></div>
+      </div>
       <div class="top-arrangement">
         <div class="progression-stack">
           <div class="controls">
@@ -1828,6 +1872,12 @@
     var workingProgressionDraft = null;
     var beatEditorState = null;
     var beatEditorLongPressMs = 675;
+
+    // Long-progression strip state. More than four progression steps keeps the
+    // buttons at the normal four-across size and turns the row into a horizontal
+    // timeline. During playback a fixed playhead sits over the second visible
+    // slot while the strip moves beneath it.
+    var progressionStripSelectionKey = "";
 
     var PC_MAP = {C:0,"C#":1,Db:1,D:2,"D#":3,Eb:3,E:4,F:5,"F#":6,Gb:6,G:7,"G#":8,Ab:8,A:9,"A#":10,Bb:10,B:11};
     var SHARP_PC_NAMES = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
@@ -3455,9 +3505,71 @@ function fetchAndDecodePercussionSample(ctx, urls) {
     }
 
 
+    function progressionStripTargetLeft(host, chipIndex) {
+      if (!host || chipIndex === null || chipIndex === undefined || chipIndex < 0) return 0;
+      var chips = host.querySelectorAll(".prog-chip");
+      if (!chips.length || !chips[chipIndex]) return 0;
+      var chip = chips[chipIndex];
+      var playheadX = host.clientWidth * 0.375;
+      var desired = chip.offsetLeft + chip.offsetWidth / 2 - playheadX;
+      var maxScroll = Math.max(0, host.scrollWidth - host.clientWidth);
+      return Math.max(0, Math.min(maxScroll, desired));
+    }
+
+    function updateProgressionStripViewport(host, prog, activeIndex, cueIndex, cueLit, savedScrollLeft, sameSelection) {
+      if (!host) return;
+      var shell = host.closest ? host.closest(".progression-strip-shell") : null;
+      var isLong = !!(prog && prog.degrees && prog.degrees.length > 4);
+      host.classList.toggle("long-strip", isLong);
+      if (shell) shell.classList.toggle("following", isLong && progressionPlaying);
+
+      if (!isLong) {
+        host.scrollLeft = 0;
+        return;
+      }
+
+      // Let layout settle so offsetLeft/scrollWidth reflect the fixed four-slot
+      // geometry before restoring or following the timeline.
+      requestAnimationFrame(function(){
+        var maxScroll = Math.max(0, host.scrollWidth - host.clientWidth);
+
+        if (!progressionPlaying) {
+          host.scrollLeft = sameSelection ? Math.min(savedScrollLeft || 0, maxScroll) : 0;
+          return;
+        }
+
+        var targetIndex = (activeIndex === null || activeIndex === undefined) ? 0 : activeIndex;
+        var smoothApproach = false;
+
+        // On the final beat, move the NEXT chord toward the stationary playhead
+        // while the current chord remains the active/highlighted harmony. At
+        // the actual beat boundary only the highlight/audio state changes.
+        if (cueLit === true && cueIndex !== null && cueIndex !== undefined && cueIndex !== activeIndex) {
+          var isLoopWrap = activeIndex === prog.degrees.length - 1 && cueIndex === 0;
+          if (!isLoopWrap) {
+            targetIndex = cueIndex;
+            smoothApproach = true;
+          }
+        }
+
+        var targetLeft = progressionStripTargetLeft(host, targetIndex);
+        if (smoothApproach && typeof host.scrollTo === "function") {
+          host.scrollTo({left:targetLeft, behavior:"smooth"});
+        } else {
+          // Loop-back deliberately snaps rather than sweeping backward through
+          // the whole form, and ordinary beat updates hold a stable position.
+          host.scrollLeft = targetLeft;
+        }
+      });
+    }
+
     function renderProgressionStrip(activeIndex, cueIndex, cueLit) {
       var host = document.getElementById("progressionStrip");
       if (!host) return;
+      var savedScrollLeft = host.scrollLeft || 0;
+      var selectionKey = progressionSessionEditKey();
+      var sameSelection = selectionKey === progressionStripSelectionKey;
+      progressionStripSelectionKey = selectionKey;
       var prog = getSelectedProgression();
       var mode = progressionModeForDegrees(prog.degrees);
       host.innerHTML = "";
@@ -3470,6 +3582,10 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       // for a square Back button that returns directly to Roman numerals.
       if (!progressionPlaying && stoppedDisplayState === 2) {
         beatEditorState = null;
+        host.classList.remove("long-strip");
+        var blankShell = host.closest ? host.closest(".progression-strip-shell") : null;
+        if (blankShell) blankShell.classList.remove("following");
+        host.scrollLeft = 0;
         var backButton = document.createElement("button");
         backButton.type = "button";
         backButton.className = "progression-back-button";
@@ -3568,6 +3684,10 @@ function fetchAndDecodePercussionSample(ctx, urls) {
         attachBeatEditor(chip, i);
         host.appendChild(chip);
       }
+
+      updateProgressionStripViewport(
+        host, prog, activeIndex, cueIndex, cueLit, savedScrollLeft, sameSelection
+      );
     }
 
     function progressionChordClasses() {
