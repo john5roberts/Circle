@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Circle v1.105</title>
+  <title>Circle v1.106</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -175,7 +175,18 @@
       transition:filter .08s, box-shadow .08s, transform .08s;
       position:relative;
       -webkit-touch-callout:none;
+      -webkit-user-select:none;
       user-select:none;
+      -webkit-tap-highlight-color:transparent;
+      touch-action:manipulation;
+    }
+    .prog-chip *,
+    .beat-editor,
+    .beat-editor * {
+      -webkit-touch-callout:none;
+      -webkit-user-select:none;
+      user-select:none;
+      -webkit-tap-highlight-color:transparent;
     }
     .beat-editor {
       position:absolute;
@@ -1405,7 +1416,7 @@
 <body>
   <div class="wrap">
     <div class="panel">
-      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.105"></svg>
+      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.106"></svg>
       <div id="progressionStrip" class="progression-strip" aria-label="Progression map"></div>
       <div class="top-arrangement">
         <div class="progression-stack">
@@ -1805,12 +1816,12 @@
     var chordAuditionChordKey = null;
     var chordAuditionChordRing = null;
 
-    // Session-only progression edits. Keys include meter + selected progression,
-    // so edits survive switching away and back during this page session but
-    // disappear on reload. Beat values are the actual beats for that meter.
-    var sessionProgressionEdits = Object.create(null);
+    // Unsaved progression editing uses one temporary working draft. The built-in
+    // progression data remains immutable. The draft survives playback and view
+    // changes, but is discarded when the user selects another progression or meter.
+    var workingProgressionDraft = null;
     var beatEditorState = null;
-    var beatEditorLongPressMs = 575;
+    var beatEditorLongPressMs = 675;
 
     var PC_MAP = {C:0,"C#":1,Db:1,D:2,"D#":3,Eb:3,E:4,F:5,"F#":6,Gb:6,G:7,"G#":8,Ab:8,A:9,"A#":10,Bb:10,B:11};
     var SHARP_PC_NAMES = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
@@ -2916,11 +2927,18 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       return [currentTimeSignature, group, opt ? opt.textContent.trim() : "", s.value].join("||");
     }
 
+    function discardWorkingProgressionDraft() {
+      workingProgressionDraft = null;
+      beatEditorState = null;
+    }
+
     function getSelectedProgression() {
       var s = document.getElementById("progressionSelect");
       if (!s) return {degrees:[], beats:[], baseBeats:[]};
 
-      var edit = sessionProgressionEdits[progressionSessionEditKey()];
+      var draftKey = progressionSessionEditKey();
+      var edit = (workingProgressionDraft && workingProgressionDraft.key === draftKey)
+        ? workingProgressionDraft : null;
       if (edit) {
         return {
           degrees:edit.degrees.slice(),
@@ -2959,7 +2977,8 @@ function fetchAndDecodePercussionSample(ctx, urls) {
         counts[index] = beats;
       }
 
-      sessionProgressionEdits[progressionSessionEditKey()] = {
+      workingProgressionDraft = {
+        key:progressionSessionEditKey(),
         degrees:degrees,
         beats:counts
       };
@@ -3005,7 +3024,7 @@ function fetchAndDecodePercussionSample(ctx, urls) {
           chip._suppressNextClick = true;
           openBeatEditor(index, chip);
         }, beatEditorLongPressMs);
-      });
+      }, {passive:true});
       chip.addEventListener("pointermove", function(ev){
         if (timer === null) return;
         if (Math.abs((ev.clientX || 0) - startX) > 12 ||
@@ -4999,7 +5018,7 @@ function renderBrowserGrid() {
 
     function setCircleTimeSignature(signature) {
       if (!TIME_SIGNATURES[signature] || signature === currentTimeSignature) return;
-      beatEditorState = null;
+      discardWorkingProgressionDraft();
       stopChordAudition(true);
       if (progressionPlaying) stopProgressionPlayback();
 
@@ -5719,7 +5738,7 @@ function renderBrowserGrid() {
       fader.addEventListener("change", applyMixerLevels);
     });
     document.getElementById("progressionSelect").addEventListener("change", function(){
-      beatEditorState = null;
+      discardWorkingProgressionDraft();
       stopChordAudition(true);
       if (progressionPlaying) stopProgressionPlayback();
       applyAssociatedAccompanimentForProgression();
