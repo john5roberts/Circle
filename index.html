@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Circle v1.109</title>
+  <title>Circle v1.110</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -1452,12 +1452,191 @@
       }
     }
 
+  
+    /* v1.110 song-library browser + song timeline */
+    .choice-head-actions .choice-song {
+      display:none;
+      background:#202428;
+      color:#f2f4f5;
+    }
+    .choice-head-actions .choice-song.visible { display:inline-block; }
+    .choice-head-actions .choice-song.active {
+      background:#e6e8ea;
+      color:#111315;
+      border-color:#fff;
+    }
+    .song-browser {
+      display:none;
+      flex:1 1 auto;
+      min-height:0;
+      flex-direction:column;
+      background:transparent;
+    }
+    .song-browser.open { display:flex; }
+    .song-search-tools {
+      padding:10px 12px 8px;
+      border-bottom:1px solid rgba(80,88,95,.55);
+      display:grid;
+      grid-template-columns:auto minmax(0,1fr) auto;
+      gap:8px;
+      align-items:center;
+    }
+    .song-search-mode {
+      display:flex;
+      gap:5px;
+    }
+    .song-mode-btn,
+    .song-search-btn {
+      appearance:none;
+      -webkit-appearance:none;
+      min-height:34px;
+      border:1px solid #4b5258;
+      background:#1b1f22;
+      color:#c6cbd0;
+      border-radius:9px;
+      padding:7px 9px;
+      font:inherit;
+      font-size:12px;
+      font-weight:800;
+      white-space:nowrap;
+    }
+    .song-mode-btn.active {
+      background:#e6e8ea;
+      color:#111315;
+      border-color:#fff;
+    }
+    .song-search-input {
+      min-width:0;
+      height:34px;
+      box-sizing:border-box;
+      border:1px solid #565d63;
+      border-radius:9px;
+      background:#171b1e;
+      color:#f2f4f5;
+      padding:6px 9px;
+      font:inherit;
+      font-size:14px;
+      outline:none;
+    }
+    .song-search-input:focus { border-color:#aab0b5; }
+    .song-results {
+      overflow-y:auto;
+      -webkit-overflow-scrolling:touch;
+      padding:10px 12px 12px;
+      display:grid;
+      grid-template-columns:1fr;
+      grid-auto-rows:minmax(58px,auto);
+      align-content:start;
+      gap:8px;
+      flex:1 1 auto;
+      min-height:0;
+      overscroll-behavior:contain;
+    }
+    .song-result {
+      appearance:none;
+      -webkit-appearance:none;
+      width:100%;
+      min-height:58px;
+      border:1px solid #454b51;
+      background:#1d2124;
+      color:#f2f4f5;
+      border-radius:11px;
+      padding:8px 10px;
+      text-align:left;
+      font:inherit;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      gap:3px;
+    }
+    .song-result.selected {
+      border-color:#fff;
+      box-shadow:inset 0 0 0 1px #fff;
+      background:#2b3034;
+    }
+    .song-result-title {
+      font-size:13px;
+      line-height:1.18;
+      font-weight:850;
+    }
+    .song-result-artist {
+      font-size:11px;
+      line-height:1.15;
+      color:#aeb4b9;
+      font-weight:700;
+    }
+    .song-result-empty {
+      color:#aeb4b9;
+      font-size:13px;
+      text-align:center;
+      padding:28px 12px;
+    }
+    .song-library-status {
+      color:#aeb4b9;
+      font-size:11px;
+      padding:0 12px 8px;
+      min-height:14px;
+    }
+
+    .prog-chip .chord-quality {
+      min-height:11px;
+      font-size:10px;
+      line-height:1;
+      font-weight:800;
+      color:#bac0c5;
+      white-space:nowrap;
+      letter-spacing:-.01em;
+    }
+    .prog-chip .chord-quality:empty { visibility:hidden; }
+    .progression-section-marker {
+      flex:0 0 30px;
+      width:30px;
+      min-width:30px;
+      height:54px;
+      align-self:flex-end;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:3px;
+      color:#90989f;
+      user-select:none;
+      -webkit-user-select:none;
+      pointer-events:none;
+    }
+    .progression-strip.long-strip .progression-section-marker {
+      align-self:flex-end;
+    }
+    .progression-section-marker::before,
+    .progression-section-marker::after {
+      content:"";
+      width:1px;
+      flex:1 1 auto;
+      min-height:7px;
+      background:#596168;
+    }
+    .progression-section-marker span {
+      display:block;
+      max-width:28px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      text-transform:uppercase;
+      font-size:7px;
+      line-height:1;
+      letter-spacing:.04em;
+      font-weight:850;
+    }
+    .prog-chip.song-wide {
+      flex-basis:calc((100% - 15px) / 4 + 18px) !important;
+    }
+
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="panel">
-      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.109"></svg>
+      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.110"></svg>
       <div class="progression-strip-shell">
         <div id="progressionStrip" class="progression-strip" aria-label="Progression map"></div>
         <div id="progressionPlayhead" class="progression-playhead" aria-hidden="true"></div>
@@ -1872,6 +2051,19 @@
     var workingProgressionDraft = null;
     var beatEditorState = null;
     var beatEditorLongPressMs = 675;
+
+    // v1.110 song library. Songs remain a distinct source from built-in
+    // progressions while sharing the same timeline, transport and playhead.
+    var songLibrary = [];
+    var songLibraryLoaded = false;
+    var songLibraryLoading = false;
+    var songLibraryError = "";
+    var activeSong = null;
+    var activeSongProgression = null;
+    var songBrowserOpen = false;
+    var songSearchMode = "title";
+    var songSearchContains = false;
+    var activeSongMode = "ionian";
 
     // Long-progression strip state. More than four progression steps keeps the
     // buttons at the normal four-across size and turns the row into a horizontal
@@ -2889,7 +3081,458 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       return deg.replace(/^b/, "♭");
     }
 
+
+    function circlePitchNameFromHarte(name) {
+      if (!name) return "";
+      return String(name).replace(/-/g,"b");
+    }
+
+    function circleCanonicalKeyName(name) {
+      var n = circlePitchNameFromHarte(name);
+      if (PC_MAP.hasOwnProperty(n)) return canonicalMajorForPitchClass(PC_MAP[n]);
+      return n || "C";
+    }
+
+    function songModeName(mode) {
+      var m=(mode||"major").toLowerCase();
+      if (m.indexOf("minor")!==-1) return "aeolian";
+      if (m.indexOf("dorian")!==-1) return "dorian";
+      if (m.indexOf("phrygian")!==-1) return "phrygian";
+      if (m.indexOf("lydian")!==-1 && m.indexOf("mixo")===-1) return "lydian";
+      if (m.indexOf("mixo")!==-1) return "mixolydian";
+      if (m.indexOf("locrian")!==-1) return "locrian";
+      return "ionian";
+    }
+
+    function romanFunctionOnly(raw) {
+      var s = (raw || "").trim();
+      if (!s) return "?";
+      s = s.replace(/-/g,"♭").replace(/#/g,"♯");
+      // Harm annotations can append quality and inversion codes. The top
+      // line and interval row now carry those details, so the center retains
+      // just harmonic function.
+      s = s.replace(/([ivIV]+)(?:m7|M7|\+7|o7|ø7|7|m|o|\+)?[bcdefg]?$/,"$1");
+      s = s.replace(/([ivIV]+)(?:m7|M7|\+7|o7|ø7|7|m|o|\+)?[bcdefg]?(\/)/g,"$1$2");
+      return s;
+    }
+
+    function harteDegreeInterval(token) {
+      var map = {
+        "1":0,"b2":1,"2":2,"#2":3,"b3":3,"3":4,"4":5,"#4":6,"b5":6,
+        "5":7,"#5":8,"b6":8,"6":9,"bb7":9,"b7":10,"7":11,
+        "8":12,"b9":13,"9":14,"#9":15,"11":17,"#11":18,"b13":20,"13":21
+      };
+      return map.hasOwnProperty(token) ? map[token] : null;
+    }
+
+    function uniqueSortedIntervals(values) {
+      var seen={}, out=[];
+      values.forEach(function(v){
+        if (v===null || v===undefined || !isFinite(v)) return;
+        var key=String(v);
+        if(!seen[key]) { seen[key]=true; out.push(v); }
+      });
+      out.sort(function(a,b){return a-b;});
+      return out;
+    }
+
+    function parseHarteQuality(q) {
+      q = (q || "maj").trim();
+      var base=q, additions=[];
+      var pm=q.match(/^([^()]*)\(([^)]*)\)$/);
+      if(pm) {
+        base=pm[1] || "";
+        additions=pm[2].split(",").map(function(x){return x.trim();}).filter(Boolean);
+      }
+
+      var intervals, label;
+      switch(base) {
+        case "": case "maj": intervals=[0,4,7]; label=""; break;
+        case "min": intervals=[0,3,7]; label="m"; break;
+        case "7": intervals=[0,4,7,10]; label="7"; break;
+        case "min7": intervals=[0,3,7,10]; label="m7"; break;
+        case "maj7": intervals=[0,4,7,11]; label="maj7"; break;
+        case "5": intervals=[0,7]; label="5"; break;
+        case "1": intervals=[0]; label=""; break;
+        case "sus2": intervals=[0,2,7]; label="sus2"; break;
+        case "sus4": intervals=[0,5,7]; label="sus4"; break;
+        case "maj6": intervals=[0,4,7,9]; label="6"; break;
+        case "min6": intervals=[0,3,7,9]; label="m6"; break;
+        case "dim": intervals=[0,3,6]; label="°"; break;
+        case "dim7": intervals=[0,3,6,9]; label="°7"; break;
+        case "hdim7": intervals=[0,3,6,10]; label="ø7"; break;
+        case "aug": intervals=[0,4,8]; label="+"; break;
+        case "minmaj7": intervals=[0,3,7,11]; label="m(maj7)"; break;
+        case "9": intervals=[0,4,7,10,14]; label="9"; break;
+        case "min9": intervals=[0,3,7,10,14]; label="m9"; break;
+        case "maj9": intervals=[0,4,7,11,14]; label="maj9"; break;
+        case "11": intervals=[0,4,7,10,14,17]; label="11"; break;
+        case "min11": intervals=[0,3,7,10,14,17]; label="m11"; break;
+        case "13": intervals=[0,4,7,10,14,21]; label="13"; break;
+        case "min13": intervals=[0,3,7,10,14,17,21]; label="m13"; break;
+        case "maj13": intervals=[0,4,7,11,14,21]; label="maj13"; break;
+        default:
+          intervals=[0,4,7];
+          label=base.replace(/min/g,"m").replace(/hdim7/g,"ø7").replace(/dim7/g,"°7").replace(/dim/g,"°");
+      }
+
+      additions.forEach(function(a){
+        var ai=harteDegreeInterval(a);
+        if(ai!==null) intervals.push(ai);
+      });
+      intervals=uniqueSortedIntervals(intervals);
+
+      // Conventional compact labels for the most common "added tone" forms.
+      if (additions.length && (base==="maj" || base==="min")) {
+        var addText=additions.map(function(a){
+          return a.replace(/^b/,"♭").replace(/^#/,"♯");
+        }).join(",");
+        if (additions.length===1 && ["9","11","13"].indexOf(additions[0])!==-1) {
+          label=(base==="min" ? "m" : "")+"add"+addText;
+        } else {
+          label=(base==="min" ? "m" : "")+"("+addText+")";
+        }
+      } else if (additions.length) {
+        var extra=additions.map(function(a){return a.replace(/^b/,"♭").replace(/^#/,"♯");}).join(",");
+        label += "("+extra+")";
+      }
+      return {intervals:intervals,label:label};
+    }
+
+    function songChordInfoFromRaw(raw) {
+      if (!raw) return null;
+      var s=String(raw);
+      var colon=s.indexOf(":");
+      var rootPart=colon>=0 ? s.slice(0,colon) : s;
+      var qualityPart=colon>=0 ? s.slice(colon+1) : "maj";
+      var slash="";
+      var slashIndex=qualityPart.lastIndexOf("/");
+      if(slashIndex>0) {
+        slash=qualityPart.slice(slashIndex+1);
+        qualityPart=qualityPart.slice(0,slashIndex);
+      }
+      var rootName=circlePitchNameFromHarte(rootPart);
+      var rootPC=PC_MAP[rootName];
+      if(rootPC===undefined) return null;
+      var parsed=parseHarteQuality(qualityPart);
+      var rootMidi=60+rootPC;
+      var midi=parsed.intervals.map(function(i){return rootMidi+i;});
+      var quality=(parsed.intervals.indexOf(3)!==-1) ? "minor" :
+                  (parsed.intervals.indexOf(6)!==-1 && parsed.intervals.indexOf(4)===-1 ? "dim" : "major");
+      return {
+        midiNotes:midi,
+        chordKey:null,
+        chordRing:null,
+        pitchClass:rootPC,
+        quality:quality,
+        songQualityLabel:parsed.label,
+        songRootName:rootName,
+        songSlashBass:circlePitchNameFromHarte(slash),
+        rawHarte:raw
+      };
+    }
+
+    function songPulsesForQuarterDuration(q, meter) {
+      var n=parseFloat(q);
+      if(!isFinite(n) || n<=0) n=1;
+      var compound=(meter==="6/8" || meter==="12/8");
+      var pulses=compound ? n/1.5 : n;
+      // v1.110 transport remains pulse-based. Preserve ordinary beat-aligned
+      // durations exactly and keep shorter source events visible as one pulse.
+      return Math.max(1, Math.round(pulses));
+    }
+
+    function buildSongProgression(song) {
+      var steps=[], pendingSection=null;
+      var keyTonic=(song.key && song.key.tonic) ? circlePitchNameFromHarte(song.key.tonic) : "C";
+      var keyMode=(song.key && song.key.mode) ? song.key.mode : "major";
+      var meter=song.meter || "4/4";
+
+      (song.events || []).forEach(function(e){
+        if(!e || !e.length) return;
+        if(e[0]==="s") {
+          pendingSection=(e[2] || "").trim() || null;
+          return;
+        }
+        if(e[0]==="k") {
+          keyTonic=circlePitchNameFromHarte(e[3] || keyTonic);
+          keyMode=e[4] || keyMode;
+          return;
+        }
+        if(e[0]==="m") {
+          meter=e[2] || meter;
+          return;
+        }
+        if(e[0]!=="c") return;
+        var raw=e[2], roman=e[3] || "?";
+        var info=songChordInfoFromRaw(raw);
+        if(!info) return;
+        var step={
+          romanRaw:roman,
+          roman:romanFunctionOnly(roman),
+          rawHarte:raw,
+          info:info,
+          beats:songPulsesForQuarterDuration(e[1],meter),
+          sourceQuarterDuration:parseFloat(e[1]) || 1,
+          measure:e[4],
+          sectionBefore:pendingSection,
+          keyTonic:keyTonic,
+          keyMode:keyMode,
+          meter:meter
+        };
+        pendingSection=null;
+
+        // Collapse adjacent identical harmonies only when no structural
+        // boundary, key change, or meter change separates them.
+        var prev=steps.length ? steps[steps.length-1] : null;
+        if(prev && !step.sectionBefore &&
+           prev.rawHarte===step.rawHarte &&
+           prev.romanRaw===step.romanRaw &&
+           prev.keyTonic===step.keyTonic &&
+           prev.keyMode===step.keyMode &&
+           prev.meter===step.meter) {
+          prev.beats += step.beats;
+          prev.sourceQuarterDuration += step.sourceQuarterDuration;
+        } else {
+          steps.push(step);
+        }
+      });
+
+      return {
+        isSong:true,
+        song:song,
+        steps:steps,
+        degrees:steps.map(function(s){return s.roman;}),
+        beats:steps.map(function(s){return s.beats;}),
+        baseBeats:steps.map(function(s){return s.beats;}),
+        sessionEdited:false
+      };
+    }
+
+    function progressionChordInfo(prog,index) {
+      if(prog && prog.isSong && prog.steps && prog.steps[index]) return prog.steps[index].info;
+      if(!prog || !prog.degrees || index<0 || index>=prog.degrees.length) return null;
+      return chordInfoForDegree(selectedMajor,prog.degrees[index]);
+    }
+
+    function songStepIsDiatonic(step) {
+      if(!step || !step.info || !step.info.midiNotes) return false;
+      var tonicPC=PC_MAP[step.keyTonic];
+      if(tonicPC===undefined) return false;
+      var mode=songModeName(step.keyMode);
+      var allowed=modeScalePitchClasses(tonicPC,mode);
+      for(var i=0;i<step.info.midiNotes.length;i++) {
+        var pc=((step.info.midiNotes[i]%12)+12)%12;
+        if(!allowed[pc]) return false;
+      }
+      return true;
+    }
+
+    function progressionStepIsDiatonic(prog,index,mode) {
+      if(prog && prog.isSong) return songStepIsDiatonic(prog.steps[index]);
+      return isDegreeDiatonic(prog.degrees[index],mode);
+    }
+
+    function songIntervalDisplay(step) {
+      if(!step || !step.info || !step.info.midiNotes) return [];
+      var tonicPC=PC_MAP[step.keyTonic];
+      if(tonicPC===undefined) tonicPC=0;
+      var mode=songModeName(step.keyMode);
+      var allowed=modeScalePitchClasses(tonicPC,mode);
+      var preferSharp=/♯|#/.test(step.romanRaw||"");
+      return step.info.midiNotes.map(function(midi){
+        var pc=((midi%12)+12)%12;
+        return {
+          label:intervalLabelFromTonic(pc-tonicPC,preferSharp,mode),
+          diatonic:!!allowed[pc]
+        };
+      });
+    }
+
+    function songMiddleLabel(step, letterView) {
+      if(!step) return "?";
+      if(letterView) return step.info.songRootName || "?";
+      return step.roman || "?";
+    }
+
+    function songQualityLabel(step) {
+      if(!step || !step.info) return "";
+      var label=step.info.songQualityLabel || "";
+      if(step.info.songSlashBass) {
+        label += (label ? " " : "") + "/" + step.info.songSlashBass;
+      }
+      return label;
+    }
+
+    function songSectionDisplayName(raw) {
+      var s=(raw||"").trim();
+      if(!s) return "";
+      var map={intro:"INTRO",verse:"VERSE",chorus:"CHORUS",bridge:"BRIDGE",
+               refrain:"REFRAIN",interlude:"INTERLUDE",outro:"OUTRO",
+               prechorus:"PRE",solo:"SOLO"};
+      return map[s.toLowerCase()] || s.toUpperCase().slice(0,9);
+    }
+
+    function setProgressionTriggerForSong() {
+      var btn=document.getElementById("progressionSelectTrigger");
+      if(!btn) return;
+      var main=btn.querySelector(".main-value");
+      if(main) main.textContent=activeSong ? "Song" : compactProgressionTriggerLabel(selectedOptionFor(document.getElementById("progressionSelect")));
+    }
+
+    function activateSong(song) {
+      if(!song) return;
+      stopProgressionPlayback();
+      discardWorkingProgressionDraft();
+      activeSong=song;
+      activeSongProgression=buildSongProgression(song);
+      activeSongMode=songModeName(song.key && song.key.mode);
+      var tonic=(song.key && song.key.tonic) ? circlePitchNameFromHarte(song.key.tonic) : "C";
+      if(PC_MAP.hasOwnProperty(tonic)) selectedMajor=canonicalMajorForPitchClass(PC_MAP[tonic]);
+      if(["4/4","3/4","6/8","12/8","2/4"].indexOf(song.meter)!==-1) {
+        setCircleTimeSignature(song.meter);
+      }
+      stoppedDisplayState=0;
+      chordLetterView=false;
+      beatEditorState=null;
+      progressionStripSelectionKey="";
+      setProgressionTriggerForSong();
+      transportVisualStateKey="";
+      render(selectedMajor);
+      renderProgressionStrip(null,null,false);
+      renderSongResults();
+    }
+
+    function clearActiveSong() {
+      activeSong=null;
+      activeSongProgression=null;
+      activeSongMode="ionian";
+      setProgressionTriggerForSong();
+    }
+
+    function songSortValue(song) {
+      return String(songSearchMode==="artist" ? song.artist : song.title).toLowerCase();
+    }
+
+    function filteredSongs() {
+      var input=document.getElementById("songSearchInput");
+      var q=input ? input.value.trim().toLowerCase() : "";
+      var arr=songLibrary.slice().sort(function(a,b){
+        var av=songSortValue(a), bv=songSortValue(b);
+        if(av<bv) return -1; if(av>bv) return 1;
+        return String(a.title).localeCompare(String(b.title));
+      });
+      if(!q) return arr;
+      return arr.filter(function(song){
+        var value=String(songSearchMode==="artist" ? song.artist : song.title).toLowerCase();
+        return songSearchContains ? value.indexOf(q)!==-1 : value.indexOf(q)===0;
+      });
+    }
+
+    function renderSongResults() {
+      var host=document.getElementById("songResults");
+      var status=document.getElementById("songLibraryStatus");
+      if(!host) return;
+      host.innerHTML="";
+      if(songLibraryLoading) {
+        if(status) status.textContent="Loading song library…";
+        return;
+      }
+      if(songLibraryError) {
+        if(status) status.textContent=songLibraryError;
+        return;
+      }
+      var matches=filteredSongs();
+      if(status) {
+        status.textContent=(songSearchContains ? "Contains · " : "Starts with · ") +
+          matches.length+" of "+songLibrary.length+" songs";
+      }
+      if(!matches.length) {
+        var empty=document.createElement("div");
+        empty.className="song-result-empty";
+        empty.textContent="No matching songs";
+        host.appendChild(empty);
+        return;
+      }
+      matches.forEach(function(song){
+        var b=document.createElement("button");
+        b.type="button";
+        b.className="song-result"+(activeSong && activeSong.id===song.id ? " selected" : "");
+        var title=document.createElement("div");
+        title.className="song-result-title";
+        title.textContent=song.title;
+        var artist=document.createElement("div");
+        artist.className="song-result-artist";
+        artist.textContent=song.artist;
+        b.appendChild(title); b.appendChild(artist);
+        b.addEventListener("click",function(){ activateSong(song); });
+        host.appendChild(b);
+      });
+    }
+
+    function loadSongLibrary() {
+      if(songLibraryLoaded || songLibraryLoading) return;
+      songLibraryLoading=true;
+      songLibraryError="";
+      renderSongResults();
+      fetch("Circle_song_library.json",{cache:"no-store"}).then(function(r){
+        if(!r.ok) throw new Error("HTTP "+r.status);
+        return r.json();
+      }).then(function(data){
+        songLibrary=Array.isArray(data) ? data : (data.songs || []);
+        songLibraryLoaded=true;
+        songLibraryLoading=false;
+        renderSongResults();
+      }).catch(function(){
+        songLibraryLoading=false;
+        songLibraryError="Song library not found. Keep Circle_song_library.json beside index.html.";
+        renderSongResults();
+      });
+    }
+
+    function setSongSearchMode(mode) {
+      songSearchMode=(mode==="artist") ? "artist" : "title";
+      songSearchContains=false;
+      var t=document.getElementById("songModeTitle"), a=document.getElementById("songModeArtist");
+      if(t) t.classList.toggle("active",songSearchMode==="title");
+      if(a) a.classList.toggle("active",songSearchMode==="artist");
+      renderSongResults();
+    }
+
+    function openSongBrowser() {
+      if(!activeBrowserSelect || activeBrowserSelect.id!=="progressionSelect") return;
+      songBrowserOpen=true;
+      var songBtn=document.getElementById("choiceSong");
+      var sb=document.getElementById("songBrowser");
+      var tabs=document.getElementById("choiceTabs");
+      var grid=document.getElementById("choiceGrid");
+      if(songBtn) songBtn.classList.add("active");
+      if(sb) { sb.classList.add("open"); sb.setAttribute("aria-hidden","false"); }
+      if(tabs) tabs.style.display="none";
+      if(grid) grid.style.display="none";
+      document.getElementById("choiceTitle").textContent="Songs";
+      loadSongLibrary();
+      renderSongResults();
+    }
+
+    function closeSongBrowserView() {
+      songBrowserOpen=false;
+      var songBtn=document.getElementById("choiceSong");
+      var sb=document.getElementById("songBrowser");
+      var tabs=document.getElementById("choiceTabs");
+      var grid=document.getElementById("choiceGrid");
+      if(songBtn) songBtn.classList.remove("active");
+      if(sb) { sb.classList.remove("open"); sb.setAttribute("aria-hidden","true"); }
+      if(tabs) tabs.style.display="";
+      if(grid) grid.style.display="";
+      if(activeBrowserSelect) {
+        var cfg=selectorBrowserConfig[activeBrowserSelect.id];
+        document.getElementById("choiceTitle").textContent=cfg ? cfg.title : "Choose";
+      }
+    }
+
     function progressionModeForSelection() {
+      if (activeSong) return activeSongMode || "ionian";
       var select = document.getElementById("progressionSelect");
       var opt = select && select.options ? select.options[select.selectedIndex] : null;
       var group = (opt && opt.parentElement && opt.parentElement.tagName === "OPTGROUP")
@@ -2979,6 +3622,7 @@ function fetchAndDecodePercussionSample(ctx, urls) {
     }
 
     function progressionSessionEditKey() {
+      if (activeSong) return "song||" + activeSong.id;
       var s = document.getElementById("progressionSelect");
       if (!s || s.selectedIndex < 0) return currentTimeSignature + "||none";
       var opt = s.options[s.selectedIndex];
@@ -3012,6 +3656,7 @@ function fetchAndDecodePercussionSample(ctx, urls) {
     }
 
     function getSelectedProgression() {
+      if (activeSongProgression) return activeSongProgression;
       var s = document.getElementById("progressionSelect");
       if (!s) return {degrees:[], beats:[], baseBeats:[]};
 
@@ -3088,7 +3733,7 @@ function fetchAndDecodePercussionSample(ctx, urls) {
     }
 
     function bindProgressionBeatLongPress(chip, index) {
-      if (!chip || progressionPlaying) return;
+      if (activeSong || !chip || progressionPlaying) return;
       var timer = null;
       var startX = 0, startY = 0;
 
@@ -3601,8 +4246,22 @@ function fetchAndDecodePercussionSample(ctx, urls) {
 
       for (var i=0; i<prog.degrees.length; i++) {
         var d = prog.degrees[i];
+        var songStep = (prog.isSong && prog.steps) ? prog.steps[i] : null;
+
+        if (songStep && songStep.sectionBefore) {
+          var marker=document.createElement("div");
+          marker.className="progression-section-marker";
+          var markerText=document.createElement("span");
+          markerText.textContent=songSectionDisplayName(songStep.sectionBefore);
+          marker.appendChild(markerText);
+          host.appendChild(marker);
+        }
+
         var chip = document.createElement("div");
-        chip.className = "prog-chip " + (isDegreeDiatonic(d, mode) ? "in-key" : "out-key");
+        chip.className = "prog-chip " + (progressionStepIsDiatonic(prog,i,mode) ? "in-key" : "out-key");
+        if(songStep && songStep.info && songStep.info.midiNotes && songStep.info.midiNotes.length>5) {
+          chip.className += " song-wide";
+        }
 
         // While stopped, any progression chip toggles the whole strip between
         // Roman numerals and actual chord names.
@@ -3623,7 +4282,8 @@ function fetchAndDecodePercussionSample(ctx, urls) {
             // handler that is installed when state 2 (blank/independent) renders.
             ev.stopPropagation();
             beatEditorState = null;
-            toggleChordLetterView();
+            if (activeSong) setStoppedDisplayState(stoppedDisplayState === 0 ? 1 : 0);
+            else toggleChordLetterView();
           });
         }
 
@@ -3652,15 +4312,22 @@ function fetchAndDecodePercussionSample(ctx, urls) {
           chip.className += " next-cue";
         }
 
+        var quality=document.createElement("div");
+        quality.className="chord-quality";
+        quality.textContent=songStep ? songQualityLabel(songStep) : "";
+        chip.appendChild(quality);
+
         var roman=document.createElement("div");
-        roman.textContent = (chordLetterView && !progressionPlaying)
-          ? chordNameForDegree(d)
-          : (modeReferenceView
-              ? romanLabelForChordRelativeToParent(d, mode)
-              : normalizedDegreeLabel(d));
+        roman.textContent = songStep
+          ? songMiddleLabel(songStep, chordLetterView && !progressionPlaying)
+          : ((chordLetterView && !progressionPlaying)
+              ? chordNameForDegree(d)
+              : (modeReferenceView
+                  ? romanLabelForChordRelativeToParent(d, mode)
+                  : normalizedDegreeLabel(d)));
         chip.appendChild(roman);
 
-        var triadIntervals = triadIntervalDisplayForDegree(d,mode);
+        var triadIntervals = songStep ? songIntervalDisplay(songStep) : triadIntervalDisplayForDegree(d,mode);
         if (triadIntervals.length) {
           var intervalRow = document.createElement("div");
           intervalRow.className = "triad-intervals";
@@ -3681,7 +4348,7 @@ function fetchAndDecodePercussionSample(ctx, urls) {
 
           chip.appendChild(intervalRow);
         }
-        attachBeatEditor(chip, i);
+        if (!prog.isSong) attachBeatEditor(chip, i);
         host.appendChild(chip);
       }
 
@@ -3694,12 +4361,12 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       var prog = getSelectedProgression(), inPC = {}, outPC = {};
       var mode = progressionModeForDegrees(prog.degrees);
       for (var i=0; i<prog.degrees.length; i++) {
-        var d = prog.degrees[i], info = chordInfoForDegree(selectedMajor, d);
+        var d = prog.degrees[i], info = progressionChordInfo(prog,i);
         if (!info || !info.midiNotes) continue;
         var pc = ((info.midiNotes[0] % 12) + 12) % 12;
-        var q = info.quality || ((info.midiNotes[1]-info.midiNotes[0] === 3) ? "minor" : "major");
+        var q = info.quality || ((info.midiNotes.length>1 && info.midiNotes[1]-info.midiNotes[0] === 3) ? "minor" : "major");
         var key = pc + ":" + q;
-        if (isDegreeDiatonic(d, mode)) inPC[key] = true;
+        if (progressionStepIsDiatonic(prog,i,mode)) inPC[key] = true;
         else outPC[key] = true;
       }
       return {inPC:inPC, outPC:outPC};
@@ -4322,6 +4989,9 @@ function renderBrowserGrid() {
       if(!activeBrowserSelect) return;
       var cfg=selectorBrowserConfig[selectId];
       document.getElementById("choiceTitle").textContent=cfg.title;
+      closeSongBrowserView();
+      var songBtn=document.getElementById("choiceSong");
+      if(songBtn) songBtn.classList.toggle("visible",selectId==="progressionSelect");
       activeBrowserCategory=optionCategory(selectedOptionFor(activeBrowserSelect));
       browserWasPlaying=progressionPlaying;
       renderBrowserTabs();
@@ -4332,6 +5002,9 @@ function renderBrowserGrid() {
     }
 
     function closeChoiceBrowser() {
+      closeSongBrowserView();
+      var songBtn=document.getElementById("choiceSong");
+      if(songBtn) songBtn.classList.remove("visible");
       var ov=document.getElementById("choiceOverlay");
       ov.classList.remove("open");
       ov.setAttribute("aria-hidden","true");
@@ -4362,8 +5035,36 @@ function renderBrowserGrid() {
       var previewBtn=document.getElementById("choicePreview");
       var overlay=document.getElementById("choiceOverlay");
 
+      var songBtn=document.getElementById("choiceSong");
+      var modeTitle=document.getElementById("songModeTitle");
+      var modeArtist=document.getElementById("songModeArtist");
+      var searchInput=document.getElementById("songSearchInput");
+      var searchButton=document.getElementById("songSearchButton");
+
       if(doneBtn) doneBtn.addEventListener("click",closeChoiceBrowser);
       if(previewBtn) previewBtn.addEventListener("click",toggleBrowserPreview);
+      if(songBtn) songBtn.addEventListener("click",function(){
+        if(songBrowserOpen) closeSongBrowserView(); else openSongBrowser();
+      });
+      if(modeTitle) modeTitle.addEventListener("click",function(){ setSongSearchMode("title"); });
+      if(modeArtist) modeArtist.addEventListener("click",function(){ setSongSearchMode("artist"); });
+      if(searchInput) {
+        searchInput.addEventListener("input",function(){
+          songSearchContains=false;
+          renderSongResults();
+        });
+        searchInput.addEventListener("keydown",function(e){
+          if(e.key==="Enter") {
+            e.preventDefault();
+            songSearchContains=true;
+            renderSongResults();
+          }
+        });
+      }
+      if(searchButton) searchButton.addEventListener("click",function(){
+        songSearchContains=true;
+        renderSongResults();
+      });
       if(overlay) overlay.addEventListener("click",function(e){
         if(e.target===this) closeChoiceBrowser();
       });
@@ -5509,7 +6210,7 @@ function renderBrowserGrid() {
       var events = selectedBassPatternEvents();
       if (!events.length) return;
 
-      var info = chordInfoForDegree(selectedMajor, position.degree);
+      var info = progressionChordInfo(getSelectedProgression(), position.chordIndex);
       if (!info || !info.midiNotes || !info.midiNotes.length) return;
 
       // Bass now has its own four-beat pattern, independent of Guitar.
@@ -5548,7 +6249,7 @@ function renderBrowserGrid() {
       var events = selectedGuitarPatternEvents();
       if (!events.length) return;
 
-      var info = chordInfoForDegree(selectedMajor, position.degree);
+      var info = progressionChordInfo(getSelectedProgression(), position.chordIndex);
       if (!info || !info.midiNotes || !info.midiNotes.length) return;
 
       // C@... and A0/A1/A2@... events repeat every four beats WITHIN
@@ -5607,10 +6308,19 @@ function renderBrowserGrid() {
       var position = transportProgressionPosition(beatNumber);
       if (!position) return;
 
-      var info = chordInfoForDegree(selectedMajor, position.degree);
+      var prog = getSelectedProgression();
+      var info = progressionChordInfo(prog, position.chordIndex);
       if (!info || !info.midiNotes || !info.midiNotes.length) return;
 
-      var prog = getSelectedProgression();
+      // Follow source key changes visually. Meter changes remain preserved in
+      // the song data for the next transport pass.
+      if (prog.isSong && prog.steps && prog.steps[position.chordIndex]) {
+        var activeStep=prog.steps[position.chordIndex];
+        if(activeStep.keyTonic && PC_MAP.hasOwnProperty(activeStep.keyTonic)) {
+          selectedMajor=canonicalMajorForPitchClass(PC_MAP[activeStep.keyTonic]);
+          activeSongMode=songModeName(activeStep.keyMode);
+        }
+      }
 
       // Keep the current chord steadily lit.
       // Reuse the previous cue timing for the NEXT chord:
@@ -5637,13 +6347,14 @@ function renderBrowserGrid() {
 
       if (cueIndex !== null && cueLit === true) {
         var cueDegree = prog.degrees[cueIndex];
-        var cueInfo = chordInfoForDegree(selectedMajor, cueDegree);
+        var cueInfo = progressionChordInfo(prog,cueIndex);
         if (cueInfo && cueInfo.midiNotes && cueInfo.midiNotes.length) {
           cuePitchClass = ((cueInfo.midiNotes[0] % 12) + 12) % 12;
           cueQuality = cueInfo.quality ||
-            ((cueInfo.midiNotes[1] - cueInfo.midiNotes[0] === 3) ? "minor" : "major");
-          cueIsDiatonic = isDegreeDiatonic(
-            cueDegree,
+            ((cueInfo.midiNotes.length>1 && cueInfo.midiNotes[1] - cueInfo.midiNotes[0] === 3) ? "minor" : "major");
+          cueIsDiatonic = progressionStepIsDiatonic(
+            prog,
+            cueIndex,
             progressionModeForDegrees(prog.degrees)
           );
           cueLitOnWheel = true;
@@ -5669,8 +6380,9 @@ function renderBrowserGrid() {
       activePitchClass = ((info.midiNotes[0] % 12) + 12) % 12;
       activeQuality = info.quality ||
         ((info.midiNotes[1] - info.midiNotes[0] === 3) ? "minor" : "major");
-      activeIsDiatonic = isDegreeDiatonic(
-        position.degree,
+      activeIsDiatonic = progressionStepIsDiatonic(
+        prog,
+        position.chordIndex,
         progressionModeForDegrees(prog.degrees)
       );
 
@@ -5941,6 +6653,7 @@ function renderBrowserGrid() {
       fader.addEventListener("change", applyMixerLevels);
     });
     document.getElementById("progressionSelect").addEventListener("change", function(){
+      clearActiveSong();
       discardWorkingProgressionDraft();
       stopChordAudition(true);
       if (progressionPlaying) stopProgressionPlayback();
@@ -6012,12 +6725,27 @@ function primeAudioSamples(){
       <div class="choice-head">
         <div id="choiceTitle" class="choice-title">Choose</div>
         <div class="choice-head-actions">
+          <button type="button" id="choiceSong" class="choice-song">Song</button>
           <button type="button" id="choicePreview" class="choice-preview">Preview</button>
           <button type="button" id="choiceDone" class="choice-done">Done</button>
         </div>
       </div>
       <div id="choiceTabs" class="choice-tabs"></div>
       <div id="choiceGrid" class="choice-grid"></div>
+      <div id="songBrowser" class="song-browser" aria-hidden="true">
+        <div class="song-search-tools">
+          <div class="song-search-mode">
+            <button type="button" id="songModeTitle" class="song-mode-btn active">Title</button>
+            <button type="button" id="songModeArtist" class="song-mode-btn">Artist</button>
+          </div>
+          <input id="songSearchInput" class="song-search-input" type="search"
+                 autocomplete="off" autocapitalize="none" spellcheck="false"
+                 placeholder="Start typing…" aria-label="Search songs">
+          <button type="button" id="songSearchButton" class="song-search-btn">Search</button>
+        </div>
+        <div id="songLibraryStatus" class="song-library-status"></div>
+        <div id="songResults" class="song-results"></div>
+      </div>
     </div>
   </div>
 
