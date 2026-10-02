@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Circle v1.110</title>
+  <title>Circle v1.111</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -1515,7 +1515,7 @@
       color:#f2f4f5;
       padding:6px 9px;
       font:inherit;
-      font-size:14px;
+      font-size:16px; /* Prevent iOS Safari from auto-zooming focused inputs */
       outline:none;
     }
     .song-search-input:focus { border-color:#aab0b5; }
@@ -1636,7 +1636,7 @@
 <body>
   <div class="wrap">
     <div class="panel">
-      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.110"></svg>
+      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.111"></svg>
       <div class="progression-strip-shell">
         <div id="progressionStrip" class="progression-strip" aria-label="Progression map"></div>
         <div id="progressionPlayhead" class="progression-playhead" aria-hidden="true"></div>
