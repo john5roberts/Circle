@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Circle v1.111</title>
+  <title>Circle v1.112</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -1636,7 +1636,7 @@
 <body>
   <div class="wrap">
     <div class="panel">
-      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.111"></svg>
+      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.112"></svg>
       <div class="progression-strip-shell">
         <div id="progressionStrip" class="progression-strip" aria-label="Progression map"></div>
         <div id="progressionPlayhead" class="progression-playhead" aria-hidden="true"></div>
@@ -3339,11 +3339,27 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       if(tonicPC===undefined) tonicPC=0;
       var mode=songModeName(step.keyMode);
       var allowed=modeScalePitchClasses(tonicPC,mode);
+
+      // Match Circle's established interval-reference toggle:
+      // normal view numbers from the song/modal center; 1–7 Mode view
+      // numbers from the parent major. Diatonic green/red always remains
+      // based on the active song/modal collection.
+      var referenceTonic=tonicPC;
+      var referenceMode=mode;
+      if(modeReferenceView) {
+        var parent=parentMajorForMode(
+          canonicalMajorForPitchClass(tonicPC),
+          mode
+        );
+        referenceTonic=PC_MAP[KEY_NOTES[parent][0]];
+        referenceMode="ionian";
+      }
+
       var preferSharp=/♯|#/.test(step.romanRaw||"");
       return step.info.midiNotes.map(function(midi){
         var pc=((midi%12)+12)%12;
         return {
-          label:intervalLabelFromTonic(pc-tonicPC,preferSharp,mode),
+          label:intervalLabelFromTonic(pc-referenceTonic,preferSharp,referenceMode),
           diatonic:!!allowed[pc]
         };
       });
