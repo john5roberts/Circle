@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Circle v1.116</title>
+  <title>Circle ChoCo Test</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -1661,7 +1661,7 @@
 <body>
   <div class="wrap">
     <div class="panel">
-      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.116"></svg>
+      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle ChoCo Test · based on v1.116"></svg>
       <div class="progression-strip-shell">
         <div id="progressionStrip" class="progression-strip" aria-label="Progression map"></div>
         <div id="progressionPlayhead" class="progression-playhead" aria-hidden="true"></div>
@@ -3518,7 +3518,7 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       songLibraryLoading=true;
       songLibraryError="";
       renderSongResults();
-      fetch("Circle_song_library.json",{cache:"no-store"}).then(function(r){
+      fetch("Circle_test_song_library.json",{cache:"no-store"}).then(function(r){
         if(!r.ok) throw new Error("HTTP "+r.status);
         return r.json();
       }).then(function(data){
@@ -3528,7 +3528,7 @@ function fetchAndDecodePercussionSample(ctx, urls) {
         renderSongResults();
       }).catch(function(){
         songLibraryLoading=false;
-        songLibraryError="Song library not found. Keep Circle_song_library.json beside index.html.";
+        songLibraryError="Test song library not found. Keep Circle_test_song_library.json beside this HTML file.";
         renderSongResults();
       });
     }
