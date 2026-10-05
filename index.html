@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Circle v1.112</title>
+  <title>Circle v1.116</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -299,7 +299,8 @@
     .prog-chip.hold-target { cursor:pointer; touch-action:manipulation; }
     .prog-chip.view-toggle { cursor:pointer; touch-action:manipulation; }
     .progression-strip.blank-view { touch-action:manipulation; }
-    .progression-back-button {
+    .progression-back-button,
+    .progression-random-button {
       flex:0 0 54px;
       width:54px;
       height:54px;
@@ -318,8 +319,32 @@
       cursor:pointer;
       touch-action:manipulation;
       transition:filter .08s, box-shadow .08s, transform .08s;
+      -webkit-tap-highlight-color:transparent;
     }
-    .progression-back-button:active {
+    .progression-random-button {
+      margin-left:auto;
+    }
+    .progression-random-button svg {
+      width:30px;
+      height:30px;
+      display:block;
+      fill:none;
+      stroke:currentColor;
+      stroke-width:2.15;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+    }
+
+    /* Independent-circle mode is intentionally stripped down: only the wheel
+       and the Back / Randomize row remain visible. */
+    body.independent-clean .top-arrangement,
+    body.independent-clean #detailTabs,
+    body.independent-clean #detailStage {
+      visibility:hidden !important;
+      pointer-events:none !important;
+    }
+    .progression-back-button:active,
+    .progression-random-button:active {
       filter:brightness(1.25);
       transform:translateY(1px);
     }
@@ -1636,7 +1661,7 @@
 <body>
   <div class="wrap">
     <div class="panel">
-      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.112"></svg>
+      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.116"></svg>
       <div class="progression-strip-shell">
         <div id="progressionStrip" class="progression-strip" aria-label="Progression map"></div>
         <div id="progressionPlayhead" class="progression-playhead" aria-hidden="true"></div>
@@ -2042,8 +2067,10 @@
     var chordAuditionNextBeatTime = 0;
     var chordAuditionBeatNumber = 0;
     var chordAuditionInfo = null;
+    var chordAuditionPendingInfo = null;
     var chordAuditionChordKey = null;
     var chordAuditionChordRing = null;
+    var chordAuditionScheduleAheadSec = 0.045;
 
     // Unsaved progression editing uses one temporary working draft. The built-in
     // progression data remains immutable. The draft survives playback and view
@@ -4006,6 +4033,7 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       }
       chordAuditionRunning = false;
       chordAuditionInfo = null;
+      chordAuditionPendingInfo = null;
       chordAuditionChordKey = null;
       chordAuditionChordRing = null;
       clearProgressionVoiceArray();
@@ -4081,7 +4109,15 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       if (!chordAuditionRunning || !chordAuditionInfo) return;
       var ctx = getAudioCtx();
       var beatSeconds = getTransportBeatSeconds();
-      while (chordAuditionNextBeatTime < ctx.currentTime + transportScheduleAheadSec) {
+      while (chordAuditionNextBeatTime < ctx.currentTime + chordAuditionScheduleAheadSec) {
+        // A circle tap changes the graphics immediately, but harmony changes
+        // only here, at the next beat boundary. The beat counter and clock
+        // continue uninterrupted.
+        if (chordAuditionPendingInfo) {
+          chordAuditionInfo = chordAuditionPendingInfo;
+          chordAuditionPendingInfo = null;
+        }
+
         var bassToggle = document.getElementById("bassToggle");
         var guitarToggle = document.getElementById("chordToggle");
         if (!bassToggle || bassToggle.checked) {
@@ -4099,39 +4135,105 @@ function fetchAndDecodePercussionSample(ctx, urls) {
     function startChordAudition(rootPC, quality, chordKey, chordRing) {
       if (progressionPlaying || !isIndependentCircleView() || independentCircleMode !== "sound") return;
 
+      // Tapping the currently selected chord still acts as an on/off toggle.
       if (chordAuditionRunning &&
-          chordAuditionInfo &&
-          chordAuditionInfo.pitchClass === rootPC &&
-          chordAuditionInfo.quality === quality) {
+          activePitchClass === rootPC &&
+          activeQuality === quality) {
         stopChordAudition();
         return;
       }
 
       stopArpeggioOnly();
+
+      var requestedInfo = wheelChordInfo(rootPC, quality);
+
+      // Visual response is immediate.
+      activeRoman = null;
+      activeChordKey = chordKey;
+      activeChordRing = chordRing;
+      activePitchClass = rootPC;
+      activeQuality = quality;
+      activeIsDiatonic = independentChordIsDiatonic(rootPC, quality);
+      render(selectedMajor);
+
+      // If the independent accompaniment is already running, do NOT stop it
+      // or restart its beat count. Queue the new harmony for the next beat.
+      if (chordAuditionRunning && chordAuditionInfo) {
+        chordAuditionPendingInfo = requestedInfo;
+        chordAuditionChordKey = chordKey;
+        chordAuditionChordRing = chordRing;
+        return;
+      }
+
+      // First chord starts a fresh independent beat clock. Sample loading may
+      // take a moment, so confirm the same chord is still selected before start.
       stopChordAudition(true);
+
+      // stopChordAudition clears the visual state, so restore it immediately.
+      activeRoman = null;
+      activeChordKey = chordKey;
+      activeChordRing = chordRing;
+      activePitchClass = rootPC;
+      activeQuality = quality;
+      activeIsDiatonic = independentChordIsDiatonic(rootPC, quality);
+      render(selectedMajor);
 
       ensureAudioReady(function(ctx){
         Promise.all([loadBassSamples(ctx), loadGuitarSamples(ctx)]).then(function(){
           if (progressionPlaying || !isIndependentCircleView() || independentCircleMode !== "sound") return;
-          chordAuditionInfo = wheelChordInfo(rootPC, quality);
+          if (activePitchClass !== rootPC || activeQuality !== quality) return;
+
+          chordAuditionInfo = requestedInfo;
+          chordAuditionPendingInfo = null;
           chordAuditionChordKey = chordKey;
           chordAuditionChordRing = chordRing;
           chordAuditionRunning = true;
           chordAuditionBeatNumber = 0;
           chordAuditionNextBeatTime = ctx.currentTime + 0.04;
 
-          activeRoman = null;
-          activeChordKey = chordKey;
-          activeChordRing = chordRing;
-          activePitchClass = rootPC;
-          activeQuality = quality;
-          activeIsDiatonic = independentChordIsDiatonic(rootPC, quality);
-
-          render(selectedMajor);
           runChordAuditionScheduler();
           chordAuditionTimer = setInterval(runChordAuditionScheduler, transportLookaheadMs);
         });
       });
+    }
+
+    function randomizeSelectToDifferentPattern(select) {
+      if (!select || !select.options || select.options.length < 2) return false;
+      var current = select.options[select.selectedIndex];
+      var currentValue = current ? current.value : select.value;
+      var candidates = [];
+
+      for (var i=0; i<select.options.length; i++) {
+        var opt = select.options[i];
+        if (!opt || opt.disabled) continue;
+        // Different underlying pattern, not merely a different display name.
+        if (opt.value === currentValue) continue;
+        candidates.push(i);
+      }
+
+      if (!candidates.length) return false;
+      var chosenIndex = candidates[Math.floor(Math.random() * candidates.length)];
+      select.selectedIndex = chosenIndex;
+      updateTrigger(select);
+      return true;
+    }
+
+    function randomizeIndependentAccompaniment() {
+      if (!isIndependentCircleView()) return;
+
+      var guitar = document.getElementById("guitarPatternSelect");
+      var bass = document.getElementById("bassPatternSelect");
+
+      var guitarChanged = randomizeSelectToDifferentPattern(guitar);
+      var bassChanged = randomizeSelectToDifferentPattern(bass);
+
+      // Remember the randomized pair for this meter. Do not dispatch the normal
+      // select change events: those intentionally stop chord audition, whereas
+      // this control is meant to change accompaniment live without disturbing
+      // the selected chord or diatonic center.
+      if (guitarChanged || bassChanged) {
+        saveCurrentMeterSelections();
+      }
     }
 
     function setStoppedDisplayState(state) {
@@ -4234,7 +4336,10 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       var prog = getSelectedProgression();
       var mode = progressionModeForDegrees(prog.degrees);
       host.innerHTML = "";
-      host.classList.toggle("blank-view", !progressionPlaying && stoppedDisplayState === 2);
+      var independentClean = !progressionPlaying && stoppedDisplayState === 2;
+      host.classList.toggle("blank-view", independentClean);
+      document.body.classList.toggle("independent-clean", independentClean);
+      if (independentClean) closeDetailPanels();
       host.onclick = null;
       host.removeAttribute("role");
       host.removeAttribute("aria-label");
@@ -4257,6 +4362,24 @@ function fetchAndDecodePercussionSample(ctx, urls) {
           setStoppedDisplayState(0);
         });
         host.appendChild(backButton);
+
+        var randomButton = document.createElement("button");
+        randomButton.type = "button";
+        randomButton.className = "progression-random-button";
+        randomButton.setAttribute("aria-label", "Randomize guitar and bass accompaniment");
+        randomButton.setAttribute("title", "Randomize guitar and bass");
+        randomButton.innerHTML =
+          '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+            '<path d="M3.5 7h3.2L16 17h4.5"/>' +
+            '<path d="M17.8 14.3 20.5 17l-2.7 2.7"/>' +
+            '<path d="M3.5 17h3.2L16 7h4.5"/>' +
+            '<path d="M17.8 4.3 20.5 7l-2.7 2.7"/>' +
+          '</svg>';
+        randomButton.addEventListener("click", function(ev){
+          ev.stopPropagation();
+          randomizeIndependentAccompaniment();
+        });
+        host.appendChild(randomButton);
         return;
       }
 
@@ -4335,8 +4458,8 @@ function fetchAndDecodePercussionSample(ctx, urls) {
 
         var roman=document.createElement("div");
         roman.textContent = songStep
-          ? songMiddleLabel(songStep, chordLetterView && !progressionPlaying)
-          : ((chordLetterView && !progressionPlaying)
+          ? songMiddleLabel(songStep, chordLetterView)
+          : ((chordLetterView)
               ? chordNameForDegree(d)
               : (modeReferenceView
                   ? romanLabelForChordRelativeToParent(d, mode)
@@ -4502,8 +4625,19 @@ function setTransportButtonState(state) {
       if (!editableProgression || !editableProgression.degrees.length) return;
       beatEditorState = null;
       stopChordAudition(true);
-      stoppedDisplayState = 0;
-      chordLetterView = false;
+
+      // Preserve the user's linked notation view through playback:
+      // state 0 = Roman numerals in the progression strip,
+      // state 1 = chord letters in the progression strip.
+      // The third, independent-circle view has no progression labels to
+      // preserve, so starting playback from there returns to state 0.
+      if (stoppedDisplayState === 2) {
+        stoppedDisplayState = 0;
+        chordLetterView = false;
+      } else {
+        chordLetterView = (stoppedDisplayState === 1);
+      }
+
       independentCircleMode = "diatonic";
       stopArpeggioOnly();
       stopProgressionPlayback();
@@ -4685,7 +4819,7 @@ function setTransportButtonState(state) {
           majorText = "#65e69b";
         }
 
-        var majorLabelForWheel = (!independentView && chordLetterView && !progressionPlaying)
+        var majorLabelForWheel = (!independentView && chordLetterView)
           ? romanLabelForWheelChord(renderChroma[major], "major")
           : majorDisplay;
         text(svg, majorX + majorDx, majorY, majorLabelForWheel, { size: majorSize, weight: 800, fill: majorText });
@@ -4733,7 +4867,7 @@ function setTransportButtonState(state) {
         if (minorIsActive) inner.setAttribute("class", "clickable active-wedge");
         else if (minorIsCue) inner.setAttribute("class", "clickable next-cue-wedge");
         var minorTextR = 98, minorX = cx + Math.cos(centerAngle) * minorTextR, minorY = cy + Math.sin(centerAngle) * minorTextR + 7, minorDx = 0;
-        var minorLabelForWheel = (!independentView && chordLetterView && !progressionPlaying)
+        var minorLabelForWheel = (!independentView && chordLetterView)
           ? romanLabelForWheelChord(minorRootPC, minorQualityForWheel)
           : minorDisplayForWheel;
         text(svg, minorX + minorDx, minorY, minorLabelForWheel, { size: minorSize, weight: 800, fill: minorText });
