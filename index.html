@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Circle ChoCo Test - Sound Fix</title>
+  <title>Circle ChoCo Test</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -3187,7 +3187,7 @@ function fetchAndDecodePercussionSample(ctx, urls) {
         case "min6": intervals=[0,3,7,9]; label="m6"; break;
         case "dim": intervals=[0,3,6]; label="°"; break;
         case "dim7": intervals=[0,3,6,9]; label="°7"; break;
-        case "hdim7": intervals=[0,3,6,10]; label="ø7"; break;
+        case "hdim": case "hdim7": intervals=[0,3,6,10]; label="ø7"; break;
         case "aug": intervals=[0,4,8]; label="+"; break;
         case "minmaj7": intervals=[0,3,7,11]; label="m(maj7)"; break;
         case "9": intervals=[0,4,7,10,14]; label="9"; break;
@@ -3204,7 +3204,16 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       }
 
       additions.forEach(function(a){
-        var ai=harteDegreeInterval(a);
+        // ChoCo's Real Book export uses "s" for sharp alterations
+        // (s5/s9/s11) and "*n" for an omitted chord degree.
+        var token = String(a || "").replace(/^s/,"#");
+        if(token.charAt(0)==="*") {
+          var omitted = token.slice(1).replace(/^s/,"#");
+          var oi = harteDegreeInterval(omitted);
+          if(oi!==null) intervals = intervals.filter(function(i){ return i!==oi; });
+          return;
+        }
+        var ai=harteDegreeInterval(token);
         if(ai!==null) intervals.push(ai);
       });
       intervals=uniqueSortedIntervals(intervals);
@@ -3212,7 +3221,7 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       // Conventional compact labels for the most common "added tone" forms.
       if (additions.length && (base==="maj" || base==="min")) {
         var addText=additions.map(function(a){
-          return a.replace(/^b/,"♭").replace(/^#/,"♯");
+          return a.replace(/^s/,"♯").replace(/^b/,"♭").replace(/^#/,"♯").replace(/^\*/,"no");
         }).join(",");
         if (additions.length===1 && ["9","11","13"].indexOf(additions[0])!==-1) {
           label=(base==="min" ? "m" : "")+"add"+addText;
@@ -3220,7 +3229,9 @@ function fetchAndDecodePercussionSample(ctx, urls) {
           label=(base==="min" ? "m" : "")+"("+addText+")";
         }
       } else if (additions.length) {
-        var extra=additions.map(function(a){return a.replace(/^b/,"♭").replace(/^#/,"♯");}).join(",");
+        var extra=additions.map(function(a){
+          return a.replace(/^s/,"♯").replace(/^b/,"♭").replace(/^#/,"♯").replace(/^\*/,"no");
+        }).join(",");
         label += "("+extra+")";
       }
       return {intervals:intervals,label:label};
@@ -4649,26 +4660,25 @@ function setTransportButtonState(state) {
           setTransportButtonState("loading");
         }
 
-        // Start playback immediately from the user's gesture. Sample loading is
-        // deliberately non-blocking: if a local/remote WAV is unavailable or slow
-        // on GitHub Pages, Circle's existing synth fallback can sound at once.
-        progressionPlaying = true;
-        if (btn) {
-          btn.disabled = false;
-          setTransportButtonState("stop");
-          btn.classList.add("playing");
-        }
-
-        // All audible layers and graphics run from the stable master transport.
-        startMasterTransport(ctx);
-
-        // Warm the sampled instruments in the background. As buffers arrive,
-        // subsequent notes can use them; failures never prevent playback.
-        loadPercussionSamples(ctx).catch(function(){});
-        loadBassSamples(ctx).catch(function(){});
+        var startupLoads = [
+          loadPercussionSamples(ctx),
+          loadBassSamples(ctx)
+        ];
         if (selectedInstrument() === "sampled") {
-          loadGuitarSamples(ctx).catch(function(){});
+          startupLoads.push(loadGuitarSamples(ctx));
         }
+
+        Promise.all(startupLoads).then(function(){
+          progressionPlaying = true;
+          if (btn) {
+            btn.disabled = false;
+            setTransportButtonState("stop");
+            btn.classList.add("playing");
+          }
+
+          // All audible layers and graphics run from the stable master transport.
+          startMasterTransport(ctx);
+        });
       });
     }
 
