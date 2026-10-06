@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Circle ChoCo Test</title>
+  <title>Circle v1.117</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -1656,12 +1656,22 @@
       flex-basis:calc((100% - 15px) / 4 + 18px) !important;
     }
 
+    .file-id {
+      margin: 9px 4px 1px;
+      text-align: center;
+      color: #737b82;
+      font-size: 9px;
+      line-height: 1.2;
+      letter-spacing: .02em;
+      user-select: none;
+    }
+
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="panel">
-      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle ChoCo Test · based on v1.116"></svg>
+      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.117"></svg>
       <div class="progression-strip-shell">
         <div id="progressionStrip" class="progression-strip" aria-label="Progression map"></div>
         <div id="progressionPlayhead" class="progression-playhead" aria-hidden="true"></div>
@@ -2027,6 +2037,7 @@
       </div>
       </div>
       </div>
+      <div class="file-id">Circle_test_1.117.html</div>
     </div>
   </div>
   <script>
@@ -3204,7 +3215,7 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       }
 
       additions.forEach(function(a){
-        // ChoCo's Real Book export uses "s" for sharp alterations
+        // ChoCo symbolic exports may use "s" for sharp alterations
         // (s5/s9/s11) and "*n" for an omitted chord degree.
         var token = String(a || "").replace(/^s/,"#");
         if(token.charAt(0)==="*") {
@@ -3229,9 +3240,7 @@ function fetchAndDecodePercussionSample(ctx, urls) {
           label=(base==="min" ? "m" : "")+"("+addText+")";
         }
       } else if (additions.length) {
-        var extra=additions.map(function(a){
-          return a.replace(/^s/,"♯").replace(/^b/,"♭").replace(/^#/,"♯").replace(/^\*/,"no");
-        }).join(",");
+        var extra=additions.map(function(a){return a.replace(/^s/,"♯").replace(/^b/,"♭").replace(/^#/,"♯").replace(/^\*/,"no");}).join(",");
         label += "("+extra+")";
       }
       return {intervals:intervals,label:label};
