@@ -12,51 +12,43 @@ jobs:
     timeout-minutes: 35
 
     steps:
-      - name: Check out Circle repository
+      - name: Check out repository
         uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
 
       - name: Download ChoCo v1.0.0
-        run: |
-          curl -L --fail --retry 4 --retry-delay 5 \
-            -o choco-v1.0.0.zip \
-            'https://zenodo.org/records/7706751/files/smashub/choco-v1.0.0.zip?download=1'
+        run: >
+          curl -L --fail --retry 4 --retry-delay 5
+          -o choco-v1.0.0.zip
+          "https://zenodo.org/records/7706751/files/smashub/choco-v1.0.0.zip?download=1"
 
       - name: Build New Real Book Vol 1 subset
-        run: |
-          python build_new_real_book_vol1.py \
-            choco-v1.0.0.zip \
-            --base Circle_song_library.json \
-            --manifest New_Real_Book_Vol1_titles.json \
-            --converter convert_choco_realbook_to_circle.py \
-            --output Circle_song_library_NRB1_expanded.json \
-            --report New_Real_Book_Vol1_build_report.txt
+        run: >
+          python build_new_real_book_vol1.py
+          choco-v1.0.0.zip
+          --base Circle_song_library.json
+          --manifest New_Real_Book_Vol1_titles.json
+          --converter convert_choco_realbook_to_circle.py
+          --output Circle_song_library_NRB1_expanded.json
+          --report New_Real_Book_Vol1_build_report.txt
 
       - name: Validate generated library
-        run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
-
-          p = Path("Circle_song_library_NRB1_expanded.json")
-          d = json.loads(p.read_text(encoding="utf-8"))
-          songs = d["songs"]
-          book = "The New Real Book, Vol. 1"
-          tagged = [
-              s for s in songs
-              if book in ((s.get("tags") or {}).get("books") or [])
-          ]
-          print("Total songs:", len(songs))
-          print("New Real Book Vol 1 tagged songs:", len(tagged))
-          print("Added this build:", d.get("build", {}).get("new_real_book_vol1_added_this_build"))
-          assert len(songs) >= 764
-          assert len(tagged) >= 14
-          assert d.get("build", {}).get("book_tags", {}).get(book) == len(tagged)
-          PY
+        run: >
+          python -c "import json;
+          d=json.load(open('Circle_song_library_NRB1_expanded.json',encoding='utf-8'));
+          songs=d['songs'];
+          book='The New Real Book, Vol. 1';
+          tagged=[s for s in songs if book in ((s.get('tags') or {}).get('books') or [])];
+          print('Total songs:',len(songs));
+          print('New Real Book Vol 1 tagged songs:',len(tagged));
+          print('Added this build:',d.get('build',{}).get('new_real_book_vol1_added_this_build'));
+          assert len(songs)>=764;
+          assert len(tagged)>=14;
+          assert d.get('build',{}).get('book_tags',{}).get(book)==len(tagged)"
 
       - name: Upload expanded library and report
         uses: actions/upload-artifact@v4
@@ -66,4 +58,3 @@ jobs:
             Circle_song_library_NRB1_expanded.json
             New_Real_Book_Vol1_build_report.txt
           retention-days: 14
-
