@@ -2,6 +2,9 @@ name: Build Circle New Real Book Vol 1 library
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - new-real-book-vol1
 
 permissions:
   contents: read
