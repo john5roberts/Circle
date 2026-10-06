@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Circle v1.117</title>
+  <title>Circle v1.118</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -1671,7 +1671,7 @@
 <body>
   <div class="wrap">
     <div class="panel">
-      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.117"></svg>
+      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.118"></svg>
       <div class="progression-strip-shell">
         <div id="progressionStrip" class="progression-strip" aria-label="Progression map"></div>
         <div id="progressionPlayhead" class="progression-playhead" aria-hidden="true"></div>
@@ -2037,7 +2037,7 @@
       </div>
       </div>
       </div>
-      <div class="file-id">Circle_test_1.117.html</div>
+      <div class="file-id">Circle_test_1.118.html</div>
     </div>
   </div>
   <script>
@@ -3362,14 +3362,31 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       return chordInfoForDegree(selectedMajor,prog.degrees[index]);
     }
 
+    // Chord-level green/red coloring is based on the chord's triad/core only.
+    // Extensions (7ths, 9ths, 11ths, 13ths) remain in midiNotes so the
+    // interval row can color each extension independently.  Because Circle's
+    // parsed chord tones are stored above the root, intervals through an
+    // augmented fifth (8 semitones) are the triadic/core tones; 7ths and
+    // higher extensions begin above that point.
+    function triadMidiNotesForColor(info) {
+      if(!info || !info.midiNotes || !info.midiNotes.length) return [];
+      var rootMidi=info.midiNotes[0];
+      var core=info.midiNotes.filter(function(midi){
+        var interval=midi-rootMidi;
+        return interval>=0 && interval<=8;
+      });
+      return core.length ? core : [rootMidi];
+    }
+
     function songStepIsDiatonic(step) {
       if(!step || !step.info || !step.info.midiNotes) return false;
       var tonicPC=PC_MAP[step.keyTonic];
       if(tonicPC===undefined) return false;
       var mode=songModeName(step.keyMode);
       var allowed=modeScalePitchClasses(tonicPC,mode);
-      for(var i=0;i<step.info.midiNotes.length;i++) {
-        var pc=((step.info.midiNotes[i]%12)+12)%12;
+      var triadNotes=triadMidiNotesForColor(step.info);
+      for(var i=0;i<triadNotes.length;i++) {
+        var pc=((triadNotes[i]%12)+12)%12;
         if(!allowed[pc]) return false;
       }
       return true;
@@ -3894,8 +3911,9 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       if (!info || !info.midiNotes || !info.midiNotes.length) return false;
       var tonicPC = PC_MAP[KEY_NOTES[selectedMajor][0]];
       var allowed = modeScalePitchClasses(tonicPC, mode || "ionian");
-      for (var i=0; i<info.midiNotes.length; i++) {
-        var pc = ((info.midiNotes[i] % 12) + 12) % 12;
+      var triadNotes = triadMidiNotesForColor(info);
+      for (var i=0; i<triadNotes.length; i++) {
+        var pc = ((triadNotes[i] % 12) + 12) % 12;
         if (!allowed[pc]) return false;
       }
       return true;
