@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Circle v1.116</title>
+  <title>Circle v1.120</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -1656,12 +1656,22 @@
       flex-basis:calc((100% - 15px) / 4 + 18px) !important;
     }
 
+    .file-id {
+      margin: 9px 4px 1px;
+      text-align: center;
+      color: #737b82;
+      font-size: 9px;
+      line-height: 1.2;
+      letter-spacing: .02em;
+      user-select: none;
+    }
+
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="panel">
-      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.116"></svg>
+      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.118"></svg>
       <div class="progression-strip-shell">
         <div id="progressionStrip" class="progression-strip" aria-label="Progression map"></div>
         <div id="progressionPlayhead" class="progression-playhead" aria-hidden="true"></div>
@@ -2027,6 +2037,7 @@
       </div>
       </div>
       </div>
+      <div class="file-id">index.html · Circle v1.120</div>
     </div>
   </div>
   <script>
@@ -3187,7 +3198,7 @@ function fetchAndDecodePercussionSample(ctx, urls) {
         case "min6": intervals=[0,3,7,9]; label="m6"; break;
         case "dim": intervals=[0,3,6]; label="°"; break;
         case "dim7": intervals=[0,3,6,9]; label="°7"; break;
-        case "hdim7": intervals=[0,3,6,10]; label="ø7"; break;
+        case "hdim": case "hdim7": intervals=[0,3,6,10]; label="ø7"; break;
         case "aug": intervals=[0,4,8]; label="+"; break;
         case "minmaj7": intervals=[0,3,7,11]; label="m(maj7)"; break;
         case "9": intervals=[0,4,7,10,14]; label="9"; break;
@@ -3204,7 +3215,16 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       }
 
       additions.forEach(function(a){
-        var ai=harteDegreeInterval(a);
+        // ChoCo symbolic exports may use "s" for sharp alterations
+        // (s5/s9/s11) and "*n" for an omitted chord degree.
+        var token = String(a || "").replace(/^s/,"#");
+        if(token.charAt(0)==="*") {
+          var omitted = token.slice(1).replace(/^s/,"#");
+          var oi = harteDegreeInterval(omitted);
+          if(oi!==null) intervals = intervals.filter(function(i){ return i!==oi; });
+          return;
+        }
+        var ai=harteDegreeInterval(token);
         if(ai!==null) intervals.push(ai);
       });
       intervals=uniqueSortedIntervals(intervals);
@@ -3212,7 +3232,7 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       // Conventional compact labels for the most common "added tone" forms.
       if (additions.length && (base==="maj" || base==="min")) {
         var addText=additions.map(function(a){
-          return a.replace(/^b/,"♭").replace(/^#/,"♯");
+          return a.replace(/^s/,"♯").replace(/^b/,"♭").replace(/^#/,"♯").replace(/^\*/,"no");
         }).join(",");
         if (additions.length===1 && ["9","11","13"].indexOf(additions[0])!==-1) {
           label=(base==="min" ? "m" : "")+"add"+addText;
@@ -3220,7 +3240,7 @@ function fetchAndDecodePercussionSample(ctx, urls) {
           label=(base==="min" ? "m" : "")+"("+addText+")";
         }
       } else if (additions.length) {
-        var extra=additions.map(function(a){return a.replace(/^b/,"♭").replace(/^#/,"♯");}).join(",");
+        var extra=additions.map(function(a){return a.replace(/^s/,"♯").replace(/^b/,"♭").replace(/^#/,"♯").replace(/^\*/,"no");}).join(",");
         label += "("+extra+")";
       }
       return {intervals:intervals,label:label};
@@ -3342,14 +3362,31 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       return chordInfoForDegree(selectedMajor,prog.degrees[index]);
     }
 
+    // Chord-level green/red coloring is based on the chord's triad/core only.
+    // Extensions (7ths, 9ths, 11ths, 13ths) remain in midiNotes so the
+    // interval row can color each extension independently.  Because Circle's
+    // parsed chord tones are stored above the root, intervals through an
+    // augmented fifth (8 semitones) are the triadic/core tones; 7ths and
+    // higher extensions begin above that point.
+    function triadMidiNotesForColor(info) {
+      if(!info || !info.midiNotes || !info.midiNotes.length) return [];
+      var rootMidi=info.midiNotes[0];
+      var core=info.midiNotes.filter(function(midi){
+        var interval=midi-rootMidi;
+        return interval>=0 && interval<=8;
+      });
+      return core.length ? core : [rootMidi];
+    }
+
     function songStepIsDiatonic(step) {
       if(!step || !step.info || !step.info.midiNotes) return false;
       var tonicPC=PC_MAP[step.keyTonic];
       if(tonicPC===undefined) return false;
       var mode=songModeName(step.keyMode);
       var allowed=modeScalePitchClasses(tonicPC,mode);
-      for(var i=0;i<step.info.midiNotes.length;i++) {
-        var pc=((step.info.midiNotes[i]%12)+12)%12;
+      var triadNotes=triadMidiNotesForColor(step.info);
+      for(var i=0;i<triadNotes.length;i++) {
+        var pc=((triadNotes[i]%12)+12)%12;
         if(!allowed[pc]) return false;
       }
       return true;
@@ -3434,7 +3471,12 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       if(PC_MAP.hasOwnProperty(tonic)) selectedMajor=canonicalMajorForPitchClass(PC_MAP[tonic]);
       if(["4/4","3/4","6/8","12/8","2/4"].indexOf(song.meter)!==-1) {
         setCircleTimeSignature(song.meter);
+      } else {
+        // Circle does not yet have native 5/4 or 7/4 accompaniment menus.
+        // Use a deterministic 4/4 fallback instead of inheriting the previous song's meter.
+        setCircleTimeSignature("4/4");
       }
+      applySongAccompaniment(song);
       stoppedDisplayState=0;
       chordLetterView=false;
       beatEditorState=null;
@@ -3451,6 +3493,25 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       activeSongProgression=null;
       activeSongMode="ionian";
       setProgressionTriggerForSong();
+    }
+
+    // v1.119: Song records may carry preferred accompaniment defaults.
+    // These are applied only when the song is loaded; manual changes remain
+    // available afterward and do not modify the JSON assignment.
+    function applySongAccompaniment(song) {
+      var a = song && song.accompaniment;
+      if (!a) return false;
+      var guitar=document.getElementById("guitarPatternSelect");
+      var bass=document.getElementById("bassPatternSelect");
+      var drums=document.getElementById("rhythmSelect");
+      var changed=false;
+      if(a.guitar) changed = selectOptionByVisibleText(guitar,a.guitar) || changed;
+      if(a.bass) changed = selectOptionByVisibleText(bass,a.bass) || changed;
+      if(a.drums) changed = selectOptionByVisibleText(drums,a.drums) || changed;
+      updateTrigger(guitar);
+      updateTrigger(bass);
+      updateTrigger(drums);
+      return changed;
     }
 
     function songSortValue(song) {
@@ -3528,7 +3589,7 @@ function fetchAndDecodePercussionSample(ctx, urls) {
         renderSongResults();
       }).catch(function(){
         songLibraryLoading=false;
-        songLibraryError="Song library not found. Keep Circle_song_library.json beside index.html.";
+        songLibraryError="Song library not found. Keep Circle_song_library.json beside this HTML file.";
         renderSongResults();
       });
     }
@@ -3874,8 +3935,9 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       if (!info || !info.midiNotes || !info.midiNotes.length) return false;
       var tonicPC = PC_MAP[KEY_NOTES[selectedMajor][0]];
       var allowed = modeScalePitchClasses(tonicPC, mode || "ionian");
-      for (var i=0; i<info.midiNotes.length; i++) {
-        var pc = ((info.midiNotes[i] % 12) + 12) % 12;
+      var triadNotes = triadMidiNotesForColor(info);
+      for (var i=0; i<triadNotes.length; i++) {
+        var pc = ((triadNotes[i] % 12) + 12) % 12;
         if (!allowed[pc]) return false;
       }
       return true;
