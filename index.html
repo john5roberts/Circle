@@ -2037,7 +2037,7 @@
       </div>
       </div>
       </div>
-      <div class="file-id">Circle_test_1.118.html</div>
+      <div class="file-id">Circle_test_1.119.html</div>
     </div>
   </div>
   <script>
@@ -3471,7 +3471,12 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       if(PC_MAP.hasOwnProperty(tonic)) selectedMajor=canonicalMajorForPitchClass(PC_MAP[tonic]);
       if(["4/4","3/4","6/8","12/8","2/4"].indexOf(song.meter)!==-1) {
         setCircleTimeSignature(song.meter);
+      } else {
+        // Circle does not yet have native 5/4 or 7/4 accompaniment menus.
+        // Use a deterministic 4/4 fallback instead of inheriting the previous song's meter.
+        setCircleTimeSignature("4/4");
       }
+      applySongAccompaniment(song);
       stoppedDisplayState=0;
       chordLetterView=false;
       beatEditorState=null;
@@ -3488,6 +3493,25 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       activeSongProgression=null;
       activeSongMode="ionian";
       setProgressionTriggerForSong();
+    }
+
+    // v1.119: Song records may carry preferred accompaniment defaults.
+    // These are applied only when the song is loaded; manual changes remain
+    // available afterward and do not modify the JSON assignment.
+    function applySongAccompaniment(song) {
+      var a = song && song.accompaniment;
+      if (!a) return false;
+      var guitar=document.getElementById("guitarPatternSelect");
+      var bass=document.getElementById("bassPatternSelect");
+      var drums=document.getElementById("rhythmSelect");
+      var changed=false;
+      if(a.guitar) changed = selectOptionByVisibleText(guitar,a.guitar) || changed;
+      if(a.bass) changed = selectOptionByVisibleText(bass,a.bass) || changed;
+      if(a.drums) changed = selectOptionByVisibleText(drums,a.drums) || changed;
+      updateTrigger(guitar);
+      updateTrigger(bass);
+      updateTrigger(drums);
+      return changed;
     }
 
     function songSortValue(song) {
