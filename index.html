@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Circle v1.120</title>
+  <title>Circle v1.121</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -1671,7 +1671,7 @@
 <body>
   <div class="wrap">
     <div class="panel">
-      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.118"></svg>
+      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.121"></svg>
       <div class="progression-strip-shell">
         <div id="progressionStrip" class="progression-strip" aria-label="Progression map"></div>
         <div id="progressionPlayhead" class="progression-playhead" aria-hidden="true"></div>
@@ -1681,92 +1681,92 @@
           <div class="controls">
             <select id="progressionSelect" class="source-select">
           <optgroup label="Ionian">
-            <option value="I-IV-V-I|4,4,4,8">I–IV–V–I</option>
-            <option value="I-ii-V-I|4,4,4,8">I–ii–V–I</option>
-            <option value="ii-V-I|4,4,8">ii–V–I</option>
-            <option value="I-vi-ii-V-I|4,4,4,4,8">I–vi–ii–V–I</option>
-            <option value="iii-vi-ii-V-I|4,4,4,4,8">iii–vi–ii–V–I</option>
-            <option value="I-V-vi-IV|4,4,4,4">I–V–vi–IV</option>
-            <option value="vi-IV-I-V|4,4,4,4">vi–IV–I–V</option>
-            <option value="I-vi-IV-V|4,4,4,4">I–vi–IV–V</option>
-            <option value="I-V-IV-I|4,4,4,8">I–V–IV–I</option>
-            <option value="IV-I-ii-V|4,4,4,4">IV–I–ii–V</option>
+            <option value="I-IV-V-I|8,8,8,8">I–IV–V–I</option>
+            <option value="I-ii-V-I|8,8,8,8">I–ii–V–I</option>
+            <option value="ii-V-I|8,8,8">ii–V–I</option>
+            <option value="I-vi-ii-V-I|8,8,8,8,8">I–vi–ii–V–I</option>
+            <option value="iii-vi-ii-V-I|8,8,8,8,8">iii–vi–ii–V–I</option>
+            <option value="I-V-vi-IV|8,8,8,8">I–V–vi–IV</option>
+            <option value="vi-IV-I-V|8,8,8,8">vi–IV–I–V</option>
+            <option value="I-vi-IV-V|8,8,8,8">I–vi–IV–V</option>
+            <option value="I-V-IV-I|8,8,8,8">I–V–IV–I</option>
+            <option value="IV-I-ii-V|8,8,8,8">IV–I–ii–V</option>
             <option value="I-V-vi-IV|8,8,8,8">I–V–vi–IV (2 bars each)</option>
-            <option value="I-vi-ii-V|4,4,4,4">I–vi–ii–V</option>
-            <option value="ii-V-I|2,2,4">ii–V–I (quick ii–V)</option>
-            <option value="I-iii-vi-ii-V-I|4,4,4,4,4,8">I–iii–vi–ii–V–I</option>
-            <option value="vi-ii-V-I|2,2,2,4">vi–ii–V–I (quick)</option>
-            <option value="I-vi-IV-ii-V-I|4,4,4,4,4,8">I–vi–IV–ii–V–I</option>
+            <option value="I-vi-ii-V|8,8,8,8">I–vi–ii–V</option>
+            <option value="ii-V-I|8,8,8">ii–V–I (quick ii–V)</option>
+            <option value="I-iii-vi-ii-V-I|8,8,8,8,8,8">I–iii–vi–ii–V–I</option>
+            <option value="vi-ii-V-I|8,8,8,8">vi–ii–V–I (quick)</option>
+            <option value="I-vi-IV-ii-V-I|8,8,8,8,8,8">I–vi–IV–ii–V–I</option>
           </optgroup>
           <optgroup label="Dorian">
-            <option value="i-IV-i|4,4,8">i–IV–i</option>
-            <option value="i-IV-bVII-i|4,4,4,8">i–IV–♭VII–i</option>
-            <option value="i-bVII-IV-i|4,4,4,8">i–♭VII–IV–i</option>
-            <option value="i-IV-bVII-IV|4,4,4,4">i–IV–♭VII–IV</option>
-            <option value="i-ii-IV-i|4,4,4,8">i–ii–IV–i</option>
-            <option value="i-bVII-i-IV|4,4,4,4">i–♭VII–i–IV</option>
+            <option value="i-IV-i|8,8,8">i–IV–i</option>
+            <option value="i-IV-bVII-i|8,8,8,8">i–IV–♭VII–i</option>
+            <option value="i-bVII-IV-i|8,8,8,8">i–♭VII–IV–i</option>
+            <option value="i-IV-bVII-IV|8,8,8,8">i–IV–♭VII–IV</option>
+            <option value="i-ii-IV-i|8,8,8,8">i–ii–IV–i</option>
+            <option value="i-bVII-i-IV|8,8,8,8">i–♭VII–i–IV</option>
           </optgroup>
           <optgroup label="Phrygian">
-            <option value="i-bII-i|4,4,8">i–♭II–i</option>
-            <option value="i-bII-bVII-i|4,4,4,8">i–♭II–♭VII–i</option>
-            <option value="i-bVII-bII-i|4,4,4,8">i–♭VII–♭II–i</option>
+            <option value="i-bII-i|8,8,8">i–♭II–i</option>
+            <option value="i-bII-bVII-i|8,8,8,8">i–♭II–♭VII–i</option>
+            <option value="i-bVII-bII-i|8,8,8,8">i–♭VII–♭II–i</option>
           </optgroup>
           <optgroup label="Lydian">
-            <option value="I-II-I|4,4,8">I–II–I</option>
-            <option value="I-II-V-I|4,4,4,8">I–II–V–I</option>
-            <option value="I-V-II-I|4,4,4,8">I–V–II–I</option>
+            <option value="I-II-I|8,8,8">I–II–I</option>
+            <option value="I-II-V-I|8,8,8,8">I–II–V–I</option>
+            <option value="I-V-II-I|8,8,8,8">I–V–II–I</option>
           </optgroup>
           <optgroup label="Mixolydian">
-            <option value="I-bVII-IV-I|4,4,4,8">I–♭VII–IV–I</option>
-            <option value="I-bVII-I|4,4,8">I–♭VII–I</option>
-            <option value="I-IV-bVII-I|4,4,4,8">I–IV–♭VII–I</option>
-            <option value="I-bVII-IV-bVII|4,4,4,4">I–♭VII–IV–♭VII</option>
-            <option value="I-V-bVII-IV|4,4,4,4">I–V–♭VII–IV</option>
-            <option value="IV-bVII-I|4,4,8">IV–♭VII–I</option>
+            <option value="I-bVII-IV-I|8,8,8,8">I–♭VII–IV–I</option>
+            <option value="I-bVII-I|8,8,8">I–♭VII–I</option>
+            <option value="I-IV-bVII-I|8,8,8,8">I–IV–♭VII–I</option>
+            <option value="I-bVII-IV-bVII|8,8,8,8">I–♭VII–IV–♭VII</option>
+            <option value="I-V-bVII-IV|8,8,8,8">I–V–♭VII–IV</option>
+            <option value="IV-bVII-I|8,8,8">IV–♭VII–I</option>
           </optgroup>
           <optgroup label="Aeolian">
-            <option value="i-bVI-bIII-bVII|4,4,4,4">i–♭VI–♭III–♭VII</option>
-            <option value="i-bVII-bVI-bVII|4,4,4,4">i–♭VII–♭VI–♭VII</option>
-            <option value="i-bVI-bVII-i|4,4,4,8">i–♭VI–♭VII–i</option>
-            <option value="i-bIII-bVII-iv|4,4,4,4">i–♭III–♭VII–iv</option>
-            <option value="i-iv-bVII-bIII|4,4,4,4">i–iv–♭VII–♭III</option>
-            <option value="i-bVII-bVI-V|4,4,4,4">i–♭VII–♭VI–V</option>
+            <option value="i-bVI-bIII-bVII|8,8,8,8">i–♭VI–♭III–♭VII</option>
+            <option value="i-bVII-bVI-bVII|8,8,8,8">i–♭VII–♭VI–♭VII</option>
+            <option value="i-bVI-bVII-i|8,8,8,8">i–♭VI–♭VII–i</option>
+            <option value="i-bIII-bVII-iv|8,8,8,8">i–♭III–♭VII–iv</option>
+            <option value="i-iv-bVII-bIII|8,8,8,8">i–iv–♭VII–♭III</option>
+            <option value="i-bVII-bVI-V|8,8,8,8">i–♭VII–♭VI–V</option>
           </optgroup>
           <optgroup label="Borrowed">
-            <option value="I-iv-I|4,4,8">I–iv–I</option>
-            <option value="I-IV-iv-I|4,4,4,8">I–IV–iv–I</option>
-            <option value="I-bVI-IV-I|4,4,4,8">I–♭VI–IV–I</option>
-            <option value="I-bVI-bVII-I|4,4,4,8">I–♭VI–♭VII–I</option>
-            <option value="I-bIII-IV-I|4,4,4,8">I–♭III–IV–I</option>
-            <option value="I-bIII-bVII-IV|4,4,4,4">I–♭III–♭VII–IV</option>
-            <option value="I-iv-bVII-I|4,4,4,8">I–iv–♭VII–I</option>
-            <option value="I-bVI-iv-I|4,4,4,8">I–♭VI–iv–I</option>
+            <option value="I-iv-I|8,8,8">I–iv–I</option>
+            <option value="I-IV-iv-I|8,8,8,8">I–IV–iv–I</option>
+            <option value="I-bVI-IV-I|8,8,8,8">I–♭VI–IV–I</option>
+            <option value="I-bVI-bVII-I|8,8,8,8">I–♭VI–♭VII–I</option>
+            <option value="I-bIII-IV-I|8,8,8,8">I–♭III–IV–I</option>
+            <option value="I-bIII-bVII-IV|8,8,8,8">I–♭III–♭VII–IV</option>
+            <option value="I-iv-bVII-I|8,8,8,8">I–iv–♭VII–I</option>
+            <option value="I-bVI-iv-I|8,8,8,8">I–♭VI–iv–I</option>
           </optgroup>
           <optgroup label="Secondary">
-            <option value="I-V2-ii-V-I|4,4,4,4,8">I–V/ii–ii–V–I</option>
-            <option value="I-V6-vi-ii-V-I|4,4,4,4,4,8">I–V/vi–vi–ii–V–I</option>
-            <option value="I-V5-V-I|4,4,4,8">I–V/V–V–I</option>
-            <option value="I-III-vi-IV|4,4,4,4">I–III–vi–IV</option>
-            <option value="I-VI-ii-V|4,4,4,4">I–VI–ii–V</option>
-            <option value="I-II-V-I|4,4,4,8">I–II–V–I</option>
-            <option value="iii-VI-ii-V-I|4,4,4,4,8">iii–VI–ii–V–I</option>
+            <option value="I-V2-ii-V-I|8,8,8,8,8">I–V/ii–ii–V–I</option>
+            <option value="I-V6-vi-ii-V-I|8,8,8,8,8,8">I–V/vi–vi–ii–V–I</option>
+            <option value="I-V5-V-I|8,8,8,8">I–V/V–V–I</option>
+            <option value="I-III-vi-IV|8,8,8,8">I–III–vi–IV</option>
+            <option value="I-VI-ii-V|8,8,8,8">I–VI–ii–V</option>
+            <option value="I-II-V-I|8,8,8,8">I–II–V–I</option>
+            <option value="iii-VI-ii-V-I|8,8,8,8,8">iii–VI–ii–V–I</option>
           </optgroup>
           <optgroup label="Substitution">
-            <option value="ii-bII7-I|4,4,8">ii–♭II7–I (tritone)</option>
-            <option value="I-vi-ii-bII7-I|4,4,4,4,8">I–vi–ii–♭II7–I (tritone)</option>
-            <option value="iv-bVII7-I|4,4,8">iv–♭VII7–I (backdoor)</option>
-            <option value="I-IV-iv-bVII7-I|4,4,4,4,8">I–IV–iv–♭VII7–I (backdoor)</option>
-            <option value="I-viiD7-I|4,4,8">I–vii°7–I (diminished)</option>
-            <option value="I-sID7-ii-V-I|4,4,4,4,8">I–♯I°7–ii–V–I (diminished)</option>
+            <option value="ii-bII7-I|8,8,8">ii–♭II7–I (tritone)</option>
+            <option value="I-vi-ii-bII7-I|8,8,8,8,8">I–vi–ii–♭II7–I (tritone)</option>
+            <option value="iv-bVII7-I|8,8,8">iv–♭VII7–I (backdoor)</option>
+            <option value="I-IV-iv-bVII7-I|8,8,8,8,8">I–IV–iv–♭VII7–I (backdoor)</option>
+            <option value="I-viiD7-I|8,8,8">I–vii°7–I (diminished)</option>
+            <option value="I-sID7-ii-V-I|8,8,8,8,8">I–♯I°7–ii–V–I (diminished)</option>
           </optgroup>
           <optgroup label="Chromatic">
-            <option value="I-III-IV-iv-I|4,4,4,4,8">I–III–IV–iv–I</option>
-            <option value="I7-I7-I7-I7-IV7-IV7-I7-I7-V7-IV7-I7-V7|4,4,4,4,4,4,4,4,4,4,4,4">12-bar blues</option>
-            <option value="I7-IV7-I7-I7-IV7-IV7-I7-I7-V7-IV7-I7-V7|4,4,4,4,4,4,4,4,4,4,4,4">Quick-change blues</option>
-            <option value="i7-i7-i7-i7-iv7-iv7-i7-i7-V7-iv7-i7-V7|4,4,4,4,4,4,4,4,4,4,4,4">Minor blues</option>
-            <option value="I7-IV7-I7-I7-IV7-sIVD7-I7-VI7-ii7-V7-I7-VI7-ii7-V7|4,4,4,4,4,4,4,4,4,4,2,2,2,2">Jazz blues</option>
-            <option value="IM7-viiH7-III7-vi7-II7-v7-I7-IVM7-iv7-bVII7-iii7-VI7-ii7-V7-IM7-VI7-ii7-V7-iii7-VI7-ii7-V7|4,2,2,2,2,2,2,4,2,2,2,2,2,2,2,2,2,2,2,2,2,2">Bird blues</option>
-            <option value="I7-V7-IV7-IV7-I7-V7-I7-V7|4,4,4,4,4,4,4,4">8-bar blues</option>
+            <option value="I-III-IV-iv-I|8,8,8,8,8">I–III–IV–iv–I</option>
+            <option value="I7-I7-I7-I7-IV7-IV7-I7-I7-V7-IV7-I7-V7|8,8,8,8,8,8,8,8,8,8,8,8">12-bar blues</option>
+            <option value="I7-IV7-I7-I7-IV7-IV7-I7-I7-V7-IV7-I7-V7|8,8,8,8,8,8,8,8,8,8,8,8">Quick-change blues</option>
+            <option value="i7-i7-i7-i7-iv7-iv7-i7-i7-V7-iv7-i7-V7|8,8,8,8,8,8,8,8,8,8,8,8">Minor blues</option>
+            <option value="I7-IV7-I7-I7-IV7-sIVD7-I7-VI7-ii7-V7-I7-VI7-ii7-V7|8,8,8,8,8,8,8,8,8,8,8,8,8,8">Jazz blues</option>
+            <option value="IM7-viiH7-III7-vi7-II7-v7-I7-IVM7-iv7-bVII7-iii7-VI7-ii7-V7-IM7-VI7-ii7-V7-iii7-VI7-ii7-V7|8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8">Bird blues</option>
+            <option value="I7-V7-IV7-IV7-I7-V7-I7-V7|8,8,8,8,8,8,8,8">8-bar blues</option>
           </optgroup>
         </select>
           </div>
@@ -2037,7 +2037,7 @@
       </div>
       </div>
       </div>
-      <div class="file-id">index.html · Circle v1.120</div>
+      <div class="file-id">index.html · Circle v1.121</div>
     </div>
   </div>
   <script>
@@ -2083,6 +2083,7 @@
     var chordAuditionChordRing = null;
     var chordAuditionScheduleAheadSec = 0.045;
 
+    // v1.121: Every built-in/canned progression chord defaults to 8 beats.
     // Unsaved progression editing uses one temporary working draft. The built-in
     // progression data remains immutable. The draft survives playback and view
     // changes, but is discarded when the user selects another progression or meter.
