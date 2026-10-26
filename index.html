@@ -3752,7 +3752,7 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       songLibraryLoading=true;
       songLibraryError="";
       renderSongResults();
-      fetch("Circle_test_song_library.json",{cache:"no-store"}).then(function(r){
+      fetch("Circle_song_library.json",{cache:"no-store"}).then(function(r){
         if(!r.ok) throw new Error("HTTP "+r.status);
         return r.json();
       }).then(function(data){
@@ -3762,7 +3762,7 @@ function fetchAndDecodePercussionSample(ctx, urls) {
         renderSongResults();
       }).catch(function(){
         songLibraryLoading=false;
-        songLibraryError="Test song library not found. Keep Circle_test_song_library.json beside this HTML file.";
+        songLibraryError="Song library not found. Keep Circle_song_library.json beside this HTML file.";
         renderSongResults();
       });
     }
