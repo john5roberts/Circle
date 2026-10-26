@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Circle v1.121</title>
+  <title>Circle v1.126 — Pentatonic Explorer</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -161,14 +161,13 @@
       position:relative;
       overflow:visible;
     }
-    /* Long progressions keep the current four-across button size and scroll
-       horizontally. Extra vertical room lives above the buttons so the
-       long-press beat editor can still open without being clipped. */
+    /* Long progressions reserve room for the taller two-row beat editor
+       inside their scrolling viewport without altering chord-chip heights. */
     .progression-strip.long-strip {
-      height:96px;
-      min-height:96px;
-      margin-top:-42px;
-      padding-top:42px;
+      height:152px;
+      min-height:152px;
+      margin-top:-98px;
+      padding-top:98px;
       box-sizing:border-box;
       overflow-x:auto;
       overflow-y:hidden;
@@ -229,22 +228,26 @@
       user-select:none;
       -webkit-tap-highlight-color:transparent;
     }
+    /* Two-row beat editor: count raised above broad - / + touch targets. */
     .beat-editor {
       position:absolute;
       left:50%;
       bottom:calc(100% + 7px);
       transform:translateX(-50%);
-      width:108px;
-      height:34px;
+      width:142px;
+      height:86px;
       display:grid;
-      grid-template-columns:34px 40px 34px;
+      grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+      grid-template-rows:29px 1fr;
+      gap:4px;
+      padding:4px;
       align-items:stretch;
-      border:1px solid #596168;
-      border-radius:9px;
+      border:1px solid #69737c;
+      border-radius:11px;
       background:#171a1d;
-      box-shadow:0 4px 14px rgba(0,0,0,.42);
+      box-shadow:0 5px 17px rgba(0,0,0,.54);
       overflow:hidden;
-      z-index:60;
+      z-index:80;
     }
     .prog-chip:first-child .beat-editor { left:0; transform:none; }
     .prog-chip:last-child .beat-editor { left:auto; right:0; transform:none; }
@@ -252,24 +255,35 @@
     .beat-editor button {
       appearance:none;
       -webkit-appearance:none;
-      border:0;
-      border-right:1px solid #3d4348;
-      border-radius:0;
-      background:#202428;
-      color:#d8dcdf;
-      font:800 18px/1 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      border:1px solid #4b5258;
+      border-radius:6px;
+      background:#2a3035;
+      color:#f2f4f5;
+      font:800 24px/1 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
       padding:0;
       margin:0;
       min-width:0;
+      min-height:44px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
       touch-action:manipulation;
     }
-    .beat-editor button:last-child { border-right:0; }
     .beat-editor .beat-count {
-      font-size:15px;
-      background:#2a2f34;
+      grid-row:1;
+      grid-column:1 / -1;
+      min-height:0;
+      border:0;
+      background:#22282d;
       color:#f0f2f3;
+      font-size:18px;
+      font-weight:850;
     }
-    .beat-editor button:active { filter:brightness(1.35); }
+    .beat-editor .beat-minus { grid-row:2; grid-column:1; }
+    .beat-editor .beat-plus  { grid-row:2; grid-column:2; }
+    .beat-editor button:active { filter:brightness(1.4); }
+    .beat-editor button:focus-visible { outline:2px solid #bfcbd3; outline-offset:-2px; }
     /* Progression strip: all inactive chords stay neutral.
        Green/red is reserved for the chord that is sounding now. */
     .prog-chip.in-key,
@@ -1666,109 +1680,255 @@
       user-select: none;
     }
 
+
+    /* v1.123: Long progression strips reserve transparent room for
+       the beat editor using a negative top margin. That scroll container
+       otherwise intercepts taps on the Scale button above it. Let taps pass
+       through the empty area while keeping chords, their beat editors,
+       and horizontal scrolling interactive. */
+    .progression-strip-shell { pointer-events:none; }
+    .progression-strip.long-strip { pointer-events:none; }
+    .progression-strip .prog-chip { pointer-events:auto; }
+
+    /* v1.120: Scale Explorer is an overlay mode within the usual progression view. */
+    .scale-explorer-toolbar {
+      display:flex;
+      justify-content:flex-start;
+      align-items:center;
+      margin:3px 4px 6px;
+      min-height:30px;
+    }
+    .progression-scale-button {
+      box-sizing:border-box;
+      min-width:84px;
+      min-height:42px;
+      height:42px;
+      padding:0 14px;
+      background:#202428;
+      border:1px solid #505961;
+      border-radius:8px;
+      color:#d8dcdf;
+      font:800 13px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+      cursor:pointer;
+      touch-action:manipulation;
+    }
+    .progression-scale-button[aria-pressed="true"] {
+      color:#f2f4f5;
+      background:#20573c;
+      border-color:#7aefb3;
+      box-shadow:inset 0 0 0 1px rgba(122,239,179,.5), 0 0 0 1px rgba(122,239,179,.12);
+    }
+    .progression-scale-button:focus-visible { outline:2px solid #7aefb3; outline-offset:3px; }
+    .scale-explorer-panel {
+      display:none;
+      margin:10px 4px 0;
+      padding:12px;
+      background:#171b1e;
+      color:#f2f4f5;
+      border:1px solid #414a50;
+      border-radius:13px;
+    }
+    body.scale-explorer-open .scale-explorer-panel { display:block; }
+    /* Selected progression chords behave like on/off selection buttons in Scale. */
+    .prog-chip.scale-selectable { cursor:pointer; }
+    .prog-chip.scale-selected {
+      background:#20573c !important;
+      color:#c1f7db !important;
+      border-color:#e4f6ed !important;
+      box-shadow:inset 0 0 0 1px rgba(228,246,237,.5);
+    }
+    .scale-explorer-header { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .scale-explorer-title { font-size:16px; font-weight:850; letter-spacing:-.015em; }
+    .scale-explorer-subtitle { margin-top:3px; font-size:11px; color:#a9b1b6; line-height:1.35; }
+    .scale-explorer-actions { display:flex; flex:0 0 auto; align-items:center; gap:7px; }
+    .scale-explorer-count { color:#d1d8d3; font:800 12px/1.2 system-ui,sans-serif; white-space:nowrap; }
+    .scale-explorer-reset { color:#f2f4f5; background:#272d31; border:1px solid #596168; border-radius:7px; padding:7px 9px; font:750 11px/1 system-ui,sans-serif; cursor:pointer; }
+    .scale-explorer-selected { display:flex; flex-wrap:wrap; gap:5px; margin:9px 0 7px; min-height:25px; align-items:center; }
+    .scale-explorer-empty-selection { color:#848e95; font-size:11px; }
+    .scale-explorer-chip { display:inline-flex; align-items:center; gap:5px; background:#193626; color:#b3f5d1; border:1px solid #397b56; border-radius:7px; padding:5px 8px; font:750 12px/1 system-ui,sans-serif; cursor:pointer; }
+    .scale-explorer-chip span { font-size:14px; opacity:.75; }
+    .scale-explorer-results { max-height:366px; overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; padding-right:3px; }
+    .scale-explorer-entry { display:grid; grid-template-columns:minmax(84px,105px) 27px minmax(0,1fr); gap:4px; align-items:center; min-height:35px; border:1px solid #353c41; border-radius:7px; margin-bottom:4px; padding:4px 6px; background:#20262a; }
+    .scale-explorer-root { font:800 12px/1.15 system-ui,sans-serif; color:#f1f5f3; white-space:normal; }
+    .scale-explorer-signature { font:650 10px/1.2 system-ui,sans-serif; color:#9ba6ad; white-space:nowrap; }
+    .scale-explorer-notes { display:flex; justify-content:space-between; align-items:center; gap:1px; min-width:0; }
+    .scale-explorer-note { font:750 12px/1.2 system-ui,sans-serif; color:#b6bfc4; white-space:nowrap; text-align:center; flex:0 1 auto; min-width:0; }
+    .scale-explorer-note.chord-note { color:#68e6a3; }
+    .scale-explorer-no-matches { border:1px dashed #566068; border-radius:8px; background:#20262a; padding:15px 10px; color:#c5cdd2; font-size:12px; line-height:1.45; text-align:center; }
+    .scale-explorer-footnote { padding-top:10px; color:#909ba2; font-size:10px; line-height:1.4; }
+    /* v1.126: Flat, ranked pentatonic possibilities with per-chord note explanations. */
+    .scale-explorer-entry { cursor:pointer; transition:background .14s, border-color .14s; }
+    .scale-explorer-entry:hover { background:#263039; }
+    .scale-explorer-entry:focus-visible { outline:2px solid #d5d9dc; outline-offset:1px; }
+    .scale-explorer-entry.expanded { border-color:#aeb8bf; background:#273039; margin-bottom:0; border-radius:7px 7px 0 0; }
+    .scale-explorer-root { display:flex; flex-direction:column; gap:2px; }
+    .scale-explorer-root-name { display:block; }
+    .scale-explorer-tag { display:block; font:650 10px/1.15 system-ui,sans-serif; color:#9da8ae; }
+    .scale-explorer-note { border-radius:3px; }
+    .scale-explorer-note.chord-tone, .scale-role.chord-tone { color:#68e6a3; }
+    .scale-explorer-note.extension, .scale-role.extension { color:#8dbffb; }
+    .scale-explorer-note.color, .scale-role.color { color:#f4ba72; }
+    .scale-explorer-note.caution, .scale-role.caution { color:#ff8a8a; }
+    .scale-explorer-breakdown { border:1px solid #aeb8bf; border-top:0; border-radius:0 0 7px 7px;
+      margin:0 0 6px; padding:8px 7px 9px; background:#1b2329; }
+    .scale-detail-heading { color:#aab6bf; font-size:10px; line-height:1.35; margin-bottom:6px; }
+    .scale-detail-chord { display:grid; grid-template-columns:70px minmax(0,1fr); gap:6px;
+      align-items:start; padding:5px 0; border-top:1px solid #35414a; }
+    .scale-detail-name { font:750 11px/1.25 system-ui,sans-serif; color:#e8eeef; overflow-wrap:anywhere; }
+    .scale-detail-notes { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:3px; }
+    .scale-detail-note { display:flex; flex-direction:column; align-items:center; gap:2px; min-width:0; }
+    .scale-detail-note-name { color:#aebbc2; font-size:10px; line-height:1.1; }
+    .scale-role { font:800 11px/1.2 system-ui,sans-serif; }
+    .scale-detail-foot { padding-top:5px; color:#aeb8bf; font-size:10px; line-height:1.35; }
+    .scale-legend { white-space:nowrap; font-weight:750; }
+    .scale-legend.chord-tone {color:#68e6a3;}
+    .scale-legend.extension {color:#8dbffb;}
+    .scale-legend.color {color:#f4ba72;}
+    .scale-legend.caution {color:#ff8a8a;}
+    @media (max-width:380px) {
+      .scale-explorer-tag { font-size:9px; }
+      .scale-detail-chord { grid-template-columns:58px minmax(0,1fr); }
+      .scale-detail-name { font-size:10px; }
+    }
+    @media (max-width:380px) {
+      .scale-explorer-panel { padding:9px; }
+      .scale-explorer-entry { grid-template-columns:83px 22px minmax(0,1fr); gap:3px; padding:4px; }
+      .scale-explorer-note { font-size:11px; }
+      .scale-explorer-root { font-size:11px; }
+    }
+
+    /* v1.125: three clear families above the scrollable subcategory row. */
+    .choice-family-tabs{display:none;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;
+      padding:10px 12px 8px;border-bottom:1px solid rgba(80,88,95,.55)}
+    .choice-family-btn{min-width:0;width:100%;border-radius:9px;font-size:13px;padding:10px 4px;
+      white-space:nowrap}
+    /* Category labels can be longer; keep them legible and scroll inside the chooser. */
+    #choiceTabs.category-grid{gap:5px;padding:8px 12px}
+    #choiceTabs.category-grid .choice-tab{white-space:normal;min-height:35px;line-height:1.1;padding:6px 4px}
+    .choice-grid{grid-auto-rows:minmax(62px,auto)}
+    .choice-item{height:auto;min-height:62px;max-height:none}
+    .choice-item .choice-name{overflow-wrap:anywhere}
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="panel">
-      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.121"></svg>
+      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.126"></svg>
+      <div class="scale-explorer-toolbar">
+        <button type="button" id="scaleExplorerToggle" class="progression-scale-button" aria-label="Toggle scale explorer" aria-pressed="false" aria-expanded="false" aria-controls="scaleExplorerPanel">Scale</button>
+      </div>
       <div class="progression-strip-shell">
         <div id="progressionStrip" class="progression-strip" aria-label="Progression map"></div>
         <div id="progressionPlayhead" class="progression-playhead" aria-hidden="true"></div>
       </div>
+      <section id="scaleExplorerPanel" class="scale-explorer-panel" aria-label="Scale explorer" aria-hidden="true">
+        <div class="scale-explorer-header">
+          <div>
+            <div class="scale-explorer-title">Scale Explorer</div>
+            <div class="scale-explorer-subtitle">Select chords on the circle or progression. Tap a scale to inspect its note roles.</div>
+          </div>
+          <div class="scale-explorer-actions">
+            <span id="scaleExplorerCount" class="scale-explorer-count" aria-live="polite">24 / 24</span>
+            <button type="button" id="scaleExplorerReset" class="scale-explorer-reset">Reset</button>
+          </div>
+        </div>
+        <div id="scaleExplorerSelected" class="scale-explorer-selected" aria-live="polite"></div>
+        <div id="scaleExplorerResults" class="scale-explorer-results"></div>
+        <div class="scale-explorer-footnote"><span class="scale-legend chord-tone">Green = chord tone</span> · <span class="scale-legend extension">Blue = ordinary extension</span> · <span class="scale-legend color">Amber = altered color</span> · <span class="scale-legend caution">Red = use care</span>. Major scales require all chord tones; pentatonics are ranked possibilities, not guarantees. Tap a row for each chord’s interval labels.</div>
+      </section>
       <div class="top-arrangement">
         <div class="progression-stack">
           <div class="controls">
-            <select id="progressionSelect" class="source-select">
-          <optgroup label="Ionian">
-            <option value="I-IV-V-I|8,8,8,8">I–IV–V–I</option>
-            <option value="I-ii-V-I|8,8,8,8">I–ii–V–I</option>
-            <option value="ii-V-I|8,8,8">ii–V–I</option>
-            <option value="I-vi-ii-V-I|8,8,8,8,8">I–vi–ii–V–I</option>
-            <option value="iii-vi-ii-V-I|8,8,8,8,8">iii–vi–ii–V–I</option>
-            <option value="I-V-vi-IV|8,8,8,8">I–V–vi–IV</option>
-            <option value="vi-IV-I-V|8,8,8,8">vi–IV–I–V</option>
-            <option value="I-vi-IV-V|8,8,8,8">I–vi–IV–V</option>
-            <option value="I-V-IV-I|8,8,8,8">I–V–IV–I</option>
-            <option value="IV-I-ii-V|8,8,8,8">IV–I–ii–V</option>
-            <option value="I-V-vi-IV|8,8,8,8">I–V–vi–IV (2 bars each)</option>
-            <option value="I-vi-ii-V|8,8,8,8">I–vi–ii–V</option>
-            <option value="ii-V-I|8,8,8">ii–V–I (quick ii–V)</option>
-            <option value="I-iii-vi-ii-V-I|8,8,8,8,8,8">I–iii–vi–ii–V–I</option>
-            <option value="vi-ii-V-I|8,8,8,8">vi–ii–V–I (quick)</option>
-            <option value="I-vi-IV-ii-V-I|8,8,8,8,8,8">I–vi–IV–ii–V–I</option>
-          </optgroup>
-          <optgroup label="Dorian">
-            <option value="i-IV-i|8,8,8">i–IV–i</option>
-            <option value="i-IV-bVII-i|8,8,8,8">i–IV–♭VII–i</option>
-            <option value="i-bVII-IV-i|8,8,8,8">i–♭VII–IV–i</option>
-            <option value="i-IV-bVII-IV|8,8,8,8">i–IV–♭VII–IV</option>
-            <option value="i-ii-IV-i|8,8,8,8">i–ii–IV–i</option>
-            <option value="i-bVII-i-IV|8,8,8,8">i–♭VII–i–IV</option>
-          </optgroup>
-          <optgroup label="Phrygian">
-            <option value="i-bII-i|8,8,8">i–♭II–i</option>
-            <option value="i-bII-bVII-i|8,8,8,8">i–♭II–♭VII–i</option>
-            <option value="i-bVII-bII-i|8,8,8,8">i–♭VII–♭II–i</option>
-          </optgroup>
-          <optgroup label="Lydian">
-            <option value="I-II-I|8,8,8">I–II–I</option>
-            <option value="I-II-V-I|8,8,8,8">I–II–V–I</option>
-            <option value="I-V-II-I|8,8,8,8">I–V–II–I</option>
-          </optgroup>
-          <optgroup label="Mixolydian">
-            <option value="I-bVII-IV-I|8,8,8,8">I–♭VII–IV–I</option>
-            <option value="I-bVII-I|8,8,8">I–♭VII–I</option>
-            <option value="I-IV-bVII-I|8,8,8,8">I–IV–♭VII–I</option>
-            <option value="I-bVII-IV-bVII|8,8,8,8">I–♭VII–IV–♭VII</option>
-            <option value="I-V-bVII-IV|8,8,8,8">I–V–♭VII–IV</option>
-            <option value="IV-bVII-I|8,8,8">IV–♭VII–I</option>
-          </optgroup>
-          <optgroup label="Aeolian">
-            <option value="i-bVI-bIII-bVII|8,8,8,8">i–♭VI–♭III–♭VII</option>
-            <option value="i-bVII-bVI-bVII|8,8,8,8">i–♭VII–♭VI–♭VII</option>
-            <option value="i-bVI-bVII-i|8,8,8,8">i–♭VI–♭VII–i</option>
-            <option value="i-bIII-bVII-iv|8,8,8,8">i–♭III–♭VII–iv</option>
-            <option value="i-iv-bVII-bIII|8,8,8,8">i–iv–♭VII–♭III</option>
-            <option value="i-bVII-bVI-V|8,8,8,8">i–♭VII–♭VI–V</option>
-          </optgroup>
-          <optgroup label="Borrowed">
-            <option value="I-iv-I|8,8,8">I–iv–I</option>
-            <option value="I-IV-iv-I|8,8,8,8">I–IV–iv–I</option>
-            <option value="I-bVI-IV-I|8,8,8,8">I–♭VI–IV–I</option>
-            <option value="I-bVI-bVII-I|8,8,8,8">I–♭VI–♭VII–I</option>
-            <option value="I-bIII-IV-I|8,8,8,8">I–♭III–IV–I</option>
-            <option value="I-bIII-bVII-IV|8,8,8,8">I–♭III–♭VII–IV</option>
-            <option value="I-iv-bVII-I|8,8,8,8">I–iv–♭VII–I</option>
-            <option value="I-bVI-iv-I|8,8,8,8">I–♭VI–iv–I</option>
-          </optgroup>
-          <optgroup label="Secondary">
-            <option value="I-V2-ii-V-I|8,8,8,8,8">I–V/ii–ii–V–I</option>
-            <option value="I-V6-vi-ii-V-I|8,8,8,8,8,8">I–V/vi–vi–ii–V–I</option>
-            <option value="I-V5-V-I|8,8,8,8">I–V/V–V–I</option>
-            <option value="I-III-vi-IV|8,8,8,8">I–III–vi–IV</option>
-            <option value="I-VI-ii-V|8,8,8,8">I–VI–ii–V</option>
-            <option value="I-II-V-I|8,8,8,8">I–II–V–I</option>
-            <option value="iii-VI-ii-V-I|8,8,8,8,8">iii–VI–ii–V–I</option>
-          </optgroup>
-          <optgroup label="Substitution">
-            <option value="ii-bII7-I|8,8,8">ii–♭II7–I (tritone)</option>
-            <option value="I-vi-ii-bII7-I|8,8,8,8,8">I–vi–ii–♭II7–I (tritone)</option>
-            <option value="iv-bVII7-I|8,8,8">iv–♭VII7–I (backdoor)</option>
-            <option value="I-IV-iv-bVII7-I|8,8,8,8,8">I–IV–iv–♭VII7–I (backdoor)</option>
-            <option value="I-viiD7-I|8,8,8">I–vii°7–I (diminished)</option>
-            <option value="I-sID7-ii-V-I|8,8,8,8,8">I–♯I°7–ii–V–I (diminished)</option>
-          </optgroup>
-          <optgroup label="Chromatic">
-            <option value="I-III-IV-iv-I|8,8,8,8,8">I–III–IV–iv–I</option>
-            <option value="I7-I7-I7-I7-IV7-IV7-I7-I7-V7-IV7-I7-V7|8,8,8,8,8,8,8,8,8,8,8,8">12-bar blues</option>
-            <option value="I7-IV7-I7-I7-IV7-IV7-I7-I7-V7-IV7-I7-V7|8,8,8,8,8,8,8,8,8,8,8,8">Quick-change blues</option>
-            <option value="i7-i7-i7-i7-iv7-iv7-i7-i7-V7-iv7-i7-V7|8,8,8,8,8,8,8,8,8,8,8,8">Minor blues</option>
-            <option value="I7-IV7-I7-I7-IV7-sIVD7-I7-VI7-ii7-V7-I7-VI7-ii7-V7|8,8,8,8,8,8,8,8,8,8,8,8,8,8">Jazz blues</option>
-            <option value="IM7-viiH7-III7-vi7-II7-v7-I7-IVM7-iv7-bVII7-iii7-VI7-ii7-V7-IM7-VI7-ii7-V7-iii7-VI7-ii7-V7|8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8">Bird blues</option>
-            <option value="I7-V7-IV7-IV7-I7-V7-I7-V7|8,8,8,8,8,8,8,8">8-bar blues</option>
-          </optgroup>
-        </select>
+    <select class="source-select" id="progressionSelect">
+<optgroup label="Ionian">
+<option value="I-IV-V-I|8,8,8,8">I–IV–V–I</option>
+<option value="I-ii-V-I|8,4,4,16">I–ii–V–I</option>
+<option value="ii-V-I|8,8,16">ii–V–I</option>
+<option value="I-vi-ii-V-I|8,4,4,8,8">I–vi–ii–V–I</option>
+<option value="iii-vi-ii-V-I|8,4,4,8,8">iii–vi–ii–V–I</option>
+<option value="I-V-vi-IV|8,8,8,8">I–V–vi–IV</option>
+<option value="vi-IV-I-V|8,8,8,8">vi–IV–I–V</option>
+<option value="I-vi-IV-V|8,8,8,8">I–vi–IV–V</option>
+<option value="I-V-IV-I|8,8,8,8">I–V–IV–I</option>
+<option value="IV-I-ii-V|8,8,8,8">IV–I–ii–V</option>
+<option value="I-V-vi-IV|8,8,8,8">I–V–vi–IV (2 bars each)</option>
+<option value="I-vi-ii-V|8,8,8,8">I–vi–ii–V</option>
+<option value="ii-V-I|4,4,8">ii–V–I (quick ii–V)</option>
+<option value="I-iii-vi-ii-V-I|8,4,4,4,4,8">I–iii–vi–ii–V–I</option>
+<option value="vi-ii-V-I|4,4,4,4">vi–ii–V–I (quick)</option>
+<option value="I-vi-IV-ii-V-I|8,4,4,4,4,8">I–vi–IV–ii–V–I</option>
+</optgroup>
+<optgroup label="Dorian">
+<option value="i-IV-i|8,8,16">i–IV–i</option>
+<option value="i-IV-bVII-i|8,8,8,8">i–IV–♭VII–i</option>
+<option value="i-bVII-IV-i|8,8,8,8">i–♭VII–IV–i</option>
+<option value="i-IV-bVII-IV|8,8,8,8">i–IV–♭VII–IV</option>
+<option value="i-ii-IV-i|8,8,8,8">i–ii–IV–i</option>
+<option value="i-bVII-i-IV|8,8,8,8">i–♭VII–i–IV</option>
+</optgroup>
+<optgroup label="Phrygian">
+<option value="i-bII-i|8,8,16">i–♭II–i</option>
+<option value="i-bII-bVII-i|8,8,8,8">i–♭II–♭VII–i</option>
+<option value="i-bVII-bII-i|8,8,8,8">i–♭VII–♭II–i</option>
+</optgroup>
+<optgroup label="Lydian">
+<option value="I-II-I|8,8,16">I–II–I</option>
+<option value="I-II-V-I|8,8,8,8">I–II–V–I</option>
+<option value="I-V-II-I|8,8,8,8">I–V–II–I</option>
+</optgroup>
+<optgroup label="Mixolydian">
+<option value="I-bVII-IV-I|8,8,8,8">I–♭VII–IV–I</option>
+<option value="I-bVII-I|8,8,16">I–♭VII–I</option>
+<option value="I-IV-bVII-I|8,8,8,8">I–IV–♭VII–I</option>
+<option value="I-bVII-IV-bVII|8,8,8,8">I–♭VII–IV–♭VII</option>
+<option value="I-V-bVII-IV|8,8,8,8">I–V–♭VII–IV</option>
+<option value="IV-bVII-I|8,8,16">IV–♭VII–I</option>
+</optgroup>
+<optgroup label="Aeolian">
+<option value="i-bVI-bIII-bVII|8,8,8,8">i–♭VI–♭III–♭VII</option>
+<option value="i-bVII-bVI-bVII|8,8,8,8">i–♭VII–♭VI–♭VII</option>
+<option value="i-bVI-bVII-i|8,8,8,8">i–♭VI–♭VII–i</option>
+<option value="i-bIII-bVII-iv|8,8,8,8">i–♭III–♭VII–iv</option>
+<option value="i-iv-bVII-bIII|8,8,8,8">i–iv–♭VII–♭III</option>
+<option value="i-bVII-bVI-V|8,8,8,8">i–♭VII–♭VI–V</option>
+</optgroup><optgroup label="Locrian"><option value="iD-bII-iD|8,8,16">i°–♭II–i°</option><option value="iD-bV-bII-iD|8,8,8,8">i°–♭V–♭II–i°</option></optgroup>
+<optgroup label="Borrowed">
+<option value="I-iv-I|8,8,16">I–iv–I</option>
+<option value="I-IV-iv-I|8,8,8,8">I–IV–iv–I</option>
+<option value="I-bVI-IV-I|8,8,8,8">I–♭VI–IV–I</option>
+<option value="I-bVI-bVII-I|8,8,8,8">I–♭VI–♭VII–I</option>
+<option value="I-bIII-IV-I|8,8,8,8">I–♭III–IV–I</option>
+<option value="I-bIII-bVII-IV|8,8,8,8">I–♭III–♭VII–IV</option>
+<option value="I-iv-bVII-I|8,8,8,8">I–iv–♭VII–I</option>
+<option value="I-bVI-iv-I|8,8,8,8">I–♭VI–iv–I</option>
+</optgroup>
+<optgroup label="Secondary">
+<option value="I-V2-ii-V-I|8,4,4,8,8">I–V/ii–ii–V–I</option>
+<option value="I-V6-vi-ii-V-I|8,4,4,4,4,8">I–V/vi–vi–ii–V–I</option>
+<option value="I-V5-V-I|8,8,8,8">I–V/V–V–I</option>
+<option value="I-III-vi-IV|8,8,8,8">I–III–vi–IV</option>
+<option value="I-VI-ii-V|8,8,8,8">I–VI–ii–V</option>
+<option value="I-II-V-I|8,8,8,8">I–II–V–I</option>
+<option value="iii-VI-ii-V-I|8,4,4,8,8">iii–VI–ii–V–I</option>
+</optgroup>
+<optgroup label="Substitution">
+<option value="ii-bII7-I|8,8,16">ii–♭II7–I (tritone)</option>
+<option value="I-vi-ii-bII7-I|8,4,4,8,8">I–vi–ii–♭II7–I (tritone)</option>
+<option value="iv-bVII7-I|8,8,16">iv–♭VII7–I (backdoor)</option>
+<option value="I-IV-iv-bVII7-I|8,4,4,8,8">I–IV–iv–♭VII7–I (backdoor)</option>
+<option value="I-viiD7-I|8,8,16">I–vii°7–I (diminished)</option>
+<option value="I-sID7-ii-V-I|8,4,4,8,8">I–♯I°7–ii–V–I (diminished)</option>
+</optgroup>
+<optgroup label="Chromatic">
+<option value="I-III-IV-iv-I|8,4,4,8,8">I–III–IV–iv–I</option>
+
+
+
+
+
+
+</optgroup>
+<optgroup label="Blues"><option value="I7-I7-I7-I7-IV7-IV7-I7-I7-V7-IV7-I7-V7|8,8,8,8,8,8,8,8,8,8,8,8">12-bar blues</option><option value="I7-IV7-I7-I7-IV7-IV7-I7-I7-V7-IV7-I7-V7|8,8,8,8,8,8,8,8,8,8,8,8">Quick-change blues</option><option value="i7-i7-i7-i7-iv7-iv7-i7-i7-V7-iv7-i7-V7|8,8,8,8,8,8,8,8,8,8,8,8">Minor blues</option><option value="I7-IV7-I7-I7-IV7-sIVD7-I7-VI7-ii7-V7-I7-VI7-ii7-V7|8,8,8,8,8,8,8,8,8,8,4,4,4,4">Jazz blues</option><option value="IM7-viiH7-III7-vi7-II7-v7-I7-IVM7-iv7-bVII7-iii7-VI7-ii7-V7-IM7-VI7-ii7-V7-iii7-VI7-ii7-V7|8,4,4,4,4,4,4,8,4,4,4,4,4,4,4,4,4,4,4,4,4,4">Bird blues</option><option value="I7-V7-IV7-IV7-I7-V7-I7-V7|8,8,8,8,8,8,8,8">8-bar blues</option></optgroup><optgroup label="Jazz Standards"><option value="ii9-V13-IM9|8,8,16">ii9–V13–Imaj9</option><option value="ii7-V7-IM7|8,8,16">ii7–V7–Imaj7</option><option value="ii9-V7b9-IM9|8,8,16">ii9–V7♭9–Imaj9</option><option value="IM9-vi7-ii9-V13|8,8,8,8">Imaj9–vi7–ii9–V13</option><option value="IM7-VI7-ii9-V13|8,8,8,8">Imaj7–VI7–ii9–V13</option><option value="iii7-VI7-ii7-V7-IM7|8,4,4,8,8">iii7–VI7–ii7–V7–Imaj7</option><option value="IM9-I7-IVM9-iv9|8,8,8,8">Imaj9–I7–IVmaj9–iv9</option><option value="IM9-III7-vi9-II7-ii9-V13|8,4,4,4,4,8">Imaj9–III7–vi9–II7–ii9–V13</option><option value="ii9-bII7-IM9|8,8,16">ii9–♭II7–Imaj9 (tritone)</option><option value="IM9-bVII13-IM9|8,8,16">Imaj9–♭VII13–Imaj9 (backdoor)</option><option value="IM7-VI7-ii7-V7-iii7-VI7-ii7-V7|4,4,4,4,4,4,4,4">Rhythm changes A (jazz turnaround)</option><option value="III7-VI7-II7-V7|8,8,8,8">Rhythm changes bridge</option></optgroup><optgroup label="Minor Jazz"><option data-mode="aeolian" value="iiH7-V7b9-i9|8,8,16">iiø7–V7♭9–i9</option><option data-mode="aeolian" value="iiH7-V7alt-i9|8,8,16">iiø7–V7alt–i9</option><option data-mode="aeolian" value="iiH7-V7alt-iM9|8,8,16">iiø7–V7alt–i(maj9)</option><option data-mode="aeolian" value="i9-iv9-V7b9-i9|8,8,8,8">i9–iv9–V7♭9–i9</option><option data-mode="aeolian" value="i9-bVIM9-V7alt-i9|8,8,8,8">i9–♭VImaj9–V7alt–i9</option><option data-mode="aeolian" value="i9-iM9-i7-i6|8,8,8,8">Minor line cliché (i9–iMaj9–i7–i6)</option></optgroup><optgroup label="Extensions"><option value="IM9-IVM9-ii9-V13|8,8,8,8">Imaj9–IVmaj9–ii9–V13</option><option value="IM9-VI13-ii9-V13|8,8,8,8">Imaj9–VI13–ii9–V13</option><option value="IM9-II13-IM9|8,8,16">Imaj9–II13–Imaj9</option><option value="IVM9-IM9-ii9-V13|8,8,8,8">IVmaj9–Imaj9–ii9–V13</option><option data-mode="dorian" value="i11-IV13-i11|8,8,16">i11–IV13–i11 (Dorian)</option><option data-mode="lydian" value="IM7s11-IIM9-IM7s11|8,8,16">Imaj7♯11–IImaj9–Imaj7♯11 (Lydian)</option></optgroup><optgroup label="Altered Dominants"><option value="ii9-V7b9-IM9|8,8,16">ii9–V7♭9–Imaj9</option><option value="ii9-V7s9-IM9|8,8,16">ii9–V7♯9–Imaj9</option><option value="ii9-V7b13-IM9|8,8,16">ii9–V7♭13–Imaj9</option><option value="ii9-V7s11-IM9|8,8,16">ii9–V7♯11–Imaj9</option><option value="ii9-V7s5b9-IM9|8,8,16">ii9–V7♯5♭9–Imaj9</option><option value="ii9-bII13-IM9|8,8,16">ii9–♭II13–Imaj9 (tritone)</option><option value="iiH7-V7alt-i9|8,8,16">iiø7–V7alt–i9</option></optgroup><optgroup label="Modal Jazz"><option data-mode="dorian" value="i11-IV13-i11|8,8,16">Dorian i11–IV13 vamp</option><option data-mode="lydian" value="IM7s11-IIM9-IM7s11|8,8,16">Lydian Imaj7♯11–IImaj9 vamp</option><option data-mode="mixolydian" value="I13-bVII13-I13|8,8,16">Mixolydian I13–♭VII13 vamp</option><option data-mode="phrygian" value="i9-bII13-i9|8,8,16">Phrygian i9–♭II13 color</option><option data-mode="aeolian" value="i9-bVII9-i9|8,8,16">Aeolian i9–♭VII9 vamp</option><option data-mode="aeolian" value="i9-iv9-i9|8,8,16">Aeolian i9–iv9 vamp</option></optgroup></select>
           </div>
           <div class="mix-row">
             <label><input type="checkbox" id="bassToggle" checked /><span>Bass</span></label>
@@ -2037,7 +2197,7 @@
       </div>
       </div>
       </div>
-      <div class="file-id">index.html · Circle v1.121</div>
+      <div class="file-id">Circle v1.126 — Pentatonic Explorer</div>
     </div>
   </div>
   <script>
@@ -2064,13 +2224,18 @@
     var activeRoman = null, activeChordKey = null, activeChordRing = null, activePitchClass = null, activeQuality = null, activeIsDiatonic = null;
     var cuePitchClass = null, cueQuality = null, cueIsDiatonic = null, cueLitOnWheel = false;
 
-    // Stopped-state display cycle:
+    // Stopped-state display cycle has two positions only:
     // 0 = Roman strip / letter-name wheel (linked)
     // 1 = letter-name strip / Roman-numeral wheel (linked)
-    // 2 = blank strip / independent circle with Diatonic + Sound modes.
+    // When Scale is on, both surfaces show the progression-strip notation.
     var stoppedDisplayState = 0;
     var chordLetterView = false; // compatibility shorthand for state 1
     var independentCircleMode = "diatonic";
+    var scaleExplorerOpen = false;
+    var scaleExplorerSelections = [];
+    // Cancels playback that is still waiting for sample loading.
+    var progressionStartEpoch = 0;
+
     var independentDiatonicRootPC = null;
     var independentDiatonicQuality = "major";
     var chordAuditionRunning = false;
@@ -2083,7 +2248,10 @@
     var chordAuditionChordRing = null;
     var chordAuditionScheduleAheadSec = 0.045;
 
-    // v1.121: Every built-in/canned progression chord defaults to 8 beats.
+    // v1.124: Each canned progression has a musically appropriate rhythmic form,
+    // at double the customary chord durations (4/4 quarter-note beats).
+    // For example, each original measure in a 12-bar blues lasts 8 beats,
+    // giving a 24-bar loop. Faster ii–V and jazz-blues changes stay proportionate.
     // Unsaved progression editing uses one temporary working draft. The built-in
     // progression data remains immutable. The draft survives playback and view
     // changes, but is discarded when the user selects another progression or meter.
@@ -2705,6 +2873,7 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       activeRoman = null; activeChordKey = null; activeChordRing = null; activePitchClass = null; activeQuality = null; activeIsDiatonic = null;
     }
     function stopProgressionPlayback() {
+      progressionStartEpoch++;
       stopMasterTransport();
 
       for (var k = 0; k < progressionOscillators.length; k++) {
@@ -3117,7 +3286,10 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       if (deg === "viiH7") return "viiø7";
       if (deg === "IM7") return "Imaj7";
       if (deg === "IVM7") return "IVmaj7";
-      return deg.replace(/^b/, "♭");
+      if (deg === "iD") return "i°";
+      return deg.replace(/^b/, "♭").replace(/^s/,"♯")
+        .replace(/M(7|9|13)/g,"maj$1").replace(/s(5|9|11)/g,"♯$1")
+        .replace(/b(9|13)/g,"♭$1").replace(/H7/g,"ø7");
     }
 
 
@@ -3580,7 +3752,7 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       songLibraryLoading=true;
       songLibraryError="";
       renderSongResults();
-      fetch("Circle_song_library.json",{cache:"no-store"}).then(function(r){
+      fetch("Circle_test_song_library.json",{cache:"no-store"}).then(function(r){
         if(!r.ok) throw new Error("HTTP "+r.status);
         return r.json();
       }).then(function(data){
@@ -3590,7 +3762,7 @@ function fetchAndDecodePercussionSample(ctx, urls) {
         renderSongResults();
       }).catch(function(){
         songLibraryLoading=false;
-        songLibraryError="Song library not found. Keep Circle_song_library.json beside this HTML file.";
+        songLibraryError="Test song library not found. Keep Circle_test_song_library.json beside this HTML file.";
         renderSongResults();
       });
     }
@@ -3614,6 +3786,8 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       if(songBtn) songBtn.classList.add("active");
       if(sb) { sb.classList.add("open"); sb.setAttribute("aria-hidden","false"); }
       if(tabs) tabs.style.display="none";
+      var families=document.getElementById("choiceFamilyTabs");
+      if(families) families.style.display="none";
       if(grid) grid.style.display="none";
       document.getElementById("choiceTitle").textContent="Songs";
       loadSongLibrary();
@@ -3629,6 +3803,7 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       if(songBtn) songBtn.classList.remove("active");
       if(sb) { sb.classList.remove("open"); sb.setAttribute("aria-hidden","true"); }
       if(tabs) tabs.style.display="";
+      renderBrowserFamilies();
       if(grid) grid.style.display="";
       if(activeBrowserSelect) {
         var cfg=selectorBrowserConfig[activeBrowserSelect.id];
@@ -3642,6 +3817,7 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       var opt = select && select.options ? select.options[select.selectedIndex] : null;
       var group = (opt && opt.parentElement && opt.parentElement.tagName === "OPTGROUP")
         ? opt.parentElement.label : "";
+      if(opt && opt.dataset && opt.dataset.mode) return opt.dataset.mode;
       var text = ((group || "") + " " + (opt ? opt.textContent : "")).toLowerCase();
 
       // The selected progression defines the active modal collection.
@@ -3878,6 +4054,7 @@ function fetchAndDecodePercussionSample(ctx, urls) {
 
       var minus = document.createElement("button");
       minus.type = "button";
+      minus.className = "beat-minus";
       minus.textContent = "−";
       minus.setAttribute("aria-label", "Reduce beats");
 
@@ -3889,6 +4066,7 @@ function fetchAndDecodePercussionSample(ctx, urls) {
 
       var plus = document.createElement("button");
       plus.type = "button";
+      plus.className = "beat-plus";
       plus.textContent = "+";
       plus.setAttribute("aria-label", "Increase beats");
 
@@ -4003,15 +4181,15 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       if (!info || !info.midiNotes || !info.midiNotes.length) return normalizedDegreeLabel(deg);
       var rootPC = ((info.midiNotes[0] % 12) + 12) % 12;
       var root = displayPitchClass(rootPC, selectedSpellingPreference);
-      var suffix = "";
-      if (info.seventhKind === "maj7") suffix = "maj7";
-      else if (info.seventhKind === "min7") suffix = "m7";
-      else if (info.seventhKind === "half-dim") suffix = "ø7";
-      else if (info.seventhKind === "dim7") suffix = "°7";
-      else if (info.seventhKind === "dom7") suffix = "7";
-      else if (info.quality === "minor") suffix = "m";
-      else if (info.quality === "dim") suffix = info.midiNotes.length >= 4 ? "°7" : "°";
-      else if (info.midiNotes.length >= 4) suffix = "7";
+      var suffix = info.extensionLabel || "";
+      if (!suffix && info.seventhKind === "maj7") suffix = "maj7";
+      else if (!suffix && info.seventhKind === "min7") suffix = "m7";
+      else if (!suffix && info.seventhKind === "half-dim") suffix = "ø7";
+      else if (!suffix && info.seventhKind === "dim7") suffix = "°7";
+      else if (!suffix && info.seventhKind === "dom7") suffix = "7";
+      else if (!suffix && info.quality === "minor") suffix = "m";
+      else if (!suffix && info.quality === "dim") suffix = info.midiNotes.length >= 4 ? "°7" : "°";
+      else if (!suffix && info.midiNotes.length >= 4) suffix = "7";
       return root + suffix;
     }
 
@@ -4027,6 +4205,323 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       }
       if (quality === "dim") label += "°";
       return label;
+    }
+
+
+    // --- Scale Explorer: 12 major + 12 major pentatonic scales, uncategorized. ---
+    // Note lists start on their root. Relative mode interpretation is left to the user.
+    var SCALE_EXPLORER_SIGNATURES = {
+      C:"0", G:"1♯", D:"2♯", A:"3♯", E:"4♯", B:"5♯", "F#":"6♯",
+      Db:"5♭", Ab:"4♭", Eb:"3♭", Bb:"2♭", F:"1♭"
+    };
+    function scaleExplorerPitchClass(note) {
+      var natural = {C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+      var pc = natural[note.charAt(0)];
+      for (var i=1;i<note.length;i++) {
+        if (note.charAt(i)==="#" || note.charAt(i)==="♯") pc++;
+        if (note.charAt(i)==="b" || note.charAt(i)==="♭") pc--;
+      }
+      return (pc+120)%12;
+    }
+    function scaleExplorerCatalog() {
+      var items=[];
+      MAJOR_KEYS.forEach(function(key){
+        var notes=KEY_NOTES[key];
+        var signature=SCALE_EXPLORER_SIGNATURES[key];
+        items.push({root:key,type:"major",signature:signature,notes:notes.slice()});
+        items.push({root:key,type:"pentatonic",signature:signature,
+          notes:[notes[0],notes[1],notes[2],notes[4],notes[5]]});
+      });
+      return items;
+    }
+    var scaleExplorerScales=scaleExplorerCatalog();
+
+    function scaleExplorerChordIntervals(quality) {
+      if (quality==="minor") return [0,3,7];
+      if (quality==="dim") return [0,3,6];
+      return [0,4,7];
+    }
+    function scaleExplorerMakeChord(rootPC,quality,notePCs,letter,roman) {
+      rootPC=((rootPC%12)+12)%12;
+      var unique=Array.from(new Set(notePCs.map(function(pc){return ((pc%12)+12)%12;}))).sort(function(a,b){return a-b;});
+      return {pc:rootPC,quality:quality,notes:unique,key:rootPC+":"+unique.join(","),
+        letter:letter||"",roman:roman||""};
+    }
+    function scaleExplorerWheelChord(pc,quality) {
+      var intervals=scaleExplorerChordIntervals(quality);
+      var root=displayPitchClass(pc,selectedSpellingPreference);
+      return scaleExplorerMakeChord(pc,quality,intervals.map(function(n){return pc+n;}),
+        root+(quality==="minor"?"m":quality==="dim"?"°":""),
+        romanLabelForWheelChord(pc,quality));
+    }
+    function scaleExplorerProgressionChord(prog,index,mode) {
+      var step=prog.isSong&&prog.steps?prog.steps[index]:null;
+      var info=step?step.info:chordInfoForDegree(selectedMajor,prog.degrees[index]);
+      if (!info || !info.midiNotes || !info.midiNotes.length) return null;
+      var roman=step?songMiddleLabel(step,false):
+        (modeReferenceView?romanLabelForChordRelativeToParent(prog.degrees[index],mode):normalizedDegreeLabel(prog.degrees[index]));
+      var letter=step ? ((step.info.songRootName||"?")+(step.info.songQualityLabel||"")) : chordNameForDegree(prog.degrees[index]);
+      var root=info.pitchClass;
+      if (step && info.songRootName) {
+        var rootMatch=info.songRootName.match(/^[A-G](?:#|b|♯|♭)?/);
+        if(rootMatch) root=scaleExplorerPitchClass(rootMatch[0]);
+      }
+      if (root===null || root===undefined) root=((info.midiNotes[0]%12)+12)%12;
+      var pcs=info.midiNotes.map(function(n){return ((n%12)+12)%12;});
+      var q=info.quality||((pcs.indexOf((root+3)%12)>=0)?"minor":"major");
+      return scaleExplorerMakeChord(root,q,pcs,letter,roman);
+    }
+    function scaleExplorerHasChord(chord) {
+      return scaleExplorerSelections.some(function(ch){return ch.key===chord.key;});
+    }
+    function scaleExplorerToggleChord(chord) {
+      if (!scaleExplorerOpen || progressionPlaying || !chord) return;
+      var index=scaleExplorerSelections.findIndex(function(ch){return ch.key===chord.key;});
+      if (index>=0) scaleExplorerSelections.splice(index,1);
+      else scaleExplorerSelections.push(chord);
+      render(selectedMajor);
+      renderProgressionStrip(null,null,false);
+      renderScaleExplorer();
+    }
+    function toggleScaleExplorer() {
+      // Scale must be available at any time. If transport is playing or
+      // loading, stop/cancel it so chord taps can become scale selections.
+      var transportButton = document.getElementById("playProgressionBtn");
+      if (progressionPlaying || (transportButton && transportButton.disabled)) {
+        stopProgressionPlayback();
+      }
+      if (!scaleExplorerOpen) {
+        stopChordAudition(true);
+        stopArpeggioOnly();
+      }
+      // Preserve selections when temporarily closing Scale to switch
+      // Roman / letter notation. Reset clears them explicitly.
+      scaleExplorerOpen = !scaleExplorerOpen;
+      render(selectedMajor);
+      renderProgressionStrip(null,null,false);
+      renderScaleExplorer();
+    }
+    function scaleExplorerLabel(item) {
+      var pc=scaleExplorerPitchClass(item.root);
+      var root=chordLetterView ? item.root : romanLabelForWheelChord(pc,"major");
+      return root+" "+(item.type==="major"?"major":"pentatonic");
+    }
+    // Pentatonics need not supply all notes in a chord. Rank by playable note
+    // functions relative to each chord, without claiming that one score is an
+    // objective measure of musical quality. Chord tones take precedence over
+    // any other interval meaning (including explicitly altered chord tones).
+    var scaleExplorerExpandedKey = null;
+    function scaleExplorerIntervalLabel(semitones,chord) {
+      var labels=["1","♭9","9","♯9","3","11","♯11","5","♭13","13","♭7","7"];
+      if (semitones===3 && chord.quality==="minor") return "♭3";
+      if (semitones===3 && chord.quality==="dim") return "♭3";
+      if (semitones===6 && chord.quality==="dim") return "♭5";
+      return labels[semitones];
+    }
+    function scaleExplorerNoteRole(chord,pc) {
+      var delta=((pc-chord.pc)%12+12)%12;
+      var pcs=chord.notes;
+      var has=function(interval){return pcs.indexOf((chord.pc+interval)%12)!==-1;};
+      var interval=scaleExplorerIntervalLabel(delta,chord);
+      if (pcs.indexOf(pc)!==-1) return {kind:"chord-tone",degree:interval,value:3.4};
+      var majorThird=has(4),minorThird=has(3),minor7=has(10),major7=has(11);
+      var dominant=majorThird && minor7;
+      if (delta===2 || delta===9) return {kind:"extension",degree:interval,value:2.65};
+      if (delta===5) return majorThird
+        ? {kind:"caution",degree:interval,value:0.15}
+        : {kind:"extension",degree:interval,value:2.5};
+      if (delta===6) return (chord.quality==="dim")
+        ? {kind:"caution",degree:interval,value:0.4}
+        : {kind:"color",degree:interval,value:2.05};
+      if (delta===1) return dominant
+        ? {kind:"color",degree:interval,value:1.7}
+        : {kind:"caution",degree:interval,value:-0.6};
+      if (delta===3) return dominant
+        ? {kind:"color",degree:interval,value:1.55}
+        : {kind:"caution",degree:interval,value:-0.8};
+      if (delta===4) return minorThird
+        ? {kind:"caution",degree:interval,value:-1.1}
+        : {kind:"extension",degree:interval,value:2.5};
+      if (delta===7) return (has(6)||has(8))
+        ? {kind:"caution",degree:interval,value:0.2}
+        : {kind:"extension",degree:interval,value:2.5};
+      if (delta===8) return (dominant||chord.quality==="minor")
+        ? {kind:"color",degree:interval,value:1.65}
+        : {kind:"caution",degree:interval,value:0.0};
+      if (delta===10) return major7
+        ? {kind:"caution",degree:interval,value:-1.0}
+        : {kind:"color",degree:interval,value:2.0};
+      if (delta===11) return minor7
+        ? {kind:"caution",degree:interval,value:-1.0}
+        : {kind:"color",degree:interval,value:2.0};
+      // Includes a major-third chord's unplayed major seventh, etc.
+      return {kind:"extension",degree:interval,value:2.4};
+    }
+    function scaleExplorerReview(item) {
+      var notePCs=item.notes.map(scaleExplorerPitchClass);
+      if (item.type!=="pentatonic" || !scaleExplorerSelections.length) return null;
+      var evaluations=scaleExplorerSelections.map(function(ch){
+        return notePCs.map(function(pc){return scaleExplorerNoteRole(ch,pc);});
+      });
+      var total=0, cautions=0, colors=0, tones=0;
+      evaluations.forEach(function(group){
+        group.forEach(function(role){
+          total+=role.value;
+          if(role.kind==="caution") cautions++;
+          if(role.kind==="color") colors++;
+          if(role.kind==="chord-tone") tones++;
+        });
+      });
+      var count=evaluations.length*notePCs.length;
+      // Favor a set with a clear harmonic anchor, but do not require the root.
+      var score=total/count + Math.min(0.22,tones/count);
+      var tag=cautions===0 ? (colors>0 ? "Color" : "Smooth")
+        : cautions<=evaluations.length ? "Some tension" : "Outside";
+      return {evaluations:evaluations,score:score,tag:tag};
+    }
+    function scaleExplorerNoteColor(review,noteIndex) {
+      if(!review) return "";
+      var roles=review.evaluations.map(function(group){return group[noteIndex];});
+      if(roles.some(function(r){return r.kind==="caution";})) return "caution";
+      if(roles.some(function(r){return r.kind==="color";})) return "color";
+      if(roles.some(function(r){return r.kind==="chord-tone";})) return "chord-tone";
+      return "extension";
+    }
+    function scaleExplorerMakeBreakdown(item,review) {
+      var box=document.createElement("div");
+      box.className="scale-explorer-breakdown";
+      var note=document.createElement("div");
+      note.className="scale-detail-heading";
+      note.textContent=item.type==="pentatonic"
+        ? "Intervals for each selected chord (suggestions, not hard rules)"
+        : "This major scale contains every selected chord tone.";
+      box.appendChild(note);
+      if (item.type==="major") return box;
+      scaleExplorerSelections.forEach(function(ch,ci){
+        var row=document.createElement("div");row.className="scale-detail-chord";
+        var name=document.createElement("span");name.className="scale-detail-name";
+        name.textContent=chordLetterView?ch.letter:ch.roman;
+        var roles=document.createElement("div");roles.className="scale-detail-notes";
+        review.evaluations[ci].forEach(function(role,ni){
+          var cell=document.createElement("div");cell.className="scale-detail-note";
+          var pitch=document.createElement("span");pitch.className="scale-detail-note-name";
+          pitch.textContent=item.notes[ni];
+          var interval=document.createElement("span");interval.className="scale-role "+role.kind;
+          interval.textContent=role.degree;
+          cell.appendChild(pitch);cell.appendChild(interval);roles.appendChild(cell);
+        });
+        row.appendChild(name);row.appendChild(roles);box.appendChild(row);
+      });
+      var foot=document.createElement("div");foot.className="scale-detail-foot";
+      foot.textContent="Color and tension are context-dependent: passing notes, resolution, and style matter.";
+      box.appendChild(foot);
+      return box;
+    }
+    function renderScaleExplorer() {
+      var panel=document.getElementById("scaleExplorerPanel");
+      if (!panel) return;
+      var visible=scaleExplorerOpen;
+      document.body.classList.toggle("scale-explorer-open",visible);
+      panel.setAttribute("aria-hidden",visible?"false":"true");
+      var btn=document.getElementById("scaleExplorerToggle");
+      if (btn) {
+        btn.setAttribute("aria-pressed",visible?"true":"false");
+        btn.setAttribute("aria-expanded",visible?"true":"false");
+        btn.disabled=false;
+      }
+      if (!visible) return;
+      var selectedHost=document.getElementById("scaleExplorerSelected");
+      var resultsHost=document.getElementById("scaleExplorerResults");
+      var countHost=document.getElementById("scaleExplorerCount");
+      var previousScroll=resultsHost.scrollTop;
+      selectedHost.replaceChildren();resultsHost.replaceChildren();
+      var required={};
+      scaleExplorerSelections.forEach(function(ch){
+        var chip=document.createElement("button");chip.type="button";
+        chip.className="scale-explorer-chip";
+        var name=chordLetterView?ch.letter:ch.roman;
+        chip.title="Remove "+name;
+        chip.appendChild(document.createTextNode(name+" "));
+        var cross=document.createElement("span");cross.textContent="×";
+        chip.appendChild(cross);
+        chip.addEventListener("click",function(){scaleExplorerToggleChord(ch);});
+        selectedHost.appendChild(chip);
+        ch.notes.forEach(function(pc){required[pc]=true;});
+      });
+      if (!scaleExplorerSelections.length) {
+        var empty=document.createElement("span");
+        empty.className="scale-explorer-empty-selection";
+        empty.textContent="No chords selected — showing all 24 scales";
+        selectedHost.appendChild(empty);
+      }
+      var requiredPCs=Object.keys(required);
+      var candidates=[];
+      scaleExplorerScales.forEach(function(item,sourceIndex){
+        var allowed={};
+        item.notes.forEach(function(note){allowed[scaleExplorerPitchClass(note)]=true;});
+        var fullMatch=requiredPCs.every(function(pc){return !!allowed[pc];});
+        if(item.type==="major" && !fullMatch) return;
+        var review=scaleExplorerReview(item);
+        candidates.push({item:item,index:sourceIndex,review:review,
+          score:review?review.score:3.3});
+      });
+      if(scaleExplorerSelections.length) {
+        candidates.sort(function(a,b){
+          return (b.score-a.score) || (a.index-b.index);
+        });
+      }
+      candidates.forEach(function(entry){
+        var item=entry.item,review=entry.review;
+        var row=document.createElement("div");
+        row.className="scale-explorer-entry";
+        row.setAttribute("tabindex","0");
+        row.setAttribute("role","button");
+        row.setAttribute("aria-label","Inspect "+scaleExplorerLabel(item));
+        var itemKey=item.root+":"+item.type;
+        var expanded=(scaleExplorerExpandedKey===itemKey && !!scaleExplorerSelections.length);
+        row.setAttribute("aria-expanded",expanded?"true":"false");
+        if(expanded) row.classList.add("expanded");
+        var label=document.createElement("div");label.className="scale-explorer-root";
+        var name=document.createElement("span");name.className="scale-explorer-root-name";
+        name.textContent=scaleExplorerLabel(item);label.appendChild(name);
+        if(scaleExplorerSelections.length){
+          var tag=document.createElement("span");tag.className="scale-explorer-tag";
+          tag.textContent=review ? review.tag+" · details ▾" : "All tones · details ▾";
+          label.appendChild(tag);
+        }
+        var signature=document.createElement("span");
+        signature.className="scale-explorer-signature";
+        signature.textContent=item.signature;
+        var noteLine=document.createElement("div");noteLine.className="scale-explorer-notes";
+        item.notes.forEach(function(note,ni){
+          var token=document.createElement("span");
+          var className=review?scaleExplorerNoteColor(review,ni)
+            :(required[scaleExplorerPitchClass(note)]?"chord-tone":"");
+          token.className="scale-explorer-note"+(className?" "+className:"");
+          token.textContent=note;noteLine.appendChild(token);
+        });
+        row.appendChild(label);row.appendChild(signature);row.appendChild(noteLine);
+        resultsHost.appendChild(row);
+        if(expanded)resultsHost.appendChild(scaleExplorerMakeBreakdown(item,review));
+        var toggle=function(){
+          if(!scaleExplorerSelections.length)return;
+          scaleExplorerExpandedKey=expanded?null:itemKey;
+          renderScaleExplorer();
+        };
+        row.addEventListener("click",toggle);
+        row.addEventListener("keydown",function(ev){
+          if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();toggle();}
+        });
+      });
+      countHost.textContent=scaleExplorerSelections.length
+        ? candidates.length+" shown / 24"
+        : "24 / 24";
+      if(!candidates.length){
+        var message=document.createElement("div");message.className="scale-explorer-no-matches";
+        message.textContent="No major-scale match. Pentatonic choices will still be shown for exploring extensions and tensions.";
+        resultsHost.appendChild(message);
+      }
+      resultsHost.scrollTop=previousScroll;
     }
 
     function isIndependentCircleView() {
@@ -4303,33 +4798,17 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       if (progressionPlaying) return;
       stopChordAudition(true);
       stopArpeggioOnly();
-
-      var next = ((state % 3) + 3) % 3;
-      stoppedDisplayState = next;
-      chordLetterView = (next === 1);
-
-      if (next === 2) {
-        // Each entry into the independent view begins from the app's current
-        // key as a major/Ionian diatonic palette. Diatonic and Sound then share
-        // that palette until the user chooses another center in Diatonic mode.
-        independentCircleMode = "diatonic";
-        independentDiatonicRootPC = PC_MAP[KEY_NOTES[selectedMajor][0]];
-        independentDiatonicQuality = "major";
-      }
-
+      stoppedDisplayState = ((state % 2) + 2) % 2;
+      chordLetterView = (stoppedDisplayState === 1);
       render(selectedMajor);
-      renderProgressionStrip(null, null, false);
+      renderProgressionStrip(null,null,false);
+      renderScaleExplorer();
     }
-
-    function setChordLetterView(on) {
-      setStoppedDisplayState(on ? 1 : 0);
-    }
-
+    function setChordLetterView(on) { setStoppedDisplayState(on ? 1 : 0); }
     function toggleChordLetterView() {
       if (progressionPlaying) return;
-      setStoppedDisplayState((stoppedDisplayState + 1) % 3);
+      setStoppedDisplayState((stoppedDisplayState+1)%2);
     }
-
 
     function progressionStripTargetLeft(host, chipIndex) {
       if (!host || chipIndex === null || chipIndex === undefined || chipIndex < 0) return 0;
@@ -4399,52 +4878,13 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       var prog = getSelectedProgression();
       var mode = progressionModeForDegrees(prog.degrees);
       host.innerHTML = "";
-      var independentClean = !progressionPlaying && stoppedDisplayState === 2;
-      host.classList.toggle("blank-view", independentClean);
-      document.body.classList.toggle("independent-clean", independentClean);
-      if (independentClean) closeDetailPanels();
+      host.classList.remove("blank-view");
+      document.body.classList.remove("independent-clean");
       host.onclick = null;
       host.removeAttribute("role");
       host.removeAttribute("aria-label");
-
-      // Third stopped-state view: keep the lower progression area blank except
-      // for a square Back button that returns directly to Roman numerals.
-      if (!progressionPlaying && stoppedDisplayState === 2) {
-        beatEditorState = null;
-        host.classList.remove("long-strip");
-        var blankShell = host.closest ? host.closest(".progression-strip-shell") : null;
-        if (blankShell) blankShell.classList.remove("following");
-        host.scrollLeft = 0;
-        var backButton = document.createElement("button");
-        backButton.type = "button";
-        backButton.className = "progression-back-button";
-        backButton.textContent = "←";
-        backButton.setAttribute("aria-label", "Back to Roman numerals");
-        backButton.addEventListener("click", function(ev){
-          ev.stopPropagation();
-          setStoppedDisplayState(0);
-        });
-        host.appendChild(backButton);
-
-        var randomButton = document.createElement("button");
-        randomButton.type = "button";
-        randomButton.className = "progression-random-button";
-        randomButton.setAttribute("aria-label", "Randomize guitar and bass accompaniment");
-        randomButton.setAttribute("title", "Randomize guitar and bass");
-        randomButton.innerHTML =
-          '<svg viewBox="0 0 24 24" aria-hidden="true">' +
-            '<path d="M3.5 7h3.2L16 17h4.5"/>' +
-            '<path d="M17.8 14.3 20.5 17l-2.7 2.7"/>' +
-            '<path d="M3.5 17h3.2L16 7h4.5"/>' +
-            '<path d="M17.8 4.3 20.5 7l-2.7 2.7"/>' +
-          '</svg>';
-        randomButton.addEventListener("click", function(ev){
-          ev.stopPropagation();
-          randomizeIndependentAccompaniment();
-        });
-        host.appendChild(randomButton);
-        return;
-      }
+      // The Scale button lives above this strip, so progression chords remain visible.
+      if (scaleExplorerOpen) { beatEditorState=null; }
 
       for (var i=0; i<prog.degrees.length; i++) {
         var d = prog.degrees[i];
@@ -4465,28 +4905,32 @@ function fetchAndDecodePercussionSample(ctx, urls) {
           chip.className += " song-wide";
         }
 
-        // While stopped, any progression chip toggles the whole strip between
-        // Roman numerals and actual chord names.
+        // Normal: tap any chord to toggle Roman / letter names.
+        // Scale: tap individual progression chords to add/remove their tones.
         if (!progressionPlaying) {
           chip.className += " view-toggle";
           chip.setAttribute("role", "button");
-          chip.setAttribute("aria-label", stoppedDisplayState === 0 ? "Show chord names" : "Show independent circle");
-          bindProgressionBeatLongPress(chip, i);
-          chip.addEventListener("click", function(ev){
-            // A completed long press opens the beat editor and must not also
-            // advance the three-state notation view when the finger lifts.
-            if (ev.currentTarget._suppressNextClick) {
-              ev.currentTarget._suppressNextClick = false;
+          if (scaleExplorerOpen) {
+            (function(chord){
+              chip.className += " scale-selectable";
+              if (chord && scaleExplorerHasChord(chord)) chip.className += " scale-selected";
+              chip.setAttribute("aria-label","Toggle scale filter: "+(chordLetterView?chord.letter:chord.roman));
+              chip.addEventListener("click",function(ev){ev.stopPropagation();scaleExplorerToggleChord(chord);});
+            })(scaleExplorerProgressionChord(prog,i,mode));
+          } else {
+            chip.setAttribute("aria-label",chordLetterView?"Show Roman numerals":"Show chord names");
+            bindProgressionBeatLongPress(chip,i);
+            chip.addEventListener("click",function(ev){
+              if(ev.currentTarget._suppressNextClick) {
+                ev.currentTarget._suppressNextClick=false;
+                ev.stopPropagation();
+                return;
+              }
               ev.stopPropagation();
-              return;
-            }
-            // Prevent this same click from bubbling to the progression-strip
-            // handler that is installed when state 2 (blank/independent) renders.
-            ev.stopPropagation();
-            beatEditorState = null;
-            if (activeSong) setStoppedDisplayState(stoppedDisplayState === 0 ? 1 : 0);
-            else toggleChordLetterView();
-          });
+              beatEditorState=null;
+              toggleChordLetterView();
+            });
+          }
         }
 
         // Current chord remains steadily highlighted.
@@ -4516,7 +4960,8 @@ function fetchAndDecodePercussionSample(ctx, urls) {
 
         var quality=document.createElement("div");
         quality.className="chord-quality";
-        quality.textContent=songStep ? songQualityLabel(songStep) : "";
+        quality.textContent=songStep ? songQualityLabel(songStep) :
+          ((function(info){return info && info.extensionLabel ? info.extensionLabel : "";})(chordInfoForDegree(selectedMajor,d)));
         chip.appendChild(quality);
 
         var roman=document.createElement("div");
@@ -4550,7 +4995,7 @@ function fetchAndDecodePercussionSample(ctx, urls) {
 
           chip.appendChild(intervalRow);
         }
-        if (!prog.isSong) attachBeatEditor(chip, i);
+        if (!prog.isSong && !scaleExplorerOpen) attachBeatEditor(chip, i);
         host.appendChild(chip);
       }
 
@@ -4574,10 +5019,63 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       return {inPC:inPC, outPC:outPC};
     }
 
+    // v1.125: fully specified canned-jazz chord qualities. No display-only
+    // extensions: midiNotes are consumed by audio, bass, interval labels and Scale.
+    function extendedChordForDegree(tonicPC,code){
+      // Root degree is separate from chord quality. Letter case denotes
+      // major/minor third; suffix encodes sevenths, extensions, alterations.
+      var m=code.match(/^(bVII|bVI|bV|bIII|bII|sIV|sI|VII|vii|VI|vi|IV|iv|III|iii|II|ii|V|v|I|i)(M9s11|M7s11|7s5b9|7alt|7b13|7s11|7s9|7b9|M13|M9|M7|H7|13|11|9|7|6)$/);
+      if(!m)return null;
+      var roots={I:0,i:0,II:2,ii:2,III:4,iii:4,IV:5,iv:5,V:7,v:7,VI:9,vi:9,VII:11,vii:11,
+        bII:1,bIII:3,bV:6,bVI:8,bVII:10,sIV:6,sI:1};
+      var symbol=m[1],suffix=m[2],offset=roots[symbol];
+      var min=/^[a-z]/.test(symbol),diminished=suffix==='H7';
+      var triad=min?[0,3,7]:[0,4,7];
+      var intervals,quality=min?'minor':'major',seventhKind=null,label='';
+      if(diminished){intervals=[0,3,6,10];quality='dim';seventhKind='half-dim';label='ø7';}
+      else if(suffix==='6'){intervals=triad.concat([9]);label=min?'m6':'6';}
+      else if(suffix==='7') {intervals=triad.concat([10]);seventhKind=min?'min7':'dom7';label=min?'m7':'7';}
+      else if(suffix==='9' || suffix==='11' || suffix==='13'){
+        intervals=triad.concat([10,14]);
+        if(suffix==='11')intervals.push(17);
+        if(suffix==='13')intervals.push(21);
+        seventhKind=min?'min7':'dom7';label=(min?'m':'')+suffix;
+      }
+      else if(/^M/.test(suffix)){
+        intervals=triad.concat([11]);
+        if(suffix==='M9'||suffix==='M9s11')intervals.push(14);
+        if(suffix==='M13')intervals.push(14,21);
+        if(suffix==='M7s11'||suffix==='M9s11')intervals.push(18);
+        seventhKind='maj7';
+        label=(min?'m(':'')+'maj'+suffix.slice(1).replace('s11','♯11')+(min?')':'');
+      }
+      else {
+        // Altered dominants preserve their defining third and flat seventh.
+        intervals=[0,4,7,10];quality='major';seventhKind='dom7';
+        if(suffix==='7b9')intervals.push(13);
+        if(suffix==='7s9')intervals.push(15);
+        if(suffix==='7s11')intervals.push(18);
+        if(suffix==='7b13')intervals.push(20);
+        if(suffix==='7s5b9')intervals=[0,4,8,10,13];
+        if(suffix==='7alt')intervals=[0,4,8,10,13,15];
+        label=suffix.replace(/s/g,'♯').replace(/b/g,'♭');
+      }
+      var rootPC=(tonicPC+offset+120)%12;
+      return {midiNotes:intervals.map(function(n){return 60+rootPC+n;}),
+        chordKey:null,chordRing:null,pitchClass:rootPC,quality:quality,
+        seventhKind:seventhKind,extensionLabel:label};
+    }
+
     function chordInfoForDegree(selectedMajorKey, degreeRoman) {
       var notes = KEY_NOTES[selectedMajorKey];
       var chroma = {C:0,"C#":1,Db:1,D:2,"D#":3,Eb:3,E:4,F:5,"F#":6,Gb:6,G:7,"G#":8,Ab:8,A:9,"A#":10,Bb:10,B:11};
       var tonicPC = chroma[notes[0]];
+      // Generic extended vocabulary, while preserving legacy standard seventh
+      // codes and wheel links below where they are already defined.
+      var extended=extendedChordForDegree(tonicPC,degreeRoman);
+      if(extended && !["I7","IV7","V7","II7","III7","VI7","i7","ii7","iii7","iv7","v7","vi7","IM7","IVM7","viiH7"].includes(degreeRoman))return extended;
+      if(degreeRoman==="iD")return {midiNotes:[0,3,6].map(function(i){return 60+tonicPC+i;}),
+        chordKey:null,chordRing:null,pitchClass:tonicPC,quality:"dim",extensionLabel:"°"};
       function make(offset, quality, intervals, seventhKind) {
         var rootMidi = 60 + ((tonicPC + offset + 120) % 12);
         var ints = intervals || (quality === "minor" ? [0,3,7] : quality === "dim" ? [0,3,6] : [0,4,7]);
@@ -4688,24 +5186,25 @@ function setTransportButtonState(state) {
       if (!editableProgression || !editableProgression.degrees.length) return;
       beatEditorState = null;
       stopChordAudition(true);
+      // Playback uses the ordinary progression controls, not Scale selection mode.
+      if (scaleExplorerOpen) {
+        scaleExplorerOpen=false;
+        scaleExplorerSelections=[];
+        renderScaleExplorer();
+      }
 
       // Preserve the user's linked notation view through playback:
       // state 0 = Roman numerals in the progression strip,
       // state 1 = chord letters in the progression strip.
-      // The third, independent-circle view has no progression labels to
-      // preserve, so starting playback from there returns to state 0.
-      if (stoppedDisplayState === 2) {
-        stoppedDisplayState = 0;
-        chordLetterView = false;
-      } else {
-        chordLetterView = (stoppedDisplayState === 1);
-      }
+      chordLetterView=(stoppedDisplayState===1);
 
       independentCircleMode = "diatonic";
       stopArpeggioOnly();
       stopProgressionPlayback();
+      var requestedStartEpoch = progressionStartEpoch;
       closeDetailPanels();
       ensureAudioReady(function(ctx){
+        if (requestedStartEpoch !== progressionStartEpoch || scaleExplorerOpen) return;
         var btn = document.getElementById("playProgressionBtn");
         if (btn) {
           btn.disabled = true;
@@ -4721,6 +5220,8 @@ function setTransportButtonState(state) {
         }
 
         Promise.all(startupLoads).then(function(){
+          // A Scale tap may have canceled loading while samples were pending.
+          if (requestedStartEpoch !== progressionStartEpoch || scaleExplorerOpen) return;
           progressionPlaying = true;
           if (btn) {
             btn.disabled = false;
@@ -4795,6 +5296,7 @@ function setTransportButtonState(state) {
           modeReferenceView = !modeReferenceView;
           render(selectedMajor);
           renderProgressionStrip(null, null, false);
+          renderScaleExplorer();
         });
         var centerLabel = text(svg, cx, cy + 5, centerModeLabel(), { size: 14, weight: 700, fill: "#f2f4f5" });
         centerLabel.setAttribute("pointer-events", "none");
@@ -4825,6 +5327,16 @@ function setTransportButtonState(state) {
                          cueQuality === "major" &&
                          renderChroma[major] === cuePitchClass &&
                          !majorIsActive;
+        if (scaleExplorerOpen) {
+          var majorSelected=scaleExplorerHasChord(scaleExplorerWheelChord(renderChroma[major],"major"));
+          majorFill=majorSelected?"#20573c":"#24282c";
+          majorText=majorSelected?"#c1f7db":"#aeb4b9";
+          majorStroke=majorSelected?"#e4f6ed":"#454b51";
+          majorSW=majorSelected?4:2;
+          majorIsActive=false;
+          majorIsCue=false;
+        }
+        if (scaleExplorerOpen) { majorIsActive=false;majorIsCue=false; }
         if (majorIsActive) {
           majorFill = (activeIsDiatonic === false) ? "#ef4b4b" : "#27c96f";
           majorText = "#07100b"; majorStroke = "#f2f4f5"; majorSW = 7;
@@ -4851,6 +5363,16 @@ function setTransportButtonState(state) {
                          cueQuality === minorQualityForWheel &&
                          minorRootPC === cuePitchClass &&
                          !minorIsActive;
+        if (scaleExplorerOpen) {
+          var minorSelected=scaleExplorerHasChord(scaleExplorerWheelChord(minorRootPC,minorQualityForWheel));
+          minorFill=minorSelected?"#20573c":"#24282c";
+          minorText=minorSelected?"#c1f7db":"#aeb4b9";
+          minorStroke=minorSelected?"#e4f6ed":"#454b51";
+          minorSW=minorSelected?4:2;
+          minorIsActive=false;
+          minorIsCue=false;
+        }
+        if (scaleExplorerOpen) { minorIsActive=false;minorIsCue=false; }
         if (minorIsActive) {
           minorFill = (activeIsDiatonic === false) ? "#ef4b4b" : "#27c96f";
           minorText = "#07100b"; minorStroke = "#f2f4f5"; minorSW = 7;
@@ -4882,7 +5404,7 @@ function setTransportButtonState(state) {
           majorText = "#65e69b";
         }
 
-        var majorLabelForWheel = (!independentView && chordLetterView)
+        var majorLabelForWheel = (!independentView && (scaleExplorerOpen ? !chordLetterView : chordLetterView))
           ? romanLabelForWheelChord(renderChroma[major], "major")
           : majorDisplay;
         text(svg, majorX + majorDx, majorY, majorLabelForWheel, { size: majorSize, weight: 800, fill: majorText });
@@ -4892,10 +5414,14 @@ function setTransportButtonState(state) {
         if (!independentView && activeMode !== "ionian" && modalCenterIsMajor && renderChroma[major] === modalTonicPC) {
           text(svg, majorX + majorDx, majorY + 10, "center", { size: roleLabelSize, weight: 700, fill: majorText });
         }
-        if (independentView && independentDiatonicQuality === "major" && renderChroma[major] === independentDiatonicRootPC) {
+        if (independentView && !scaleExplorerOpen && independentDiatonicQuality === "major" && renderChroma[major] === independentDiatonicRootPC) {
           text(svg, majorX + majorDx, majorY + 10, "center", { size: roleLabelSize, weight: 700, fill: majorText });
         }
         (function(m,md,rootPC){ outer.addEventListener("click", function(){
+          if (scaleExplorerOpen && !progressionPlaying) {
+            scaleExplorerToggleChord(scaleExplorerWheelChord(rootPC,"major"));
+            return;
+          }
           if (progressionPlaying) {
             if (activePitchClass !== null && activeQuality === "major" &&
                 rootPC === activePitchClass) {
@@ -4905,7 +5431,9 @@ function setTransportButtonState(state) {
           }
 
           if (independentView) {
-            if (independentCircleMode === "diatonic") {
+            if (scaleExplorerOpen) {
+              scaleExplorerToggleChord(rootPC,"major",md);
+            } else if (independentCircleMode === "diatonic") {
               stopChordAudition(true);
               independentDiatonicRootPC = rootPC;
               independentDiatonicQuality = "major";
@@ -4930,17 +5458,21 @@ function setTransportButtonState(state) {
         if (minorIsActive) inner.setAttribute("class", "clickable active-wedge");
         else if (minorIsCue) inner.setAttribute("class", "clickable next-cue-wedge");
         var minorTextR = 98, minorX = cx + Math.cos(centerAngle) * minorTextR, minorY = cy + Math.sin(centerAngle) * minorTextR + 7, minorDx = 0;
-        var minorLabelForWheel = (!independentView && chordLetterView)
+        var minorLabelForWheel = (!independentView && (scaleExplorerOpen ? !chordLetterView : chordLetterView))
           ? romanLabelForWheelChord(minorRootPC, minorQualityForWheel)
           : minorDisplayForWheel;
         text(svg, minorX + minorDx, minorY, minorLabelForWheel, { size: minorSize, weight: 800, fill: minorText });
         if (!independentView && activeMode !== "ionian" && !modalCenterIsMajor && renderChroma[minorRootName] === modalTonicPC) {
           text(svg, minorX + minorDx, minorY + 9, "center", { size: roleLabelSize, weight: 700, fill: minorText });
         }
-        if (independentView && independentDiatonicQuality === minorQualityForWheel && minorRootPC === independentDiatonicRootPC) {
+        if (independentView && !scaleExplorerOpen && independentDiatonicQuality === minorQualityForWheel && minorRootPC === independentDiatonicRootPC) {
           text(svg, minorX + minorDx, minorY + 9, "center", { size: roleLabelSize, weight: 700, fill: minorText });
         }
         (function(mn,md,relMaj,rootPC,isDimOnRoot){ inner.addEventListener("click", function(){
+          if (scaleExplorerOpen && !progressionPlaying) {
+            scaleExplorerToggleChord(scaleExplorerWheelChord(rootPC,isDimOnRoot?"dim":"minor"));
+            return;
+          }
           if (progressionPlaying) {
             if (activePitchClass !== null &&
                 (activeQuality === "minor" || activeQuality === "dim") &&
@@ -4951,7 +5483,9 @@ function setTransportButtonState(state) {
           }
 
           if (independentView) {
-            if (independentCircleMode === "diatonic") {
+            if (scaleExplorerOpen) {
+              scaleExplorerToggleChord(rootPC,isDimOnRoot?"dim":"minor",isDimOnRoot?md.slice(0,-1)+"°":md);
+            } else if (independentCircleMode === "diatonic") {
               stopChordAudition(true);
               independentDiatonicRootPC = rootPC;
               independentDiatonicQuality = isDimOnRoot ? "dim" : "minor";
@@ -5023,7 +5557,8 @@ function setTransportButtonState(state) {
     }
 
     function compactProgressionTriggerLabel(opt) {
-      return (optionCategory(opt) || "").trim();
+      var cat=optionCategory(opt);
+      return progressionFamilyForCategory(cat)+" · "+cat;
     }
 
     function updateTrigger(select) {
@@ -5081,70 +5616,87 @@ function setTransportButtonState(state) {
       return p[0].replace(/_/g," ");
     }
 
-    var progressionCategoryOrder = [
-      "Ionian","Dorian","Phrygian","Lydian","Mixolydian",
-      "Aeolian","Borrowed","Secondary","Substitution","Chromatic"
-    ];
-
-    // Compact display names for the ten Progression tabs. The underlying
-    // category names remain unchanged for selection, grouping, and mappings.
-    var progressionCategoryDisplay = {
-      Phrygian: "Phryg.",
-      Mixolydian: "Mixolyd.",
-      Borrowed: "Borrow.",
-      Secondary: "2° Dom.",
-      Substitution: "Subst.",
-      Chromatic: "Chrom."
+    // v1.125: two-level preset browser, preserving each original subcategory.
+    var progressionFamilyOrder = ["Diatonic","Changes","Extended"];
+    var progressionFamilyCategories = {
+      Diatonic: ["Ionian","Dorian","Phrygian","Lydian","Mixolydian","Aeolian","Locrian"],
+      Changes: ["Borrowed","Secondary","Substitution","Chromatic"],
+      Extended: ["Jazz Standards","Minor Jazz","Extensions","Altered Dominants","Modal Jazz","Blues"]
     };
-
+    var progressionCategoryDisplay = {
+      Phrygian:"Phrygian",Mixolydian:"Mixolydian",Secondary:"2° Dom.",
+      Substitution:"Substitutions",Chromatic:"Chromatic", "Jazz Standards":"Standards",
+      "Altered Dominants":"Altered Dom.","Modal Jazz":"Modal Jazz"
+    };
+    var activeBrowserFamily = "Diatonic";
+    function progressionFamilyForCategory(cat) {
+      for (var i=0; i<progressionFamilyOrder.length; i++) {
+        var f=progressionFamilyOrder[i];
+        if (progressionFamilyCategories[f].indexOf(cat)!==-1) return f;
+      }
+      return "Changes";
+    }
     function browserCategories(select) {
-      if (select && select.id === "progressionSelect") return progressionCategoryOrder.slice();
-      var cats = [];
-      var seen = {};
+      if (select && select.id === "progressionSelect") return progressionFamilyCategories[activeBrowserFamily].slice();
+      var cats=[],seen={};
       Array.prototype.forEach.call(select.options,function(opt){
         var c=optionCategory(opt);
-        if(!seen[c]) { seen[c]=true; cats.push(c); }
+        if(!seen[c]){seen[c]=true;cats.push(c);}
       });
       return cats;
     }
-
-    function optionsForBrowserCategory(select, category) {
+    function optionsForBrowserCategory(select,category) {
       return Array.prototype.filter.call(select.options,function(opt){
-        return optionCategory(opt) === category;
+        return optionCategory(opt)===category;
       });
     }
-
-    function renderBrowserTabs() {
+    function renderBrowserFamilies(){
+      var host=document.getElementById("choiceFamilyTabs");
+      if(!host) return;
+      var isProgression=!!activeBrowserSelect && activeBrowserSelect.id==="progressionSelect";
+      host.style.display=isProgression && !songBrowserOpen ? "grid":"none";
+      if(!isProgression || songBrowserOpen)return;
+      host.innerHTML="";
+      progressionFamilyOrder.forEach(function(f){
+        var b=document.createElement("button");
+        b.type="button";
+        b.className="choice-tab choice-family-btn"+(f===activeBrowserFamily?" active":"");
+        b.setAttribute("aria-pressed",f===activeBrowserFamily?"true":"false");
+        b.textContent=f;
+        b.addEventListener("click",function(){
+          activeBrowserFamily=f;
+          activeBrowserCategory=progressionFamilyCategories[f][0];
+          renderBrowserFamilies();renderBrowserTabs();renderBrowserGrid();
+        });
+        host.appendChild(b);
+      });
+    }
+    function renderBrowserTabs(){
       var host=document.getElementById("choiceTabs");
       host.innerHTML="";
       host.classList.remove("category-grid");
       host.style.removeProperty("--choice-tab-columns");
-
       var cats=browserCategories(activeBrowserSelect);
-      if (activeBrowserSelect) {
-        var count = cats.length;
-        var columns = count === 10 ? 5 : (count === 8 ? 4 : (count === 6 ? 3 : Math.min(Math.max(count,1),5)));
+      if(activeBrowserSelect){
+        var count=cats.length;
+        var columns=count>=6?3:(count===4?2:Math.min(Math.max(count,1),3));
         host.classList.add("category-grid");
-        host.style.setProperty("--choice-tab-columns", String(columns));
+        host.style.setProperty("--choice-tab-columns",String(columns));
       }
-
-      if(!activeBrowserCategory || cats.indexOf(activeBrowserCategory)===-1) {
+      if(!activeBrowserCategory||cats.indexOf(activeBrowserCategory)===-1){
         activeBrowserCategory=optionCategory(selectedOptionFor(activeBrowserSelect));
-        if(cats.indexOf(activeBrowserCategory)===-1) activeBrowserCategory=cats[0];
+        if(cats.indexOf(activeBrowserCategory)===-1)activeBrowserCategory=cats[0];
       }
       cats.forEach(function(cat){
         var b=document.createElement("button");
         b.type="button";
         b.className="choice-tab"+(cat===activeBrowserCategory?" active":"");
-        var tabLabel = (activeBrowserSelect && activeBrowserSelect.id === "progressionSelect")
-          ? (progressionCategoryDisplay[cat] || cat)
-          : cat;
-        b.textContent=tabLabel;
-        if (tabLabel !== cat) b.title=cat;
+        var label=activeBrowserSelect && activeBrowserSelect.id==="progressionSelect"
+          ?(progressionCategoryDisplay[cat]||cat):cat;
+        b.textContent=label;
+        if(label!==cat)b.title=cat;
         b.addEventListener("click",function(){
-          activeBrowserCategory=cat;
-          renderBrowserTabs();
-          renderBrowserGrid();
+          activeBrowserCategory=cat;renderBrowserTabs();renderBrowserGrid();
         });
         host.appendChild(b);
       });
@@ -5167,6 +5719,11 @@ function setTransportButtonState(state) {
       } catch(e) {
         var evt=document.createEvent("Event"); evt.initEvent("change",true,true);
         activeBrowserSelect.dispatchEvent(evt);
+      }
+      if(activeBrowserSelect.id==="progressionSelect") {
+        activeBrowserFamily=progressionFamilyForCategory(optionCategory(opt));
+        activeBrowserCategory=optionCategory(opt);
+        renderBrowserFamilies();
       }
       renderBrowserTabs();
       renderBrowserGrid();
@@ -5206,7 +5763,9 @@ function renderBrowserGrid() {
       var songBtn=document.getElementById("choiceSong");
       if(songBtn) songBtn.classList.toggle("visible",selectId==="progressionSelect");
       activeBrowserCategory=optionCategory(selectedOptionFor(activeBrowserSelect));
+      if(selectId==="progressionSelect") activeBrowserFamily=progressionFamilyForCategory(activeBrowserCategory);
       browserWasPlaying=progressionPlaying;
+      renderBrowserFamilies();
       renderBrowserTabs();
       renderBrowserGrid();
       var ov=document.getElementById("choiceOverlay");
@@ -6705,12 +7264,12 @@ function renderBrowserGrid() {
     // Choosing a progression applies its pairing; the user may then override
     // Guitar or Percussion manually without changing the progression.
     var progressionAccompanimentMap = {"Ionian||I–IV–V–I":{"guitar":"Folk bass-strum","percussion":"Folk quarters"},"Ionian||I–ii–V–I":{"guitar":"Jazz ballad","percussion":"Jazz ballad"},"Ionian||ii–V–I":{"guitar":"Swing comp","percussion":"Swing comp"},"Ionian||I–vi–ii–V–I":{"guitar":"Jazz bass/chord","percussion":"Swing sparse"},"Ionian||iii–vi–ii–V–I":{"guitar":"Walking shell feel","percussion":"Four to the bar"},"Ionian||I–V–vi–IV":{"guitar":"Pop bass/chord","percussion":"Pop groove (push)"},"Ionian||vi–IV–I–V":{"guitar":"Driving eighths","percussion":"Driving pop"},"Ionian||I–vi–IV–V":{"guitar":"Folk bass-strum","percussion":"Folk eighths"},"Ionian||I–V–IV–I":{"guitar":"Rock backbeat","percussion":"Rock quarters"},"Ionian||IV–I–ii–V":{"guitar":"Charleston","percussion":"Charleston"},"Mixolydian||I–♭VII–IV–I":{"guitar":"Rock backbeat","percussion":"Rock eighths"},"Mixolydian||I–♭VII–I":{"guitar":"Power pulse","percussion":"Rock quarters"},"Mixolydian||I–IV–♭VII–I":{"guitar":"Driving eighths","percussion":"Backbeat hits"},"Mixolydian||I–♭VII–IV–♭VII":{"guitar":"Syncopated rock","percussion":"Driving pop"},"Mixolydian||I–V–♭VII–IV":{"guitar":"Anthem","percussion":"Power ballad"},"Mixolydian||IV–♭VII–I":{"guitar":"Folk bass-strum","percussion":"Country drive"},"Dorian||i–IV–i":{"guitar":"Funk stabs","percussion":"Funk subdivision"},"Dorian||i–IV–♭VII–i":{"guitar":"Soul pocket","percussion":"Soul backbeat"},"Dorian||i–♭VII–IV–i":{"guitar":"Neo-soul space","percussion":"Neo-soul space"},"Dorian||i–IV–♭VII–IV":{"guitar":"Funk offbeats","percussion":"Funk push"},"Dorian||i–ii–IV–i":{"guitar":"R&B roll","percussion":"R&B pocket"},"Dorian||i–♭VII–i–IV":{"guitar":"Motown guitar","percussion":"Soul backbeat"},"Borrowed||I–iv–I":{"guitar":"Jazz ballad","percussion":"Jazz ballad"},"Borrowed||I–IV–iv–I":{"guitar":"Ballad roll","percussion":"Power ballad"},"Borrowed||I–♭VI–IV–I":{"guitar":"Neo-soul space","percussion":"Neo-soul space"},"Borrowed||I–♭VI–♭VII–I":{"guitar":"Anthem","percussion":"Arena sustain"},"Borrowed||I–♭III–IV–I":{"guitar":"Soul pocket","percussion":"R&B pocket"},"Borrowed||I–♭III–♭VII–IV":{"guitar":"Rock backbeat","percussion":"Backbeat hits"},"Borrowed||I–iv–♭VII–I":{"guitar":"Bossa sparse","percussion":"Bossa sparse"},"Borrowed||I–♭VI–iv–I":{"guitar":"R&B roll","percussion":"Neo-soul space"},"Secondary||I–V/ii–ii–V–I":{"guitar":"Swing comp","percussion":"Swing comp"},"Secondary||I–V/vi–vi–ii–V–I":{"guitar":"Jazz bass/chord","percussion":"Swing sparse"},"Secondary||I–V/V–V–I":{"guitar":"Four-to-bar comp","percussion":"Four to the bar"},"Secondary||I–III–vi–IV":{"guitar":"Soul pocket","percussion":"Soul backbeat"},"Secondary||I–VI–ii–V":{"guitar":"Charleston","percussion":"Charleston"},"Secondary||I–II–V–I":{"guitar":"Bossa basic","percussion":"Bossa-style groove"},"Secondary||iii–VI–ii–V–I":{"guitar":"Walking shell feel","percussion":"Four to the bar"},"Chromatic||I–III–IV–iv–I":{"guitar":"Jazz ballad","percussion":"Jazz ballad"},"Aeolian||i–♭VI–♭III–♭VII":{"guitar":"Driving eighths","percussion":"Rock eighths"},"Aeolian||i–♭VII–♭VI–♭VII":{"guitar":"Syncopated rock","percussion":"Backbeat hits"},"Aeolian||i–♭VI–♭VII–i":{"guitar":"Anthem","percussion":"Power ballad"},"Aeolian||i–♭III–♭VII–iv":{"guitar":"R&B roll","percussion":"Neo-soul space"},"Aeolian||i–iv–♭VII–♭III":{"guitar":"Bossa arp","percussion":"Bossa syncopated"},"Aeolian||i–♭VII–♭VI–V":{"guitar":"Tango guitar","percussion":"Tango"},"Ionian||I–V–vi–IV (2 bars each)":{"guitar":"Pop bass/chord","percussion":"Pop groove (push)"},"Ionian||I–vi–ii–V":{"guitar":"Ballad roll","percussion":"Power ballad"},"Ionian||ii–V–I (quick ii–V)":{"guitar":"Swing comp","percussion":"Swing push"},"Ionian||I–iii–vi–ii–V–I":{"guitar":"Jazz bass/chord","percussion":"Four to the bar"},"Ionian||vi–ii–V–I (quick)":{"guitar":"Four-to-bar comp","percussion":"Four to the bar"},"Ionian||I–vi–IV–ii–V–I":{"guitar":"Bossa rolling","percussion":"Bossa-style groove"},"Phrygian||i–♭II–i":{"guitar":"Tango guitar","percussion":"Tango"},"Phrygian||i–♭II–♭VII–i":{"guitar":"Latin tresillo","percussion":"Tresillo"},"Phrygian||i–♭VII–♭II–i":{"guitar":"Tango guitar","percussion":"Latin offbeat"},"Lydian||I–II–I":{"guitar":"Jazz ballad","percussion":"Two feel"},"Lydian||I–II–V–I":{"guitar":"Swing arp","percussion":"Swing sparse"},"Lydian||I–V–II–I":{"guitar":"Bossa arp","percussion":"Bossa sparse"},"Substitution||ii–♭II7–I (tritone)":{"guitar":"Swing comp","percussion":"Swing comp"},"Substitution||I–vi–ii–♭II7–I (tritone)":{"guitar":"Jazz bass/chord","percussion":"Swing sparse"},"Substitution||iv–♭VII7–I (backdoor)":{"guitar":"Soul pocket","percussion":"Soul backbeat"},"Substitution||I–IV–iv–♭VII7–I (backdoor)":{"guitar":"Jazz ballad","percussion":"Jazz ballad"},"Substitution||I–vii°7–I (diminished)":{"guitar":"Jazz ballad","percussion":"Jazz ballad"},"Substitution||I–♯I°7–ii–V–I (diminished)":{"guitar":"Walking shell feel","percussion":"Four to the bar"},
-"Chromatic||12-bar blues":{"guitar":"Swing comp","percussion":"Swing comp","bass":"Walking chord tones"},
-"Chromatic||Quick-change blues":{"guitar":"Four-to-bar comp","percussion":"Swing push","bass":"Walking chord tones"},
-"Chromatic||Minor blues":{"guitar":"Soul pocket","percussion":"R&B pocket","bass":"Soul pocket"},
-"Chromatic||Jazz blues":{"guitar":"Shell comp feel","percussion":"Four to the bar","bass":"Walking chord tones"},
-"Chromatic||Bird blues":{"guitar":"Jazz chord pocket","percussion":"Swing sparse","bass":"Walking chord tones"},
-"Chromatic||8-bar blues":{"guitar":"Jazz ballad","percussion":"Two feel","bass":"Jazz two-feel"}};
+"Blues||12-bar blues":{"guitar":"Swing comp","percussion":"Swing comp","bass":"Walking chord tones"},
+"Blues||Quick-change blues":{"guitar":"Four-to-bar comp","percussion":"Swing push","bass":"Walking chord tones"},
+"Blues||Minor blues":{"guitar":"Soul pocket","percussion":"R&B pocket","bass":"Soul pocket"},
+"Blues||Jazz blues":{"guitar":"Shell comp feel","percussion":"Four to the bar","bass":"Walking chord tones"},
+"Blues||Bird blues":{"guitar":"Jazz chord pocket","percussion":"Swing sparse","bass":"Walking chord tones"},
+"Blues||8-bar blues":{"guitar":"Jazz ballad","percussion":"Two feel","bass":"Jazz two-feel"}};
 
     function optionGroupLabel(opt) {
       return opt && opt.parentElement && opt.parentElement.tagName === "OPTGROUP"
@@ -6915,6 +7474,14 @@ function primeAudioSamples(){
       document.removeEventListener("mousedown", bootAudioMouse);
     }, { once: true });
 
+    document.getElementById("scaleExplorerToggle").addEventListener("click",toggleScaleExplorer);
+    document.getElementById("scaleExplorerReset").addEventListener("click",function(){
+      scaleExplorerSelections=[];
+      scaleExplorerExpandedKey=null;
+      render(selectedMajor);
+      renderScaleExplorer();
+    });
+
     selectedSpellingPreference = "conventional";
     setTransportButtonState("play");
     syncMixButtonStates();
@@ -6943,7 +7510,8 @@ function primeAudioSamples(){
           <button type="button" id="choiceDone" class="choice-done">Done</button>
         </div>
       </div>
-      <div id="choiceTabs" class="choice-tabs"></div>
+      <div id="choiceFamilyTabs" class="choice-family-tabs" role="group" aria-label="Progression family"></div>
+      <div id="choiceTabs" class="choice-tabs" role="group" aria-label="Progression category"></div>
       <div id="choiceGrid" class="choice-grid"></div>
       <div id="songBrowser" class="song-browser" aria-hidden="true">
         <div class="song-search-tools">
