@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Circle v1.126 — Pentatonic Explorer</title>
+  <title>Circle v1.128 — Pentatonic Explorer</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -164,10 +164,10 @@
     /* Long progressions reserve room for the taller two-row beat editor
        inside their scrolling viewport without altering chord-chip heights. */
     .progression-strip.long-strip {
-      height:152px;
-      min-height:152px;
-      margin-top:-98px;
-      padding-top:98px;
+      height:280px;
+      min-height:280px;
+      margin-top:-226px;
+      padding-top:226px;
       box-sizing:border-box;
       overflow-x:auto;
       overflow-y:hidden;
@@ -284,6 +284,86 @@
     .beat-editor .beat-plus  { grid-row:2; grid-column:2; }
     .beat-editor button:active { filter:brightness(1.4); }
     .beat-editor button:focus-visible { outline:2px solid #bfcbd3; outline-offset:-2px; }
+
+    /* v1.127 session-only chord editor stacked above the beat editor. */
+    .chord-editor {
+      position:absolute;
+      left:50%;
+      bottom:calc(100% + 100px);
+      transform:translateX(-50%);
+      width:142px;
+      min-height:126px;
+      display:grid;
+      grid-template-rows:28px 28px 1fr;
+      gap:4px;
+      padding:4px;
+      border:1px solid #69737c;
+      border-radius:11px;
+      background:#171a1d;
+      box-shadow:0 5px 17px rgba(0,0,0,.54);
+      overflow:hidden;
+      z-index:82;
+    }
+
+    .prog-chip:first-child .chord-editor { left:0; transform:none; }
+    .prog-chip:last-child .chord-editor { left:auto; right:0; transform:none; }
+    .prog-chip:only-child .chord-editor { left:50%; right:auto; transform:translateX(-50%); }
+
+    .chord-editor button {
+      appearance:none;
+      -webkit-appearance:none;
+      border:1px solid #4b5258;
+      border-radius:6px;
+      background:#2a3035;
+      color:#f2f4f5;
+      font:800 16px/1 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      padding:0 5px;
+      margin:0;
+      min-width:0;
+      min-height:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      touch-action:manipulation;
+    }
+
+    .chord-editor .chord-duplicate {
+      grid-row:1;
+      font-size:12px;
+      letter-spacing:.02em;
+      text-transform:lowercase;
+    }
+
+    .chord-editor .chord-quality-toggle {
+      grid-row:2;
+      font-size:13px;
+    }
+
+    .chord-root-row {
+      grid-row:3;
+      display:grid;
+      grid-template-columns:38px minmax(0,1fr) 38px;
+      gap:4px;
+      min-height:52px;
+    }
+
+    .chord-root-row .chord-root-minus,
+    .chord-root-row .chord-root-plus {
+      font-size:24px;
+    }
+
+    .chord-root-row .chord-root-commit {
+      font-size:17px;
+      background:#22282d;
+      border-color:#69737c;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .chord-editor button:active { filter:brightness(1.4); }
+    .chord-editor button:focus-visible { outline:2px solid #bfcbd3; outline-offset:-2px; }
     /* Progression strip: all inactive chords stay neutral.
        Green/red is reserved for the chord that is sounding now. */
     .prog-chip.in-key,
@@ -1693,7 +1773,7 @@
     /* v1.120: Scale Explorer is an overlay mode within the usual progression view. */
     .scale-explorer-toolbar {
       display:flex;
-      justify-content:flex-start;
+      justify-content:space-between;
       align-items:center;
       margin:3px 4px 6px;
       min-height:30px;
@@ -1719,6 +1799,14 @@
       box-shadow:inset 0 0 0 1px rgba(122,239,179,.5), 0 0 0 1px rgba(122,239,179,.12);
     }
     .progression-scale-button:focus-visible { outline:2px solid #7aefb3; outline-offset:3px; }
+    .progression-random-global-button:active {
+      filter:brightness(1.22);
+      transform:translateY(1px);
+    }
+    .progression-random-global-button:focus-visible {
+      outline:2px solid #d8dcdf;
+      outline-offset:3px;
+    }
     .scale-explorer-panel {
       display:none;
       margin:10px 4px 0;
@@ -1813,9 +1901,10 @@
 <body>
   <div class="wrap">
     <div class="panel">
-      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.126"></svg>
+      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.128"></svg>
       <div class="scale-explorer-toolbar">
         <button type="button" id="scaleExplorerToggle" class="progression-scale-button" aria-label="Toggle scale explorer" aria-pressed="false" aria-expanded="false" aria-controls="scaleExplorerPanel">Scale</button>
+        <button type="button" id="randomProgressionBtn" class="progression-scale-button progression-random-global-button" aria-label="Choose a random canned progression">Random</button>
       </div>
       <div class="progression-strip-shell">
         <div id="progressionStrip" class="progression-strip" aria-label="Progression map"></div>
@@ -2197,7 +2286,7 @@
       </div>
       </div>
       </div>
-      <div class="file-id">Circle v1.126 — Pentatonic Explorer</div>
+      <div class="file-id">Circle v1.128 — Pentatonic Explorer</div>
     </div>
   </div>
   <script>
@@ -2255,6 +2344,8 @@
     // Unsaved progression editing uses one temporary working draft. The built-in
     // progression data remains immutable. The draft survives playback and view
     // changes, but is discarded when the user selects another progression or meter.
+    // v1.127: the same long-press editor can also change/duplicate triads for the
+    // current practice session only.
     var workingProgressionDraft = null;
     var beatEditorState = null;
     var beatEditorLongPressMs = 675;
@@ -3945,11 +4036,17 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       var edit = (workingProgressionDraft && workingProgressionDraft.key === draftKey)
         ? workingProgressionDraft : null;
       if (edit) {
-        var collapsedEdit = collapseAdjacentProgressionSteps(edit.degrees.slice(), edit.beats.slice());
+        // Session drafts preserve explicit adjacent steps. This is required so a
+        // duplicated chord can remain a separate chord and be edited independently.
+        var editDegrees = edit.degrees.slice();
+        var editBeats = edit.beats.map(function(value){
+          var n = parseInt(value,10);
+          return isFinite(n) && n >= 0 ? n : 1;
+        });
         return {
-          degrees:collapsedEdit.degrees,
-          baseBeats:collapsedEdit.beats.slice(),
-          beats:collapsedEdit.beats.slice(),
+          degrees:editDegrees,
+          baseBeats:editBeats.slice(),
+          beats:editBeats.slice(),
           sessionEdited:true
         };
       }
@@ -4003,13 +4100,137 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       renderProgressionStrip(null, null, false);
     }
 
+    function progressionTriadDraftForDegree(deg) {
+      var info = chordInfoForDegree(selectedMajor, deg);
+      var tonicPC = PC_MAP[KEY_NOTES[selectedMajor][0]];
+      var rootPC = info && info.midiNotes && info.midiNotes.length
+        ? ((info.midiNotes[0] % 12) + 12) % 12
+        : tonicPC;
+      var rootOffset = (rootPC - tonicPC + 12) % 12;
+      var quality = (info && (info.quality === "minor" || info.quality === "dim")) ? "minor" : "major";
+      return {rootOffset:rootOffset, quality:quality};
+    }
+
+    function progressionTriadDegreeCode(rootOffset, quality) {
+      var majorCodes = ["I","bII","II","bIII","III","IV","sIV","V","bVI","VI","bVII","VII"];
+      var minorCodes = ["i","bii","ii","biii","iii","iv","siv","v","bvi","vi","bvii","vii"];
+      var offset = ((parseInt(rootOffset,10) || 0) % 12 + 12) % 12;
+      return (quality === "minor" ? minorCodes : majorCodes)[offset];
+    }
+
+    function progressionTriadEditorLabel(rootOffset, quality) {
+      var code = progressionTriadDegreeCode(rootOffset, quality);
+      if (chordLetterView) return chordNameForDegree(code);
+      var mode = progressionModeForSelection();
+      return modeReferenceView
+        ? romanLabelForChordRelativeToParent(code, mode)
+        : normalizedDegreeLabel(code);
+    }
+
+    function syncProgressionChordDraftFromRootQuality() {
+      if (!beatEditorState) return;
+      beatEditorState.degreeDraft = progressionTriadDegreeCode(
+        beatEditorState.rootOffset,
+        beatEditorState.quality
+      );
+      beatEditorState.chordTouched = true;
+    }
+
+    function commitProgressionSessionEditor(index) {
+      if (progressionPlaying || !beatEditorState || beatEditorState.index !== index) return;
+      var prog = getSelectedProgression();
+      if (!prog || index < 0 || index >= prog.degrees.length) return;
+
+      var degrees = prog.degrees.slice();
+      var counts = prog.beats.map(function(value){
+        var n = parseInt(value,10);
+        return isFinite(n) && n >= 0 ? n : 1;
+      });
+      var beats = Math.max(0, parseInt(beatEditorState.draft,10) || 0);
+      var degree = beatEditorState.chordTouched
+        ? beatEditorState.degreeDraft
+        : degrees[index];
+
+      if (beats === 0) {
+        degrees.splice(index,1);
+        counts.splice(index,1);
+      } else {
+        degrees[index] = degree;
+        counts[index] = beats;
+      }
+
+      workingProgressionDraft = {
+        key:progressionSessionEditKey(),
+        degrees:degrees,
+        beats:counts
+      };
+      beatEditorState = null;
+      transportVisualStateKey = "";
+      render(selectedMajor);
+      renderProgressionStrip(null, null, false);
+    }
+
+    function duplicateProgressionSessionChord(index) {
+      if (progressionPlaying || !beatEditorState || beatEditorState.index !== index) return;
+      var prog = getSelectedProgression();
+      if (!prog || index < 0 || index >= prog.degrees.length) return;
+
+      var degrees = prog.degrees.slice();
+      var counts = prog.beats.map(function(value){
+        var n = parseInt(value,10);
+        return isFinite(n) && n >= 0 ? n : 1;
+      });
+
+      var degree = beatEditorState.chordTouched
+        ? beatEditorState.degreeDraft
+        : degrees[index];
+      var beats = Math.max(1, parseInt(beatEditorState.draft,10) || 1);
+
+      // Apply the current in-editor state to the original, then place an exact
+      // copy immediately to its right and keep editing the new copy.
+      degrees[index] = degree;
+      counts[index] = beats;
+      degrees.splice(index + 1, 0, degree);
+      counts.splice(index + 1, 0, beats);
+
+      workingProgressionDraft = {
+        key:progressionSessionEditKey(),
+        degrees:degrees,
+        beats:counts
+      };
+
+      var triad = progressionTriadDraftForDegree(degree);
+      beatEditorState = {
+        index:index + 1,
+        draft:beats,
+        originalDegree:degree,
+        degreeDraft:degree,
+        rootOffset:triad.rootOffset,
+        quality:triad.quality,
+        chordTouched:false
+      };
+      transportVisualStateKey = "";
+      render(selectedMajor);
+      renderProgressionStrip(null, null, false);
+    }
+
     function openBeatEditor(index, chip) {
       if (progressionPlaying) return;
       var prog = getSelectedProgression();
       if (!prog || index < 0 || index >= prog.degrees.length) return;
       var count = parseInt(prog.beats[index],10);
       if (!isFinite(count) || count < 1) count = 1;
-      beatEditorState = { index:index, draft:count };
+      var degree = prog.degrees[index];
+      var triad = progressionTriadDraftForDegree(degree);
+      beatEditorState = {
+        index:index,
+        draft:count,
+        originalDegree:degree,
+        degreeDraft:degree,
+        rootOffset:triad.rootOffset,
+        quality:triad.quality,
+        chordTouched:false
+      };
       renderProgressionStrip(null, null, false);
     }
 
@@ -4024,7 +4245,7 @@ function fetchAndDecodePercussionSample(ctx, urls) {
 
       chip.addEventListener("pointerdown", function(ev){
         if (ev.button !== undefined && ev.button !== 0) return;
-        if (ev.target && ev.target.closest && ev.target.closest(".beat-editor")) return;
+        if (ev.target && ev.target.closest && ev.target.closest(".beat-editor, .chord-editor")) return;
         startX = ev.clientX || 0;
         startY = ev.clientY || 0;
         clearTimer();
@@ -4043,6 +4264,100 @@ function fetchAndDecodePercussionSample(ctx, urls) {
         chip.addEventListener(type, clearTimer);
       });
       chip.addEventListener("contextmenu", function(ev){ ev.preventDefault(); });
+    }
+
+    function attachChordEditor(chip, index) {
+      if (!beatEditorState || beatEditorState.index !== index || progressionPlaying) return;
+
+      var editor = document.createElement("div");
+      editor.className = "chord-editor";
+      editor.setAttribute("role", "group");
+      editor.setAttribute("aria-label", "Edit chord for this practice session");
+
+      var duplicate = document.createElement("button");
+      duplicate.type = "button";
+      duplicate.className = "chord-duplicate";
+      duplicate.textContent = "duplicate";
+      duplicate.setAttribute("aria-label", "Duplicate this chord to the right");
+
+      var quality = document.createElement("button");
+      quality.type = "button";
+      quality.className = "chord-quality-toggle";
+
+      var rootRow = document.createElement("div");
+      rootRow.className = "chord-root-row";
+
+      var minus = document.createElement("button");
+      minus.type = "button";
+      minus.className = "chord-root-minus";
+      minus.textContent = "−";
+      minus.setAttribute("aria-label", "Previous chord root");
+
+      var commit = document.createElement("button");
+      commit.type = "button";
+      commit.className = "chord-root-commit";
+
+      var plus = document.createElement("button");
+      plus.type = "button";
+      plus.className = "chord-root-plus";
+      plus.textContent = "+";
+      plus.setAttribute("aria-label", "Next chord root");
+
+      function refreshChordEditor() {
+        quality.textContent = beatEditorState.quality === "minor" ? "min" : "maj";
+        quality.setAttribute(
+          "aria-label",
+          beatEditorState.quality === "minor" ? "Change chord to major" : "Change chord to minor"
+        );
+        var label = progressionTriadEditorLabel(
+          beatEditorState.rootOffset,
+          beatEditorState.quality
+        );
+        commit.textContent = label;
+        commit.setAttribute("aria-label", "Use " + label + " and close");
+      }
+
+      minus.addEventListener("click", function(ev){
+        ev.stopPropagation();
+        beatEditorState.rootOffset = (beatEditorState.rootOffset + 11) % 12;
+        syncProgressionChordDraftFromRootQuality();
+        refreshChordEditor();
+      });
+
+      plus.addEventListener("click", function(ev){
+        ev.stopPropagation();
+        beatEditorState.rootOffset = (beatEditorState.rootOffset + 1) % 12;
+        syncProgressionChordDraftFromRootQuality();
+        refreshChordEditor();
+      });
+
+      quality.addEventListener("click", function(ev){
+        ev.stopPropagation();
+        beatEditorState.quality = beatEditorState.quality === "minor" ? "major" : "minor";
+        syncProgressionChordDraftFromRootQuality();
+        refreshChordEditor();
+      });
+
+      duplicate.addEventListener("click", function(ev){
+        ev.stopPropagation();
+        duplicateProgressionSessionChord(index);
+      });
+
+      commit.addEventListener("click", function(ev){
+        ev.stopPropagation();
+        commitProgressionSessionEditor(index);
+      });
+
+      editor.addEventListener("pointerdown", function(ev){ ev.stopPropagation(); });
+
+      rootRow.appendChild(minus);
+      rootRow.appendChild(commit);
+      rootRow.appendChild(plus);
+      editor.appendChild(duplicate);
+      editor.appendChild(quality);
+      editor.appendChild(rootRow);
+      refreshChordEditor();
+      chip.appendChild(editor);
     }
 
     function attachBeatEditor(chip, index) {
@@ -4084,7 +4399,7 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       });
       count.addEventListener("click", function(ev){
         ev.stopPropagation();
-        commitProgressionBeatEdit(index, beatEditorState.draft);
+        commitProgressionSessionEditor(index);
       });
       editor.addEventListener("pointerdown", function(ev){ ev.stopPropagation(); });
       editor.appendChild(minus);
@@ -4995,7 +5310,7 @@ function fetchAndDecodePercussionSample(ctx, urls) {
 
           chip.appendChild(intervalRow);
         }
-        if (!prog.isSong && !scaleExplorerOpen) attachBeatEditor(chip, i);
+        if (!prog.isSong && !scaleExplorerOpen) { attachChordEditor(chip, i); attachBeatEditor(chip, i); }
         host.appendChild(chip);
       }
 
@@ -5089,10 +5404,18 @@ function fetchAndDecodePercussionSample(ctx, urls) {
         };
       }
       var direct = {
-        "I":[0,"major"], "i":[0,"minor"], "ii":[2,"minor"], "II":[2,"major"],
-        "iii":[4,"minor"], "III":[4,"major"], "IV":[5,"major"], "iv":[5,"minor"],
-        "V":[7,"major"], "vi":[9,"minor"], "VI":[9,"major"],
-        "bII":[1,"major"], "bIII":[3,"major"], "bVI":[8,"major"], "bVII":[10,"major"]
+        "I":[0,"major"], "i":[0,"minor"],
+        "bII":[1,"major"], "bii":[1,"minor"],
+        "II":[2,"major"], "ii":[2,"minor"],
+        "bIII":[3,"major"], "biii":[3,"minor"],
+        "III":[4,"major"], "iii":[4,"minor"],
+        "IV":[5,"major"], "iv":[5,"minor"],
+        "sIV":[6,"major"], "siv":[6,"minor"],
+        "V":[7,"major"], "v":[7,"minor"],
+        "bVI":[8,"major"], "bvi":[8,"minor"],
+        "VI":[9,"major"], "vi":[9,"minor"],
+        "bVII":[10,"major"], "bvii":[10,"minor"],
+        "VII":[11,"major"], "vii":[11,"minor"]
       };
       if (degreeRoman === "V2") return make(9,"major");  // V/ii
       if (degreeRoman === "V5") return make(2,"major");  // V/V
@@ -5752,6 +6075,43 @@ function renderBrowserGrid() {
         b.addEventListener("click",function(){ applyBrowserSelection(opt); });
         host.appendChild(b);
       });
+    }
+
+    function selectRandomCannedProgression() {
+      var select = document.getElementById("progressionSelect");
+      if (!select || !select.options || !select.options.length) return;
+
+      // Draw from the complete canned progression catalog, regardless of the
+      // currently visible family/category. Songs live outside this select and
+      // therefore can never be chosen here.
+      var count = select.options.length;
+      var current = select.selectedIndex;
+      var chosen = 0;
+
+      if (count === 1) {
+        chosen = 0;
+      } else {
+        // Choose uniformly from every other canned progression so Random
+        // always produces an observable change.
+        var r = Math.floor(Math.random() * (count - 1));
+        chosen = r >= current ? r + 1 : r;
+      }
+
+      select.selectedIndex = chosen;
+      var opt = select.options[chosen];
+      activeBrowserFamily = progressionFamilyForCategory(optionCategory(opt));
+      activeBrowserCategory = optionCategory(opt);
+
+      // Reuse the ordinary progression-change pathway. This clears a loaded
+      // song/session draft, updates accompaniment, redraws the wheel/strip,
+      // and refreshes the compact progression label.
+      try {
+        select.dispatchEvent(new Event("change",{bubbles:true}));
+      } catch(e) {
+        var evt = document.createEvent("Event");
+        evt.initEvent("change",true,true);
+        select.dispatchEvent(evt);
+      }
     }
 
     function openChoiceBrowser(selectId) {
@@ -7475,6 +7835,7 @@ function primeAudioSamples(){
     }, { once: true });
 
     document.getElementById("scaleExplorerToggle").addEventListener("click",toggleScaleExplorer);
+    document.getElementById("randomProgressionBtn").addEventListener("click",selectRandomCannedProgression);
     document.getElementById("scaleExplorerReset").addEventListener("click",function(){
       scaleExplorerSelections=[];
       scaleExplorerExpandedKey=null;
