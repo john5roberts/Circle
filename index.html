@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Circle v1.128 — Pentatonic Explorer</title>
+  <title>Circle v1.129 — Pentatonic Explorer</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -1770,6 +1770,26 @@
     .progression-strip.long-strip { pointer-events:none; }
     .progression-strip .prog-chip { pointer-events:auto; }
 
+    /* v1.129: while the long-press session editor is open, restore pointer
+       handling to the scrolling strip itself. This lets the user pan left/right
+       to reach off-screen chords without closing edit mode. The rule is scoped
+       to edit mode so the enlarged transparent strip does not normally cover
+       the Scale/Random toolbar above it. */
+    .progression-strip.long-strip.editing-session {
+      pointer-events:auto;
+      touch-action:pan-x;
+      overscroll-behavior-x:contain;
+    }
+    .progression-strip.long-strip.editing-session .prog-chip {
+      touch-action:pan-x;
+    }
+    .progression-strip.long-strip.editing-session .beat-editor,
+    .progression-strip.long-strip.editing-session .chord-editor,
+    .progression-strip.long-strip.editing-session .beat-editor button,
+    .progression-strip.long-strip.editing-session .chord-editor button {
+      touch-action:manipulation;
+    }
+
     /* v1.120: Scale Explorer is an overlay mode within the usual progression view. */
     .scale-explorer-toolbar {
       display:flex;
@@ -1901,7 +1921,7 @@
 <body>
   <div class="wrap">
     <div class="panel">
-      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.128"></svg>
+      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.129"></svg>
       <div class="scale-explorer-toolbar">
         <button type="button" id="scaleExplorerToggle" class="progression-scale-button" aria-label="Toggle scale explorer" aria-pressed="false" aria-expanded="false" aria-controls="scaleExplorerPanel">Scale</button>
         <button type="button" id="randomProgressionBtn" class="progression-scale-button progression-random-global-button" aria-label="Choose a random canned progression">Random</button>
@@ -2286,7 +2306,7 @@
       </div>
       </div>
       </div>
-      <div class="file-id">Circle v1.128 — Pentatonic Explorer</div>
+      <div class="file-id">Circle v1.129 — Pentatonic Explorer</div>
     </div>
   </div>
   <script>
@@ -5194,6 +5214,9 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       var mode = progressionModeForDegrees(prog.degrees);
       host.innerHTML = "";
       host.classList.remove("blank-view");
+      // Edit mode must remain horizontally scrollable even though the enlarged
+      // long-strip viewport normally passes pointer events through its empty area.
+      host.classList.toggle("editing-session", !!beatEditorState && !prog.isSong && !scaleExplorerOpen);
       document.body.classList.remove("independent-clean");
       host.onclick = null;
       host.removeAttribute("role");
