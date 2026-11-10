@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Circle v1.129 — Pentatonic Explorer</title>
+  <title>Circle v1.134 — Three Views + Triad Integration</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -1916,16 +1916,138 @@
     .choice-grid{grid-auto-rows:minmax(62px,auto)}
     .choice-item{height:auto;min-height:62px;max-height:none}
     .choice-item .choice-name{overflow-wrap:anywhere}
+  /* Triad analysis panels and its family popup are namespaced below. */
+#triadWorkspace .panel{border:1px solid #343c42;border-radius:14px;background:#161a1d;padding:12px 12px;margin:9px 4px}#triadWorkspace .small{color:var(--sub);font-size:12px;line-height:1.5}#triadWorkspace .actions{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0 0}#triadWorkspace #categoryArea{display:none}#triadWorkspace #categoryArea.visible{display:block}#triadWorkspace #cats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}#triadWorkspace #cats button{padding:10px 3px;font-size:12px;min-height:43px}#triadWorkspace .detail{line-height:1.5}#triadWorkspace .detail h3{margin:0 0 5px;font-size:18px}#triadWorkspace .detail p{margin:8px 0}#triadWorkspace .chip{display:inline-block;padding:2px 8px;border:1px solid #66736a;border-radius:99px;color:#c5f7d6;font-size:11px;margin-right:5px}#triadWorkspace .formula{padding:10px;border-radius:8px;background:#22292b;font-size:16px;font-weight:700;margin:9px 0}#triadWorkspace .mute{color:#7e8b91}#triadWorkspace .degree{font-size:19px;font-weight:850;display:inline-block;min-width:19px;text-align:center;line-height:1.2}#triadWorkspace .degree.in-key{color:#65e69b}#triadWorkspace .degree.out-key{color:#ff7777}#triadWorkspace .degree-divider{color:#778189;padding:0 3px}#triadWorkspace .degree-legend{font-size:11px;color:#98a2aa;margin-top:6px}#triadWorkspace .formula{overflow-wrap:anywhere}@media (max-width:390px){#triadWorkspace #cats{gap:5px}#triadWorkspace #cats button{font-size:11px}#triadWorkspace .panel{padding:10px}}@media  (min-width: 1050px) {#triadWorkspace .panel{ margin: 3px 0 13px; padding: 16px; }#triadWorkspace #cats{ grid-template-columns: repeat(2, minmax(0,1fr)); }}@media  (min-width: 760px) and (max-width: 1049px) {#triadWorkspace .panel{ margin: 5px 0 11px; }#triadWorkspace #cats{ grid-template-columns: repeat(2,minmax(0,1fr)); }}#triadWorkspace .harmony,#triadWorkspace .bass-tone,#triadWorkspace .degree{font-weight:800;}#triadWorkspace .harmony.in-key,#triadWorkspace .bass-tone.in-key,#triadWorkspace .degree.in-key{color:var(--green);}#triadWorkspace .harmony.out-key,#triadWorkspace .bass-tone.out-key,#triadWorkspace .degree.out-key{color:var(--red);}#triadWorkspace .harmony.neutral{color:var(--txt);}#triadWorkspace .guidance-legend{font-size:11px;color:var(--sub);margin:7px 0 0;line-height:1.5;}#triadWorkspace .guidance-legend .harmony{font-size:11px;}#triadWorkspace .formula{line-height:1.5;}#triadWorkspace .context-panel{border-color:#4c5a60;}#triadWorkspace .context-panel h2{display:flex;gap:8px;align-items:center;justify-content:space-between;}#triadWorkspace .context-panel h2 .phase{font-size:10px;letter-spacing:.035em;color:#9ab7c3;font-weight:750;}#triadWorkspace .context-row{padding:8px 0;border-bottom:1px solid #343c42;line-height:1.45;font-size:13px;}#triadWorkspace .context-row:last-child{border-bottom:0;padding-bottom:0;}#triadWorkspace .context-label{display:block;text-transform:uppercase;letter-spacing:.055em;font-size:10px;color:#98a4aa;font-weight:800;margin-bottom:3px;}#triadWorkspace .context-focus{font-size:15px;font-weight:770;color:#edf1ef;}#triadWorkspace .context-hint{font-size:11px;color:#9faab0;line-height:1.5;margin-top:4px;}#triadWorkspace .context-roman{font-weight:800;color:#eaf0f1;}#triadWorkspace .context-local{border-left:2px solid #73818b;padding:7px 9px;margin-top:7px;background:#20262a;border-radius:0 7px 7px 0;}#triadWorkspace .context-note{color:#afb7bb;font-size:11px;line-height:1.5;margin-top:9px;}#triadWorkspace .relationship-meta{margin-top:8px;line-height:1.5;}#triadWorkspace .relationship-meta .chip{display:inline-block;margin-top:3px;}#triadWorkspace .harmony-comparison{margin:3px 0 10px;font-size:11px;line-height:1.6;}#triadWorkspace .filter-context{font-size:12px;line-height:1.5;color:#c9d3d6;margin:1px 0 12px;padding:10px 11px;background:#20282a;border:1px solid #42524d;border-radius:9px;}#triadWorkspace .filter-context strong{color:#c2f3d1;font-weight:850;}#triadWorkspace #categoryTitle{margin-bottom:9px;}#triadWorkspace #cats{margin-bottom:10px;}#triadWorkspace .category-empty{line-height:1.6;}#triadWorkspace .category-empty strong{color:#eef2f3;}#triadWorkspace .category-empty button{margin-top:10px;}#triadWorkspace .sequence-box{margin:12px 0;padding:11px;border:1px solid #4a5955;border-radius:11px;background:#192320;}#triadWorkspace .sequence-heading{font-size:11px;font-weight:850;color:#c2e8d0;letter-spacing:.02em;margin-bottom:10px;}#triadWorkspace .sequence-path{display:flex;flex-wrap:wrap;gap:7px;align-items:stretch;}#triadWorkspace .seq-step{flex:1 1 90px;min-width:83px;max-width:100%;padding:8px 6px;border:1px solid #47544e;border-radius:8px;background:#222b29;text-align:center;}#triadWorkspace .seq-step.seq-anchor{border:2px solid #e6c87c;background:#343124;padding:7px 5px;}#triadWorkspace .seq-step .seq-number{font-size:9px;color:#aeb7b9;margin-bottom:4px;}#triadWorkspace .seq-step .seq-chord{font-weight:850;font-size:15px;line-height:1.35;overflow-wrap:anywhere;}#triadWorkspace .seq-step .seq-role{font-size:10px;color:#c0c6c5;margin-top:4px;line-height:1.35;}#triadWorkspace .seq-arrow{font-size:16px;color:#8a9693;align-self:center;flex:0 0 auto;}#triadWorkspace .sequence-caption{color:#adbab5;font-size:11px;line-height:1.5;margin-top:9px;}@media (max-width:550px){#triadWorkspace .seq-step{flex-basis:100px;}#triadWorkspace .seq-arrow{font-size:12px;}}@media  (max-width: 759px) {#triadWorkspace #categoryArea{ grid-row:3; }#triadWorkspace #detail{ grid-row:4; }#triadWorkspace #context{ grid-row:5; }#triadWorkspace .panel{ padding:10px; margin:0; border-radius:11px; }#triadWorkspace #categoryTitle{ display:none; }#triadWorkspace #cats{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:5px; margin:0; }#triadWorkspace #cats button{ min-height:40px; padding:8px 2px; font-size:12px; border-radius:8px; }#triadWorkspace #categoryHelp{ display:none; }#triadWorkspace #detail .filter-context{ display:none; }#triadWorkspace .detail h3{ font-size:17px; margin-bottom:6px; }#triadWorkspace .context-panel h2{ margin:0 0 5px; font-size:13px; }#triadWorkspace .context-row{ padding:6px 0; }#triadWorkspace .context-focus{ font-size:14px; }#triadWorkspace .formula{ padding:8px; margin:7px 0; }#triadWorkspace .detail p{ margin:7px 0; }#triadWorkspace .sequence-box{ padding:8px; margin:8px 0; }}@media  (max-width:759px) {#triadWorkspace #categoryArea{grid-row:2;}#triadWorkspace #detail{grid-row:3;}#triadWorkspace #context{grid-row:4;}#triadWorkspace .panel{margin:0 7px;}}@media  (max-width:759px) {#triadWorkspace #context,#triadWorkspace #detail{
+    grid-column:1;
+    grid-row:2;
+    min-height:0;
+    height:100%;
+    max-height:100%;
+    overflow-y:auto;
+    overflow-x:hidden;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:thin;
+    scrollbar-color:#434e54 transparent;
+    touch-action:pan-y;
+    align-self:stretch;
+  }#triadWorkspace #categoryArea{
+    grid-column:1;
+    grid-row:3;
+    align-self:end;
+    margin-bottom:0;
+    flex-shrink:0;
+  }#triadWorkspace #categoryArea.visible{ display:flex; flex-direction:column; }#triadWorkspace #categoryArea #cats{ order:2; width:100%; }#triadWorkspace .context-panel h2{ margin-top:0; }}#triadWorkspace #categoryArea #cats{order:2;}#triadWorkspace #cats button{display:flex;flex-direction:column;justify-content:center;align-items:center;
+ gap:1px;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;
+ -webkit-tap-highlight-color:transparent;}#triadWorkspace #cats button .category-main{white-space:nowrap;}#triadWorkspace #cats button .category-sub{font-size:9px;line-height:1.1;color:#c9f5d9;
+ font-weight:700;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}#triadWorkspace #cats button:focus:not(:focus-visible){outline:none;}#triadWorkspace .sequence-choice-overlay{display:none !important;pointer-events:none;}#triadWorkspace .sequence-choice-overlay.is-open:not([hidden]){display:flex !important;pointer-events:auto;}#triadWorkspace .sequence-choice-overlay{position:fixed;z-index:2000;
+ top:var(--sequence-popup-top,460px);left:7px;right:7px;
+ bottom:max(7px,env(safe-area-inset-bottom));
+ flex-direction:column;min-height:0;overflow:hidden;
+ border:1px solid #6c797e;border-radius:14px;
+ background:#151b1e;color:#eef2f3;box-shadow:0 16px 45px rgba(0,0,0,.7);}#triadWorkspace .sequence-choice-head{flex:0 0 auto;display:flex;gap:10px;align-items:center;
+ padding:12px 13px;border-bottom:1px solid #424e53;background:#1c2326;}#triadWorkspace .sequence-choice-head h2{font-size:16px;line-height:1.25;margin:0;flex:1;}#triadWorkspace #sequenceChooserClose{flex:0 0 40px;height:34px;padding:0;
+ background:#2a3236;font-size:18px;color:#eef2f3;}#triadWorkspace .sequence-choice-list{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;
+ padding:10px;display:flex;flex-direction:column;gap:8px;
+ overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;}#triadWorkspace .sequence-choice-item{flex:0 0 auto;display:block;text-align:left;
+ border:1px solid #4a555a;background:#22292d;padding:12px 13px;border-radius:11px;
+ min-height:68px;width:100%;font-size:13px;font-weight:400;white-space:normal;}#triadWorkspace .sequence-choice-item.selected{border-color:#c2cbd0;background:#30383c;box-shadow:inset 0 0 0 1px #8e9ba1;}#triadWorkspace .sequence-choice-item:not(:disabled):not(.selected){border-color:#748189;background:#252d31;}#triadWorkspace .sequence-choice-item:disabled{opacity:.32;color:#9da7ac;border-color:#465158;background:#1c2225;cursor:default;box-shadow:none;}#triadWorkspace .sequence-choice-item:disabled .sequence-choice-title strong,#triadWorkspace .sequence-choice-item:disabled .sequence-choice-description,#triadWorkspace .sequence-choice-item:disabled .sequence-choice-count{color:#89969c;}#triadWorkspace .sequence-choice-item.all-choice{min-height:68px;display:flex;align-items:center;justify-content:center;text-align:center;padding:12px;}#triadWorkspace .sequence-choice-item.all-choice .sequence-choice-title{display:flex;align-items:center;justify-content:center;width:100%;}#triadWorkspace .sequence-choice-item.all-choice .sequence-choice-title strong{font-size:16px;}#triadWorkspace .category-filter-rationale{border-left:2px solid #87959b;padding:5px 10px;margin:9px 0;color:#c4d0d4;font-size:12px;line-height:1.5;}#triadWorkspace .sequence-choice-title{display:flex;gap:10px;align-items:center;justify-content:space-between;}#triadWorkspace .sequence-choice-title strong{font-size:15px;font-weight:850;color:#f3f6f5;}#triadWorkspace .sequence-choice-count{font-size:11px;color:#b4c6bf;white-space:nowrap;}#triadWorkspace .sequence-choice-description{font-size:12px;line-height:1.45;color:#b8c2c6;
+ margin-top:5px;font-weight:450;}@media (min-width:760px){#triadWorkspace .sequence-choice-overlay{width:min(550px,calc(100vw - 32px));left:50%;right:auto;transform:translateX(-50%);}}@media (max-width:759px){#triadWorkspace #cats button{height:42px;min-height:42px;padding:5px 2px;}#triadWorkspace .sequence-choice-overlay{border-radius:12px;}}@media  (max-width:759px) {#triadWorkspace #context,#triadWorkspace #detail{
+    height:100%;
+    max-height:100%;
+    min-height:0;
+    padding:8px 10px;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
+  }#triadWorkspace #categoryArea{
+    height:100%;
+    min-height:0;
+    max-height:100%;
+    padding:6px 8px;
+    border-radius:10px;
+  }#triadWorkspace #categoryArea #cats{
+    width:100%;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:4px;
+    align-content:center;
+    flex:1 1 auto;
+    min-height:0;
+  }#triadWorkspace #categoryArea #cats button{
+    height:35px;
+    min-height:35px;
+    padding:3px 2px;
+    font-size:12px;
+    line-height:1.05;
+    border-radius:7px;
+  }#triadWorkspace #categoryArea #cats button .category-sub{font-size:9px;line-height:1.05;}}
+
+/* v1.134: one shared wheel, three independent workspaces. */
+.app-mode-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:5px 4px 7px;}
+.app-mode-nav .app-mode-button{height:39px;min-height:39px;padding:6px 4px;border-radius:9px;border:1px solid #566068;background:#23292d;color:#b9c5ca;font-size:13px;font-weight:760;cursor:pointer;touch-action:manipulation;}
+.app-mode-nav .app-mode-button.active{background:#343d42;border-color:#c3cdd1;color:#fff;box-shadow:inset 0 0 0 1px #84939c;}
+.transport-main{display:grid;grid-template-columns:58px minmax(0,1fr);align-items:stretch;gap:7px;}
+.transport-main #randomProgressionBtn{min-width:0;width:58px;height:48px;min-height:48px;padding:0;border-radius:9px;background:#252d31;color:#e3eaed;border:1px solid #59636b;font-size:11px;font-weight:800;line-height:1;}
+.transport-main #playProgressionBtn{width:100%;min-width:0;}
+body.scale-explorer-open:not(.triad-view) .top-arrangement,body.scale-explorer-open:not(.triad-view) #detailTabs {display:none !important;}
+body.triad-view .progression-strip-shell,body.triad-view .top-arrangement,body.triad-view #detailTabs,
+body.triad-view .detail-panel,body.triad-view .scale-explorer-panel {display:none !important;}
+body.triad-view #triadWorkspace{display:block;}
+#triadWorkspace{display:none;--green:#65e69b;--red:#ff7777;--txt:#eef2f3;--sub:#9ea7ae;color:#eef2f3;min-width:0;margin:5px 2px 0;}
+#triadWorkspace .workspace{display:flex!important;flex-direction:column;gap:6px;height:auto!important;min-height:0!important;width:100%;max-width:100%;}
+#triadWorkspace .side-left,#triadWorkspace .side-right{display:contents!important;}
+#triadWorkspace .panel{width:100%;max-width:100%;min-width:0;margin:0!important;background:#161a1d!important;border:1px solid #3e474c!important;box-shadow:none!important;color:#edf2f3;padding:8px 10px;}
+#triadWorkspace #context,#triadWorkspace #detail{order:1;height:170px!important;max-height:170px!important;min-height:170px!important;display:block;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;padding:8px 10px;}
+#triadWorkspace #context[hidden],#triadWorkspace #detail[hidden]{display:none!important;}
+#triadWorkspace #categoryArea{order:2;height:88px!important;max-height:88px!important;min-height:88px!important;padding:5px 8px!important;display:flex!important;flex-direction:column;justify-content:center;border-radius:10px;}
+#triadWorkspace .workspace.key-view #categoryArea{visibility:hidden;}
+#triadWorkspace #categoryTitle,#triadWorkspace #categoryHelp{display:none;}
+#triadWorkspace #cats{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px!important;margin:0;}
+#triadWorkspace #cats button{height:35px!important;min-height:35px!important;min-width:0;padding:3px 2px!important;font-size:12px!important;line-height:1.05;border-radius:7px;border:1px solid #56636a;background:#272e32;color:#e8eff1;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+#triadWorkspace #cats button.active{background:#343d42!important;border-color:#c1cad0!important;color:#fff!important;}
+#triadWorkspace #cats button .category-sub{font-size:9px;color:#e5eaed;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#triadWorkspace .sequence-choice-overlay{position:fixed!important;z-index:2000!important;max-width:550px;left:7px;right:7px;bottom:max(7px,env(safe-area-inset-bottom));display:none!important;}
+#triadWorkspace .sequence-choice-overlay.is-open:not([hidden]){display:flex!important;pointer-events:auto;}
+#triadWorkspace .sequence-choice-overlay[hidden]{display:none!important;}
+#triadWorkspace .sequence-choice-item.all-choice{display:flex;justify-content:center;align-items:center;text-align:center;}
+#triadWorkspace .sequence-choice-item.all-choice .sequence-choice-title{justify-content:center;width:100%;}
+#triadWorkspace .sequence-choice-item.selected{border-color:#c2cbd0;background:#30383c;box-shadow:inset 0 0 0 1px #8e9ba1;}
+#triadWorkspace .sequence-choice-item:disabled{opacity:.32;cursor:default;}
+@media(min-width:760px){#triadWorkspace{max-width:650px;margin:9px auto 0;}#triadWorkspace #context,#triadWorkspace #detail{height:230px!important;max-height:230px!important;min-height:230px!important;}}
+@media(max-width:380px){.app-mode-nav{gap:4px}.app-mode-nav .app-mode-button{font-size:12px}}
+
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="panel">
-      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.129"></svg>
-      <div class="scale-explorer-toolbar">
-        <button type="button" id="scaleExplorerToggle" class="progression-scale-button" aria-label="Toggle scale explorer" aria-pressed="false" aria-expanded="false" aria-controls="scaleExplorerPanel">Scale</button>
-        <button type="button" id="randomProgressionBtn" class="progression-scale-button progression-random-global-button" aria-label="Choose a random canned progression">Random</button>
-      </div>
+      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.134 · unified wheel"></svg>
+      <nav class="app-mode-nav" role="group" aria-label="Circle operating mode">
+        <button type="button" id="scaleExplorerToggle" class="app-mode-button" data-view="scale" aria-label="Scale mode" aria-pressed="false" aria-controls="scaleExplorerPanel">Scale</button>
+        <button type="button" id="triadModeButton" class="app-mode-button" data-view="triad" aria-label="Triad theory mode" aria-pressed="false" aria-controls="triadWorkspace">Triad</button>
+        <button type="button" id="progressionModeButton" class="app-mode-button active" data-view="progression" aria-label="Progression mode" aria-pressed="true">Progression</button>
+      </nav>
+
+      <!-- v1.134: Triad workspace uses the SAME svg#wheel as Circle and Scale. -->
+      <section id="triadWorkspace" aria-label="Triad harmonic theory" aria-hidden="true">
+        <div class="workspace key-view">
+          <aside class="side side-left">
+            <section class="panel context-panel" id="context"></section>
+            <section class="panel" id="categoryArea">
+              <h2 id="categoryTitle">Relationship function</h2>
+              <div id="cats" role="group" aria-label="Choose harmonic function"></div>
+              <div class="small" id="categoryHelp"></div>
+            </section>
+          </aside>
+          <aside class="side side-right">
+            <section class="panel detail" id="detail" hidden></section>
+          </aside>
+        </div>
+        <section class="sequence-choice-overlay" id="sequenceChooser" role="dialog" aria-modal="true" aria-labelledby="sequenceChooserTitle" hidden>
+          <div class="sequence-choice-head"><h2 id="sequenceChooserTitle">Relationship families</h2><button type="button" id="sequenceChooserClose" aria-label="Close category choices">✕</button></div>
+          <div class="sequence-choice-list" id="sequenceChooserList" role="group" aria-label="Relationship subcategories"></div>
+        </section>
+      </section>
       <div class="progression-strip-shell">
         <div id="progressionStrip" class="progression-strip" aria-label="Progression map"></div>
         <div id="progressionPlayhead" class="progression-playhead" aria-hidden="true"></div>
@@ -2047,7 +2169,10 @@
           </div>
         </div>
         <div class="play-stack">
-          <button id="playProgressionBtn" type="button" aria-label="Play" title="Play"><span class="transport-icon play-icon" aria-hidden="true"></span></button>
+          <div class="transport-main">
+            <button type="button" id="randomProgressionBtn" aria-label="Choose a random canned progression" title="Random progression">Random</button>
+            <button id="playProgressionBtn" type="button" aria-label="Play" title="Play"><span class="transport-icon play-icon" aria-hidden="true"></span></button>
+          </div>
           <div class="tempo-row">
             <select id="tempoSelect">
               <option value="60">60 BPM</option>
@@ -2306,7 +2431,7 @@
       </div>
       </div>
       </div>
-      <div class="file-id">Circle v1.129 — Pentatonic Explorer</div>
+      <div class="file-id">Circle v1.134 — Triad Integration</div>
     </div>
   </div>
   <script>
@@ -2341,6 +2466,45 @@
     var chordLetterView = false; // compatibility shorthand for state 1
     var independentCircleMode = "diatonic";
     var scaleExplorerOpen = false;
+    window.circleAppMode = 'progression';
+    // A modal center chosen in Triad takes precedence until a new progression
+    // is selected. Underlying reference remains the parent major scale.
+    var triadModeOverride = null;
+    function circleSyncTriadContext(){
+      if(!window.TriadBridge)return;
+      var cmode=progressionModeForSelection();
+      var centerPC=PC_MAP[KEY_NOTES[selectedMajor][0]];
+      window.TriadBridge.syncContext(centerPC,cmode);
+    }
+    function circleApplyTriadContext(pc,quality){
+      var mode=quality==='min'?'aeolian':quality==='dim'?'locrian':'ionian';
+      triadModeOverride=mode;
+      selectedMajor=canonicalMajorForPitchClass(pc);
+      render(selectedMajor);
+      renderProgressionStrip(null,null,false);
+    }
+    function setCircleAppMode(mode){
+      if(!['progression','scale','triad'].includes(mode))return;
+      if(window.circleAppMode===mode)return;
+      if(progressionPlaying)stopProgressionPlayback();
+      stopChordAudition(true);
+      window.circleAppMode=mode;
+      var isScale=mode==='scale';
+      scaleExplorerOpen=isScale;
+      document.body.classList.toggle('triad-view',mode==='triad');
+      ['progression','scale','triad'].forEach(function(name){
+        var btn=document.querySelector('.app-mode-nav [data-view="'+name+'"]');
+        if(btn){btn.classList.toggle('active',name===mode);btn.setAttribute('aria-pressed',String(name===mode));}
+      });
+      var section=document.getElementById('triadWorkspace');
+      if(section)section.setAttribute('aria-hidden',String(mode!=='triad'));
+      closeDetailPanels();
+      if(mode==='triad')circleSyncTriadContext();
+      render(selectedMajor);
+      renderProgressionStrip(null,null,false);
+      renderScaleExplorer();
+      if(mode==='triad'&&window.TriadBridge)window.TriadBridge.renderUI();
+    }
     var scaleExplorerSelections = [];
     // Cancels playback that is still waiting for sample loading.
     var progressionStartEpoch = 0;
@@ -3923,6 +4087,7 @@ function fetchAndDecodePercussionSample(ctx, urls) {
     }
 
     function progressionModeForSelection() {
+      if(triadModeOverride)return triadModeOverride;
       if (activeSong) return activeSongMode || "ionian";
       var select = document.getElementById("progressionSelect");
       var opt = select && select.options ? select.options[select.selectedIndex] : null;
@@ -5589,286 +5754,356 @@ function setTransportButtonState(state) {
       } else {
         selectedMajor = parsedKey;
       }
-      var svg = document.getElementById("wheel"); svg.innerHTML = "";
-      var cx = 215, cy = 215, outerInnerR = 128, outerOuterR = 203, innerInnerR = 64, innerOuterR = 128;
-      var notes = KEY_NOTES[selectedMajor], selectedMinor = REL_MINOR[selectedMajor];
-      var renderChroma = {C:0,"C#":1,Db:1,D:2,"D#":3,Eb:3,E:4,F:5,"F#":6,Gb:6,G:7,"G#":8,Ab:8,A:9,"A#":10,Bb:10,B:11};
-      var IV = enhMajor(notes[3]), V = enhMajor(notes[4]);
-      var iiMinor = displayMinorFromNote(notes[1]);
-      var iiiMinor = displayMinorFromNote(notes[2]);
+      // Preparation for the shared renderer: key/state updates are separate
+      // from wheel construction. Behavior and drawing remain unchanged here.
+      drawCircleWheel();
+    }
 
-      circle(svg, cx, cy, outerOuterR, "#171a1d", "#454b51", 2);
-      circle(svg, cx, cy, innerOuterR, "#15181a", "#454b51", 2);
-      var independentView = isIndependentCircleView();
-      var centerDisk = circle(svg, cx, cy, innerInnerR, "#111315", "#454b51", 1.5);
-
-      if (independentView) {
-        function addCenterModeControl(label, y, modeName) {
-          var NS = "http://www.w3.org/2000/svg";
-          var hit = document.createElementNS(NS, "rect");
-          hit.setAttribute("x", cx - 46);
-          hit.setAttribute("y", y - 16);
-          hit.setAttribute("width", 92);
-          hit.setAttribute("height", 25);
-          hit.setAttribute("rx", 10);
-          hit.setAttribute("fill", "transparent");
-          hit.setAttribute("class", "clickable");
-          hit.setAttribute("role", "button");
-          hit.setAttribute("aria-label", modeName === "diatonic" ? "Diatonic selection mode" : "Sound chord mode");
-          hit.addEventListener("click", function(ev){
-            ev.stopPropagation();
-            if (independentCircleMode === modeName) return;
-            stopChordAudition(true);
-            independentCircleMode = modeName;
-            render(selectedMajor);
-          });
-          svg.appendChild(hit);
-
-          var active = independentCircleMode === modeName;
-          var t = text(svg, cx, y, label, {
-            size: 14,
-            weight: active ? 850 : 700,
-            fill: active ? "#f2f4f5" : "#777e84"
-          });
-          t.setAttribute("pointer-events", "none");
-        }
-        addCenterModeControl("Diatonic", cy - 5, "diatonic");
-        addCenterModeControl("Sound", cy + 20, "sound");
-      } else {
-        centerDisk.setAttribute("class", "clickable");
-        centerDisk.setAttribute("role", "button");
-        centerDisk.setAttribute("aria-label", "Toggle modal analysis reference");
-        centerDisk.addEventListener("click", function(){
-          modeReferenceView = !modeReferenceView;
-          render(selectedMajor);
-          renderProgressionStrip(null, null, false);
-          renderScaleExplorer();
-        });
-        var centerLabel = text(svg, cx, cy + 5, centerModeLabel(), { size: 14, weight: 700, fill: "#f2f4f5" });
-        centerLabel.setAttribute("pointer-events", "none");
+    // v1.131 — One circle renderer, retaining Circle 1.129's 430-unit SVG and
+    // 203-unit outer radius. Inner radii are Triad v0.30's 75/173/238 ratios.
+    // The renderer owns all 36 hit regions; their meaning is supplied by the
+    // active Circle controller (progression, scale, or independent palette).
+    var CIRCLE_GEOMETRY = Object.freeze({
+      cx: 215, cy: 215, outerInnerR: 203 * 173 / 238, outerOuterR: 203,
+      innerInnerR: 203 * 75 / 238, innerOuterR: 203 * 173 / 238
+    });
+    // Geometry helpers are the Triad split-wedge algorithm, expressed in
+    // Circle's 430×430 viewBox. A horizontal equal-area divide is deliberately
+    // used rather than a radial bisector or extra concentric ring.
+    function sharedSectorPoints(r0, r1, a0, a1) {
+      var result = [], steps = 32, g = CIRCLE_GEOMETRY;
+      for (var i=0;i<=steps;i++) {
+        var a=(a0+(a1-a0)*i/steps)*Math.PI/180;
+        result.push([g.cx+r1*Math.cos(a),g.cy+r1*Math.sin(a)]);
       }
+      for (var j=steps;j>=0;j--) {
+        var b=(a0+(a1-a0)*j/steps)*Math.PI/180;
+        result.push([g.cx+r0*Math.cos(b),g.cy+r0*Math.sin(b)]);
+      }
+      return result;
+    }
+    function sharedClipHorizontal(points, y, upper) {
+      var inside=function(p){ return upper ? p[1]<=y+1e-7 : p[1]>=y-1e-7; };
+      var atLine=function(a,b){var t=(y-a[1])/(b[1]-a[1]);return [a[0]+t*(b[0]-a[0]),y];};
+      var clipped=[];
+      for(var i=0;i<points.length;i++) {
+        var a=points[i],b=points[(i+1)%points.length],ina=inside(a),inb=inside(b);
+        if(ina&&inb)clipped.push(b);
+        else if(ina&&!inb)clipped.push(atLine(a,b));
+        else if(!ina&&inb){clipped.push(atLine(a,b));clipped.push(b);}
+      }
+      return clipped;
+    }
+    function sharedPolygonArea(points) {
+      var sum=0;
+      for(var i=0;i<points.length;i++) {
+        var a=points[i],b=points[(i+1)%points.length];sum+=a[0]*b[1]-b[0]*a[1];
+      }
+      return Math.abs(sum)/2;
+    }
+    function sharedSplitY(points) {
+      var low=Infinity,high=-Infinity;
+      points.forEach(function(p){low=Math.min(low,p[1]);high=Math.max(high,p[1]);});
+      var half=sharedPolygonArea(points)/2;
+      for(var i=0;i<28;i++) {
+        var mid=(low+high)/2;
+        if(sharedPolygonArea(sharedClipHorizontal(points,mid,true))<half)low=mid;
+        else high=mid;
+      }
+      return (low+high)/2;
+    }
+    function sharedPolygonPath(points) {
+      return 'M'+points.map(function(p){return p[0].toFixed(3)+' '+p[1].toFixed(3);}).join(' L')+' Z';
+    }
+    function sharedHorizontalEnds(points,y) {
+      var xs=[];
+      for(var i=0;i<points.length;i++) {
+        var a=points[i],b=points[(i+1)%points.length];
+        if(Math.abs(b[1]-a[1])<1e-9)continue;
+        var t=(y-a[1])/(b[1]-a[1]);
+        if(t>=0&&t<=1)xs.push(a[0]+t*(b[0]-a[0]));
+      }
+      return xs.length?[Math.min.apply(null,xs),Math.max.apply(null,xs)]:[CIRCLE_GEOMETRY.cx,CIRCLE_GEOMETRY.cx];
+    }
+    function sharedSvgPath(svg,d,fill,stroke,width,hitQuality,rootPC) {
+      var el=document.createElementNS('http://www.w3.org/2000/svg','path');
+      el.setAttribute('d',d);el.setAttribute('fill',fill);el.setAttribute('stroke',stroke||'none');
+      el.setAttribute('stroke-width',width||0);
+      if(hitQuality) {
+        el.setAttribute('class','clickable');
+        el.setAttribute('role','button');el.setAttribute('tabindex','0');
+        el.dataset.triadQuality=hitQuality;el.dataset.rootPc=String(rootPC);
+      } else el.setAttribute('pointer-events','none');
+      svg.appendChild(el);return el;
+    }
+    function sharedSvgLabel(svg,x,y,value,size,fill,klass,activeLabel) {
+      // Circle's sounding chord uses dark ink without bold text or an outline.
+      // Other labels retain Triad's existing outlined high-contrast typography.
+      var t=text(svg,x,y,value,{size:size,weight:activeLabel?400:800,fill:fill});
+      if(klass)t.setAttribute('class','label '+klass);
+      if(!activeLabel){
+        t.setAttribute('stroke','#111517');
+        t.setAttribute('stroke-width',klass==='triad-root'?3.2:2.5);
+        t.setAttribute('stroke-linejoin','round');
+        t.setAttribute('paint-order','stroke');
+      }
+      // The label must not mask the independent dim/min hit regions.
+      t.setAttribute('pointer-events','none');
+      return t;
+    }
+    function sharedTriadColor(map,pc,quality,active,cue) {
+      var key=pc+':'+quality;
+      var out={fill:'#24282c',text:'#aeb4b9',stroke:'#454b51',sw:2,active:active,cue:cue};
+      if(map.inPC[key]){out.fill='#153d29';out.text='#65e69b';out.stroke='#2b7d50';}
+      if(map.outPC[key]){out.fill='#492020';out.text='#ff7777';out.stroke='#8d3939';}
+      if(scaleExplorerOpen){
+        var chosen=scaleExplorerHasChord(scaleExplorerWheelChord(pc,quality));
+        out.fill=chosen?'#20573c':'#24282c';
+        out.text=chosen?'#c1f7db':'#aeb4b9';
+        out.stroke=chosen?'#e4f6ed':'#454b51';
+        out.sw=chosen?4:2;
+        out.active=false;out.cue=false;
+      }else if(active){
+        out.fill=activeIsDiatonic===false?'#ef4b4b':'#27c96f';
+        out.text='#07100b';out.stroke='#f2f4f5';out.sw=7;
+      }else if(cue){
+        out.fill=cueIsDiatonic===false?'#6a2b2b':'#1d5536';
+        out.text=cueIsDiatonic===false?'#ff9999':'#91f0b8';
+        out.stroke='#f2f4f5';out.sw=5;
+      }
+      out.visible=!!(map.inPC[key]||map.outPC[key]||scaleExplorerOpen&&scaleExplorerHasChord(scaleExplorerWheelChord(pc,quality))||active||cue);
+      return out;
+    }
+    function drawCircleWheel() {
+      var triadView=window.circleAppMode==='triad'&&!!window.TriadBridge;
+      var svg=document.getElementById('wheel');svg.innerHTML='';
+      var g=CIRCLE_GEOMETRY,cx=g.cx,cy=g.cy,outerInnerR=g.outerInnerR;
+      var innerInnerR=g.innerInnerR,innerOuterR=g.innerOuterR,outerOuterR=g.outerOuterR;
+      var renderChroma=PC_MAP;
+      var independentView=!triadView&&isIndependentCircleView();
+      var harmonicMap=independentView?independentDiatonicChordClasses():progressionChordClasses();
+      var activeMode=progressionModeForSelection();
+      var parentMajor=parentMajorForMode(selectedMajor,activeMode);
+      var modalTonicPC=PC_MAP[KEY_NOTES[selectedMajor][0]];
+      var modalCenterIsMajor=(activeMode==='ionian'||activeMode==='lydian'||activeMode==='mixolydian');
+      var useRomans=triadView?window.TriadBridge.isRoman():!independentView&&(scaleExplorerOpen?!chordLetterView:chordLetterView);
+      var defs=document.createElementNS('http://www.w3.org/2000/svg','defs');
+      svg.appendChild(defs);
+      circle(svg,cx,cy,outerOuterR,'#171a1d','#454b51',2);
+      circle(svg,cx,cy,innerOuterR,'#15181a','#454b51',2);
+      for(var i=0;i<MAJOR_KEYS.length;i++){
+        var major=MAJOR_KEYS[i],minor=REL_MINOR[major];
+        var rootName=minor.slice(0,-1),rootPC=renderChroma[rootName];
+        var majorPC=renderChroma[major];
+        var a0=-105+i*30,a1=-75+i*30,am=(-90+i*30)*Math.PI/180;
+        var majorActive=!triadView&&((activePitchClass!==null&&activeQuality==='major'&&majorPC===activePitchClass)||
+          (activeChordKey===major&&activeChordRing==='outer'&&(!activeQuality||activeQuality==='major')));
+        var minorActive=!triadView&&((activePitchClass!==null&&activeQuality==='minor'&&rootPC===activePitchClass)||
+          (activeChordKey===minor&&activeChordRing==='inner'&&(!activeQuality||activeQuality==='minor')));
+        var dimActive=!triadView&&activePitchClass!==null&&activeQuality==='dim'&&rootPC===activePitchClass;
+        var majorCue=!triadView&&cueLitOnWheel&&cuePitchClass!==null&&cueQuality==='major'&&majorPC===cuePitchClass&&!majorActive;
+        var minorCue=!triadView&&cueLitOnWheel&&cuePitchClass!==null&&cueQuality==='minor'&&rootPC===cuePitchClass&&!minorActive;
+        var dimCue=!triadView&&cueLitOnWheel&&cuePitchClass!==null&&cueQuality==='dim'&&rootPC===cuePitchClass&&!dimActive;
+        var majorStyle=triadView?window.TriadBridge.styleFor(majorPC,'maj'):sharedTriadColor(harmonicMap,majorPC,'major',majorActive,majorCue);
+        var minorStyle=triadView?window.TriadBridge.styleFor(rootPC,'min'):sharedTriadColor(harmonicMap,rootPC,'minor',minorActive,minorCue);
+        var dimStyle=triadView?window.TriadBridge.styleFor(rootPC,'dim'):sharedTriadColor(harmonicMap,rootPC,'dim',dimActive,dimCue);
+        var majorDisplay=displayMajorForCanonical(major);
+        var minorDisplay=displayMinorForCanonical(minor);
+        var majorLabel=triadView?window.TriadBridge.wheelRootLabel(majorPC):useRomans?romanLabelForWheelChord(majorPC,'major'):majorDisplay;
+        var rootLabel=triadView?window.TriadBridge.wheelRootLabel(rootPC):useRomans?romanLabelForWheelChord(rootPC,'major'):
+          displayPitchClass(rootPC,selectedSpellingPreference,rootName);
 
-      // Linked views use progression harmony. The third stopped-state view is
-      // intentionally independent and shows the diatonic palette selected in
-      // the center's Diatonic mode; Sound preserves that same palette.
-      var harmonicMapForRender = independentView
-        ? independentDiatonicChordClasses()
-        : progressionChordClasses();
-
-      for (var i = 0; i < MAJOR_KEYS.length; i++) {
-        var major = MAJOR_KEYS[i], minor = REL_MINOR[major];
-        var majorDisplay = displayMajorForCanonical(major);
-        var minorDisplay = displayMinorForCanonical(minor);
-        var centerAngle = (-90 + i * 30) * Math.PI / 180, startAngle = centerAngle - (Math.PI / 12), endAngle = centerAngle + (Math.PI / 12);
-        var harmonicMap = harmonicMapForRender;
-        var majorKey = renderChroma[major] + ":major";
-        var majorFill = "#24282c", majorText = "#aeb4b9", majorStroke = "#454b51", majorSW = 2, majorSize = 22;
-        if (harmonicMap.inPC[majorKey]) { majorFill = "#153d29"; majorText = "#65e69b"; majorStroke = "#2b7d50"; }
-        if (harmonicMap.outPC[majorKey]) { majorFill = "#492020"; majorText = "#ff7777"; majorStroke = "#8d3939"; }
-        var majorIsActive = (activeChordKey === major && activeChordRing === "outer") ||
-                            (activePitchClass !== null && activeQuality === "major" &&
-                             renderChroma[major] === activePitchClass);
-        var majorIsCue = cueLitOnWheel &&
-                         cuePitchClass !== null &&
-                         cueQuality === "major" &&
-                         renderChroma[major] === cuePitchClass &&
-                         !majorIsActive;
-        if (scaleExplorerOpen) {
-          var majorSelected=scaleExplorerHasChord(scaleExplorerWheelChord(renderChroma[major],"major"));
-          majorFill=majorSelected?"#20573c":"#24282c";
-          majorText=majorSelected?"#c1f7db":"#aeb4b9";
-          majorStroke=majorSelected?"#e4f6ed":"#454b51";
-          majorSW=majorSelected?4:2;
-          majorIsActive=false;
-          majorIsCue=false;
-        }
-        if (scaleExplorerOpen) { majorIsActive=false;majorIsCue=false; }
-        if (majorIsActive) {
-          majorFill = (activeIsDiatonic === false) ? "#ef4b4b" : "#27c96f";
-          majorText = "#07100b"; majorStroke = "#f2f4f5"; majorSW = 7;
-        } else if (majorIsCue) {
-          majorFill = (cueIsDiatonic === false) ? "#6a2b2b" : "#1d5536";
-          majorText = (cueIsDiatonic === false) ? "#ff9999" : "#91f0b8";
-          majorStroke = "#f2f4f5"; majorSW = 5;
-        }
-
-        var minorRootName = minor.slice(0,-1);
-        var minorRootPC = renderChroma[minorRootName];
-        var diminishedOnThisRoot = !!(harmonicMap.inPC[minorRootPC + ":dim"] || harmonicMap.outPC[minorRootPC + ":dim"]);
-        var minorDisplayForWheel = diminishedOnThisRoot ? displayPitchClass(minorRootPC, selectedSpellingPreference, minorRootName) + "°" : minorDisplay;
-        var minorQualityForWheel = diminishedOnThisRoot ? "dim" : "minor";
-        var minorKey = minorRootPC + ":" + minorQualityForWheel;
-        var minorFill = "#24282c", minorText = "#aeb4b9", minorStroke = "#454b51", minorSW = 2, minorSize = 18;
-        if (harmonicMap.inPC[minorKey]) { minorFill = "#153d29"; minorText = "#65e69b"; minorStroke = "#2b7d50"; }
-        if (harmonicMap.outPC[minorKey]) { minorFill = "#492020"; minorText = "#ff7777"; minorStroke = "#8d3939"; }
-        var minorIsActive = (activeChordKey === minor && activeChordRing === "inner") ||
-                            (activePitchClass !== null && activeQuality === minorQualityForWheel &&
-                             minorRootPC === activePitchClass);
-        var minorIsCue = cueLitOnWheel &&
-                         cuePitchClass !== null &&
-                         cueQuality === minorQualityForWheel &&
-                         minorRootPC === cuePitchClass &&
-                         !minorIsActive;
-        if (scaleExplorerOpen) {
-          var minorSelected=scaleExplorerHasChord(scaleExplorerWheelChord(minorRootPC,minorQualityForWheel));
-          minorFill=minorSelected?"#20573c":"#24282c";
-          minorText=minorSelected?"#c1f7db":"#aeb4b9";
-          minorStroke=minorSelected?"#e4f6ed":"#454b51";
-          minorSW=minorSelected?4:2;
-          minorIsActive=false;
-          minorIsCue=false;
-        }
-        if (scaleExplorerOpen) { minorIsActive=false;minorIsCue=false; }
-        if (minorIsActive) {
-          minorFill = (activeIsDiatonic === false) ? "#ef4b4b" : "#27c96f";
-          minorText = "#07100b"; minorStroke = "#f2f4f5"; minorSW = 7;
-        } else if (minorIsCue) {
-          minorFill = (cueIsDiatonic === false) ? "#6a2b2b" : "#1d5536";
-          minorText = (cueIsDiatonic === false) ? "#ff9999" : "#91f0b8";
-          minorStroke = "#f2f4f5"; minorSW = 5;
-        }
-
-        var outer = wedge(svg, cx, cy, outerInnerR, outerOuterR, startAngle, endAngle, majorFill, majorStroke, majorSW);
-        if (majorIsActive) outer.setAttribute("class", "clickable active-wedge");
-        else if (majorIsCue) outer.setAttribute("class", "clickable next-cue-wedge");
-        var majorTextR = 165, majorX = cx + Math.cos(centerAngle) * majorTextR, majorY = cy + Math.sin(centerAngle) * majorTextR + 8, majorDx = 0;
-
-        // Quiet role labels replace the former white key circle.
-        // "key" identifies the parent major collection. In an explicit mode,
-        // "center" identifies the modal tonic chord separately.
-        var activeMode = progressionModeForSelection();
-        var parentMajor = parentMajorForMode(selectedMajor, activeMode);
-        var modalTonicPC = renderChroma[KEY_NOTES[selectedMajor][0]];
-        var modalCenterIsMajor = (activeMode === "ionian" || activeMode === "lydian" || activeMode === "mixolydian");
-        var roleLabelSize = 9;
-
-        // If the parent-key chord itself is absent from the progression, keep
-        // the wedge neutral but make the chord name + "key" label green so the
-        // tonal reference remains easy to find without restoring the old circle.
-        var parentKeyChordIsInProgression = !!(harmonicMap.inPC[majorKey] || harmonicMap.outPC[majorKey]);
-        if (!independentView && major === parentMajor && !parentKeyChordIsInProgression) {
-          majorText = "#65e69b";
-        }
-
-        var majorLabelForWheel = (!independentView && (scaleExplorerOpen ? !chordLetterView : chordLetterView))
-          ? romanLabelForWheelChord(renderChroma[major], "major")
-          : majorDisplay;
-        text(svg, majorX + majorDx, majorY, majorLabelForWheel, { size: majorSize, weight: 800, fill: majorText });
-        if (!independentView && major === parentMajor) {
-          text(svg, majorX + majorDx, majorY + 10, "key", { size: roleLabelSize, weight: 700, fill: majorText });
-        }
-        if (!independentView && activeMode !== "ionian" && modalCenterIsMajor && renderChroma[major] === modalTonicPC) {
-          text(svg, majorX + majorDx, majorY + 10, "center", { size: roleLabelSize, weight: 700, fill: majorText });
-        }
-        if (independentView && !scaleExplorerOpen && independentDiatonicQuality === "major" && renderChroma[major] === independentDiatonicRootPC) {
-          text(svg, majorX + majorDx, majorY + 10, "center", { size: roleLabelSize, weight: 700, fill: majorText });
-        }
-        (function(m,md,rootPC){ outer.addEventListener("click", function(){
-          if (scaleExplorerOpen && !progressionPlaying) {
-            scaleExplorerToggleChord(scaleExplorerWheelChord(rootPC,"major"));
+        // Outer major regions preserve Circle's coloring and interaction.
+        var majorPath=wedgePath(cx,cy,outerInnerR,outerOuterR,a0*Math.PI/180,a1*Math.PI/180);
+        var majorWedge=sharedSvgPath(svg,majorPath,majorStyle.fill,majorStyle.stroke,majorStyle.sw,'major',majorPC);
+        if(majorActive&&!scaleExplorerOpen)majorWedge.setAttribute('class','clickable active-wedge');
+        else if(majorCue&&!scaleExplorerOpen)majorWedge.setAttribute('class','clickable next-cue-wedge');
+        majorWedge.setAttribute('aria-label',majorDisplay+' major chord');
+        if(triadView)window.TriadBridge.wire(majorWedge,{root:majorPC,q:'maj'});
+        else (function(m,md,pc){majorWedge.addEventListener('click',function(){
+          if(scaleExplorerOpen&&!progressionPlaying){scaleExplorerToggleChord(scaleExplorerWheelChord(pc,'major'));return;}
+          if(progressionPlaying){
+            if(activePitchClass!==null&&activeQuality==='major'&&pc===activePitchClass)toggleHarmonyHoldForCurrentChord();
             return;
           }
-          if (progressionPlaying) {
-            if (activePitchClass !== null && activeQuality === "major" &&
-                rootPC === activePitchClass) {
-              toggleHarmonyHoldForCurrentChord();
+          if(independentView){
+            if(independentCircleMode==='diatonic'){
+              stopChordAudition(true);independentDiatonicRootPC=pc;
+              independentDiatonicQuality='major';render(selectedMajor);
+            }else startChordAudition(pc,'major',m,'outer');
+            return;
+          }
+          stopChordAudition(true);stopArpeggioOnly();setSpellingFromSelectedDisplay(md,m);
+          selectedMajor=m;render(m);renderProgressionStrip(null,null,false);
+        });})(major,majorDisplay,majorPC);
+
+        // Inner wedges have two independently selectable hit regions, but
+        // minor's fill extends across the whole wedge when it is active.
+        // Diminished, if highlighted, paints the equal-area upper half only.
+        var innerPath=wedgePath(cx,cy,innerInnerR,innerOuterR,a0*Math.PI/180,a1*Math.PI/180);
+        var polygon=sharedSectorPoints(innerInnerR,innerOuterR,a0,a1);
+        var split=sharedSplitY(polygon);
+        var upperPoints=sharedClipHorizontal(polygon,split,true);
+        var lowerPoints=sharedClipHorizontal(polygon,split,false);
+        // The active/cue visual filter belongs to the painted wedge, never to
+        // the transparent hit regions. Filtering a transparent SVG path can
+        // produce a dark/black overlay in Safari on iPhone.
+        var minorPaint=sharedSvgPath(svg,innerPath,minorStyle.fill,'none',0,null,null);
+        if(minorActive&&!scaleExplorerOpen)minorPaint.classList.add('active-wedge');
+        else if(minorCue&&!scaleExplorerOpen)minorPaint.classList.add('next-cue-wedge');
+        if(dimStyle.visible){
+          var dimPaint=sharedSvgPath(svg,sharedPolygonPath(upperPoints),dimStyle.fill,'none',0,null,null);
+          if(dimActive&&!scaleExplorerOpen)dimPaint.classList.add('active-wedge');
+          else if(dimCue&&!scaleExplorerOpen)dimPaint.classList.add('next-cue-wedge');
+        }
+        var upper=sharedSvgPath(svg,sharedPolygonPath(upperPoints),'transparent','none',0,'dim',rootPC);
+        var lower=sharedSvgPath(svg,sharedPolygonPath(lowerPoints),'transparent','none',0,'minor',rootPC);
+        upper.setAttribute('aria-label',rootLabel+' diminished chord');
+        lower.setAttribute('aria-label',minorDisplay+' minor chord');
+        if(triadView){
+          window.TriadBridge.wire(upper,{root:rootPC,q:'dim'});
+          window.TriadBridge.wire(lower,{root:rootPC,q:'min'});
+        } else (function(relMajor,minorName,display,pc){
+          function innerClicked(q){
+            if(scaleExplorerOpen&&!progressionPlaying){scaleExplorerToggleChord(scaleExplorerWheelChord(pc,q));return;}
+            if(progressionPlaying){
+              if(activePitchClass!==null&&activeQuality===q&&pc===activePitchClass)toggleHarmonyHoldForCurrentChord();
+              return;
             }
-            return;
-          }
-
-          if (independentView) {
-            if (scaleExplorerOpen) {
-              scaleExplorerToggleChord(rootPC,"major",md);
-            } else if (independentCircleMode === "diatonic") {
-              stopChordAudition(true);
-              independentDiatonicRootPC = rootPC;
-              independentDiatonicQuality = "major";
-              render(selectedMajor);
-            } else {
-              startChordAudition(rootPC, "major", m, "outer");
+            if(independentView){
+              if(independentCircleMode==='diatonic'){
+                stopChordAudition(true);independentDiatonicRootPC=pc;independentDiatonicQuality=q;render(selectedMajor);
+              }else startChordAudition(pc,q,minorName,'inner');
+              return;
             }
-            return;
+            stopChordAudition(true);stopArpeggioOnly();
+            var mode=progressionModeForSelection();
+            if(mode!=='ionian'){
+              var centerKey=canonicalMajorForPitchClass(pc);
+              setSpellingFromSelectedDisplay(display.slice(0,-1),centerKey);
+              selectedMajor=centerKey;render(centerKey);
+            }else{
+              setSpellingFromSelectedDisplay(display.slice(0,-1),relMajor);
+              selectedMajor=relMajor;render(relMajor);
+            }
+            renderProgressionStrip(null,null,false);
           }
-
-          // Linked stopped-state views keep the circle as the key/center selector.
-          var mode = progressionModeForSelection();
-          stopChordAudition(true);
-          stopArpeggioOnly();
-          setSpellingFromSelectedDisplay(md,m);
-          selectedMajor = m;
-          render(m);
-          renderProgressionStrip(null, null, false);
-        }); })(major,majorDisplay,renderChroma[major]);
-
-        var inner = wedge(svg, cx, cy, innerInnerR, innerOuterR, startAngle, endAngle, minorFill, minorStroke, minorSW);
-        if (minorIsActive) inner.setAttribute("class", "clickable active-wedge");
-        else if (minorIsCue) inner.setAttribute("class", "clickable next-cue-wedge");
-        var minorTextR = 98, minorX = cx + Math.cos(centerAngle) * minorTextR, minorY = cy + Math.sin(centerAngle) * minorTextR + 7, minorDx = 0;
-        var minorLabelForWheel = (!independentView && (scaleExplorerOpen ? !chordLetterView : chordLetterView))
-          ? romanLabelForWheelChord(minorRootPC, minorQualityForWheel)
-          : minorDisplayForWheel;
-        text(svg, minorX + minorDx, minorY, minorLabelForWheel, { size: minorSize, weight: 800, fill: minorText });
-        if (!independentView && activeMode !== "ionian" && !modalCenterIsMajor && renderChroma[minorRootName] === modalTonicPC) {
-          text(svg, minorX + minorDx, minorY + 9, "center", { size: roleLabelSize, weight: 700, fill: minorText });
+          upper.addEventListener('click',function(){innerClicked('dim');});
+          lower.addEventListener('click',function(){innerClicked('minor');});
+        })(major,minor,minorDisplay,rootPC);
+        // Keep Circle's thick light active/cue outline on the new geometry.
+        // A diminished outline is clipped to its upper half, so no permanent
+        // horizontal dividing stroke appears when both qualities are neutral.
+        sharedSvgPath(svg,innerPath,'none','#515b61',1.25,null,null);
+        if(minorActive||minorCue||(scaleExplorerOpen&&minorStyle.sw>2))
+          sharedSvgPath(svg,innerPath,'none',minorStyle.stroke,minorStyle.sw,null,null);
+        if(dimActive||dimCue||(scaleExplorerOpen&&dimStyle.sw>2)){
+          var dimClipId='shared-dim-outline-'+i;
+          var dimClip=document.createElementNS('http://www.w3.org/2000/svg','clipPath');
+          dimClip.setAttribute('id',dimClipId);dimClip.setAttribute('clipPathUnits','userSpaceOnUse');
+          var dimClipRect=document.createElementNS('http://www.w3.org/2000/svg','rect');
+          dimClipRect.setAttribute('x','0');dimClipRect.setAttribute('y','0');
+          dimClipRect.setAttribute('width','430');dimClipRect.setAttribute('height',String(split));
+          dimClip.appendChild(dimClipRect);defs.appendChild(dimClip);
+          var dimOutline=sharedSvgPath(svg,innerPath,'none',dimStyle.stroke,dimStyle.sw,null,null);
+          dimOutline.setAttribute('clip-path','url(#'+dimClipId+')');
         }
-        if (independentView && !scaleExplorerOpen && independentDiatonicQuality === minorQualityForWheel && minorRootPC === independentDiatonicRootPC) {
-          text(svg, minorX + minorDx, minorY + 9, "center", { size: roleLabelSize, weight: 700, fill: minorText });
+
+        // Outer labels and the separate parent-key/modal-center markers.
+        var majorLabelR=outerOuterR*(207/238);
+        var mx=cx+Math.cos(am)*majorLabelR,my=cy+Math.sin(am)*majorLabelR+7;
+        var parentKeyChordPresent=!!(harmonicMap.inPC[majorPC+':major']||harmonicMap.outPC[majorPC+':major']);
+        var majorInk=majorStyle.text;
+        if(!triadView&&!independentView&&major===parentMajor&&!parentKeyChordPresent&&!scaleExplorerOpen)majorInk='#65e69b';
+        sharedSvgLabel(svg,mx,my,majorLabel,22,majorInk,'triad-major',majorActive&&!scaleExplorerOpen);
+        if(!independentView&&major===parentMajor)text(svg,mx,my+10,'key',{size:9,weight:700,fill:majorInk});
+        if(!triadView&&!independentView&&activeMode!=='ionian'&&modalCenterIsMajor&&majorPC===modalTonicPC)
+          text(svg,mx,my+10,'center',{size:9,weight:700,fill:majorInk});
+        if(independentView&&!scaleExplorerOpen&&independentDiatonicQuality==='major'&&majorPC===independentDiatonicRootPC)
+          text(svg,mx,my+10,'center',{size:9,weight:700,fill:majorInk});
+
+        // Triad's single shared root and small split quality symbols.
+        var ends=sharedHorizontalEnds(polygon,split);
+        var rootFont=rootLabel.length>3?15:rootLabel.length>2?17:20;
+        var rx=(ends[0]+ends[1])/2-(rootLabel.length>2?9:6);
+        var ry=split+rootFont*.36;
+        var minorOn=minorStyle.visible,dimOn=dimStyle.visible;
+        var rootInk=dimOn&&!minorOn?dimStyle.text:minorOn&&!dimOn?minorStyle.text:
+          dimOn&&minorOn?dimStyle.text:'#aeb4b9';
+        var rootText=sharedSvgLabel(svg,rx,ry,rootLabel,rootFont,rootInk,'triad-root',!scaleExplorerOpen&&(dimOn&&minorOn?dimActive:(minorActive||dimActive)));
+        if(dimOn&&(minorOn||dimActive)&&dimStyle.text!==minorStyle.text){
+          // Clip two copies at the real split when the qualities have opposite colors.
+          var upId='shared-upper-'+i,loId='shared-lower-'+i;
+          function clippedLabel(id,upperSide,ink){
+            var cp=document.createElementNS('http://www.w3.org/2000/svg','clipPath');
+            cp.setAttribute('id',id);cp.setAttribute('clipPathUnits','userSpaceOnUse');
+            var rect=document.createElementNS('http://www.w3.org/2000/svg','rect');
+            rect.setAttribute('x','0');rect.setAttribute('width','430');
+            rect.setAttribute('y',upperSide?'0':String(split));
+            rect.setAttribute('height',String(upperSide?split:430-split));
+            cp.appendChild(rect);defs.appendChild(cp);
+            var copy=sharedSvgLabel(svg,rx,ry,rootLabel,rootFont,ink,'triad-root',!scaleExplorerOpen&&minorActive);
+            copy.setAttribute('clip-path','url(#'+id+')');return copy;
+          }
+          rootText.setAttribute('clip-path','url(#'+upId+')');
+          var cp0=document.createElementNS('http://www.w3.org/2000/svg','clipPath');
+          cp0.setAttribute('id',upId);var r0=document.createElementNS('http://www.w3.org/2000/svg','rect');
+          r0.setAttribute('x','0');r0.setAttribute('y','0');r0.setAttribute('width','430');r0.setAttribute('height',String(split));
+          cp0.appendChild(r0);defs.appendChild(cp0);
+          clippedLabel(loId,false,minorStyle.text);
         }
-        (function(mn,md,relMaj,rootPC,isDimOnRoot){ inner.addEventListener("click", function(){
-          if (scaleExplorerOpen && !progressionPlaying) {
-            scaleExplorerToggleChord(scaleExplorerWheelChord(rootPC,isDimOnRoot?"dim":"minor"));
-            return;
-          }
-          if (progressionPlaying) {
-            if (activePitchClass !== null &&
-                (activeQuality === "minor" || activeQuality === "dim") &&
-                rootPC === activePitchClass) {
-              toggleHarmonyHoldForCurrentChord();
-            }
-            return;
-          }
-
-          if (independentView) {
-            if (scaleExplorerOpen) {
-              scaleExplorerToggleChord(rootPC,isDimOnRoot?"dim":"minor",isDimOnRoot?md.slice(0,-1)+"°":md);
-            } else if (independentCircleMode === "diatonic") {
-              stopChordAudition(true);
-              independentDiatonicRootPC = rootPC;
-              independentDiatonicQuality = isDimOnRoot ? "dim" : "minor";
-              render(selectedMajor);
-            } else {
-              startChordAudition(rootPC, isDimOnRoot ? "dim" : "minor", mn, "inner");
-            }
-            return;
-          }
-
-          // Linked stopped-state views keep the circle as the key/center selector.
-          var mode = progressionModeForSelection();
-          stopChordAudition(true);
-          stopArpeggioOnly();
-
-          if (mode !== "ionian") {
-            var rootName = mn.slice(0,-1);
-            var centerKey = canonicalMajorForPitchClass(PC_MAP[rootName]);
-            setSpellingFromSelectedDisplay(md.slice(0,-1), centerKey);
-            selectedMajor = centerKey;
-            render(centerKey);
-            renderProgressionStrip(null, null, false);
-            return;
-          }
-
-          setSpellingFromSelectedDisplay(md.slice(0,-1),relMaj);
-          selectedMajor = relMaj;
-          render(relMaj);
-          renderProgressionStrip(null, null, false);
-        }); })(minor,minorDisplay,major,minorRootPC,diminishedOnThisRoot);
+        var labelWidth=rootText.getComputedTextLength?rootText.getComputedTextLength():rootLabel.length*rootFont*.6;
+        var symX=rx+labelWidth/2+5;
+        var degreeSpec,minorSpec;
+        if(dimOn&&minorOn){degreeSpec={x:symX,y:split-4,size:14,opacity:1};minorSpec={x:symX,y:split+16,size:14,opacity:1};}
+        else if(dimOn){degreeSpec={x:symX-1,y:ry-rootFont*.47,size:15,opacity:1};minorSpec={x:symX+5,y:ry+10,size:11,opacity:.23};}
+        else{minorSpec={x:symX,y:ry,size:14,opacity:minorOn?1:.85};degreeSpec={x:symX+10,y:ry-rootFont*.83,size:11,opacity:.23};}
+        var d=sharedSvgLabel(svg,degreeSpec.x,degreeSpec.y,'°',degreeSpec.size,dimStyle.text,'triad-symbol',dimActive&&!scaleExplorerOpen);
+        d.setAttribute('opacity',String(degreeSpec.opacity));
+        var m=sharedSvgLabel(svg,minorSpec.x,minorSpec.y,'m',minorSpec.size,minorStyle.text,'triad-symbol',minorActive&&!scaleExplorerOpen);
+        m.setAttribute('opacity',String(minorSpec.opacity));
+        if(!triadView&&!independentView&&activeMode!=='ionian'&&!modalCenterIsMajor&&rootPC===modalTonicPC)
+          text(svg,rx,ry+19,'center',{size:9,weight:700,fill:minorOn?minorStyle.text:dimStyle.text});
+        if(independentView&&!scaleExplorerOpen&&independentDiatonicQuality!=='major'&&rootPC===independentDiatonicRootPC)
+          text(svg,rx,ry+19,'center',{size:9,weight:700,fill:independentDiatonicQuality==='dim'?dimStyle.text:minorStyle.text});
+      }
+      // Center's current controls and modal-reference toggle remain unchanged.
+      var disk=circle(svg,cx,cy,innerInnerR,'#111315','#454b51',1.5);
+      if(triadView){
+        var title=window.TriadBridge.centerText();
+        text(svg,cx,cy-5,title.name,{size:22,weight:750,fill:title.target?'#f4cf80':'#abf6c5'});
+        text(svg,cx,cy+18,title.target?'TARGET':'KEY / MODE',{size:10,weight:650,fill:'#b2bdc2'});
+      }else if(independentView){
+        function centerControl(label,y,modeName){
+          var NS='http://www.w3.org/2000/svg';
+          var hit=document.createElementNS(NS,'rect');
+          hit.setAttribute('x',cx-46);hit.setAttribute('y',y-16);
+          hit.setAttribute('width',92);hit.setAttribute('height',25);
+          hit.setAttribute('rx',10);hit.setAttribute('fill','transparent');hit.setAttribute('class','clickable');
+          hit.setAttribute('role','button');
+          hit.setAttribute('aria-label',modeName==='diatonic'?'Diatonic selection mode':'Sound chord mode');
+          hit.addEventListener('click',function(e){
+            e.stopPropagation();if(independentCircleMode===modeName)return;
+            stopChordAudition(true);independentCircleMode=modeName;render(selectedMajor);
+          });svg.appendChild(hit);
+          var active=independentCircleMode===modeName;
+          text(svg,cx,y,label,{size:14,weight:active?850:700,fill:active?'#f2f4f5':'#777e84'});
+        }
+        centerControl('Diatonic',cy-5,'diatonic');centerControl('Sound',cy+20,'sound');
+      }else{
+        disk.setAttribute('class','clickable');disk.setAttribute('role','button');
+        disk.setAttribute('aria-label','Toggle modal analysis reference');
+        disk.addEventListener('click',function(){
+          modeReferenceView=!modeReferenceView;render(selectedMajor);
+          renderProgressionStrip(null,null,false);renderScaleExplorer();
+        });
+        text(svg,cx,cy+5,centerModeLabel(),{size:14,weight:700,fill:'#f2f4f5'});
       }
     }
 
-
     // ---------- Compact category browsers ----------
     var selectorBrowserConfig = {
-      progressionSelect: { label:"Progression", title:"Progression" },
+      progressionSelect: { label:"Progression Selector", title:"Progression Selector" },
       guitarPatternSelect: { label:"Guitar", title:"Guitar Pattern" },
       bassPatternSelect: { label:"Bass", title:"Bass Pattern" },
       rhythmSelect: { label:"Drums", title:"Percussion Rhythm" }
@@ -7808,6 +8043,7 @@ function renderBrowserGrid() {
       fader.addEventListener("change", applyMixerLevels);
     });
     document.getElementById("progressionSelect").addEventListener("change", function(){
+      triadModeOverride=null;
       clearActiveSong();
       discardWorkingProgressionDraft();
       stopChordAudition(true);
@@ -7857,7 +8093,9 @@ function primeAudioSamples(){
       document.removeEventListener("mousedown", bootAudioMouse);
     }, { once: true });
 
-    document.getElementById("scaleExplorerToggle").addEventListener("click",toggleScaleExplorer);
+    document.getElementById("scaleExplorerToggle").addEventListener("click",function(){setCircleAppMode('scale');});
+    document.getElementById("triadModeButton").addEventListener("click",function(){setCircleAppMode('triad');});
+    document.getElementById("progressionModeButton").addEventListener("click",function(){setCircleAppMode('progression');});
     document.getElementById("randomProgressionBtn").addEventListener("click",selectRandomCannedProgression);
     document.getElementById("scaleExplorerReset").addEventListener("click",function(){
       scaleExplorerSelections=[];
@@ -7882,6 +8120,1603 @@ function primeAudioSamples(){
     } else {
       initChoiceBrowsers();
     }
+/* v1.134: Independent theory engine, reusing Circle's sole SVG renderer. */
+
+(()=>{'use strict';
+// Never inherit a visible choice panel from an iOS document-preview snapshot.
+const initialChooser=document.getElementById('sequenceChooser');
+initialChooser.hidden=true;
+initialChooser.classList.remove('is-open');
+const SVG='http://www.w3.org/2000/svg';const $=id=>document.getElementById(id), mod=x=>(x%12+12)%12;
+// On iPhone, Safari and preview wrappers can shrink the *visual* viewport
+// when their browser toolbars appear on the first tap.  Remember the largest
+// available height for the current orientation so the wheel/context/buttons
+// do not suddenly compress. A change in width resets the baseline.
+// Circle owns viewport sizing; no independent Triad viewport controller.
+
+// The wheel uses 12 pitch classes, but letter spellings must reflect the prevailing
+// key. For example: F♯ major has E♯, while D♭ major has G♭, not F♯.
+const KEY_NAMES=['C','D♭','D','E♭','E','F','F♯','G','A♭','A','B♭','B'];
+const N=KEY_NAMES.slice();
+const NATURAL_PCS={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+const LETTERS='CDEFGAB';
+const FLAT_NAMES=['C','D♭','D','E♭','E','F','G♭','G','A♭','A','B♭','B'];
+const SHARP_NAMES=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+function parsePitchClass(token){
+ const m=String(token).match(/^([A-G])([♯♭]{0,2})$/);
+ if(!m)return -1;
+ return mod(NATURAL_PCS[m[1]]+[...m[2]].reduce((a,c)=>a+(c==='♯'?1:-1),0));
+}
+function refreshKeySpellings(){
+ const majorRoot=parentMajorPC();
+ const keyName=KEY_NAMES[majorRoot];
+ const useFlats=keyName.includes('♭')||keyName==='F';
+ const spelling=(useFlats?FLAT_NAMES:SHARP_NAMES).slice();
+ if(majorRoot===0)spelling.splice(0,12,...KEY_NAMES);
+ const firstLetter=LETTERS.indexOf(keyName[0]);
+ for(const [degree,offset] of [0,2,4,5,7,9,11].entries()){
+  const letter=LETTERS[(firstLetter+degree)%7];
+  const pc=mod(majorRoot+offset);
+  let diff=mod(pc-NATURAL_PCS[letter]);
+  if(diff>6)diff-=12;
+  spelling[pc]=letter+(diff>0?'♯'.repeat(diff):diff<0?'♭'.repeat(-diff):'');
+ }
+ N.splice(0,N.length,...spelling);
+}
+const W=[0,7,2,9,4,11,6,1,8,3,10,5];const QUAL={maj:[0,4,7],min:[0,3,7],dim:[0,3,6]};const qName={maj:'major',min:'minor',dim:'diminished'};
+const categories=[['sub','Substitute'],['app','Approach'],['prep','Prepare'],['pro','Prolong'],['dep','Depart'],['col','Color']];
+// Modes are numbered relative to their parent major scale. Keep the identity
+// of a selected target relative to that fixed parent key; a parallel source is
+// additional information, not a change to the target's global Roman numeral.
+const MODE_INDEX={Ionian:1,Dorian:2,Phrygian:3,Lydian:4,Mixolydian:5,Aeolian:6,Locrian:7};
+const numberedMode=mode=>MODE_INDEX[mode]?`${mode} (${MODE_INDEX[mode]}-mode)`:mode;
+function annotateModes(text){return String(text).replace(/\b(Ionian|Dorian|Phrygian|Lydian|Mixolydian|Aeolian|Locrian)\b(?!\s*\(\d-mode\))/g,mode=>numberedMode(mode))}
+const MODE_PARENT_OFFSETS={maj:0,dorian:10,phrygian:8,lydian:7,mixolydian:5,min:3,dim:1};
+const MODE_DESCRIPTORS={maj:'Ionian',dorian:'Dorian',phrygian:'Phrygian',lydian:'Lydian',mixolydian:'Mixolydian',min:'Aeolian',dim:'Locrian'};
+const MODE_ORDINALS={maj:1,dorian:2,phrygian:3,lydian:4,mixolydian:5,min:6,dim:7};
+function parentMajorPC(){return mod(state.key+(MODE_PARENT_OFFSETS[state.mode]||0))}
+function parentMajorName(){return N[parentMajorPC()]}
+
+const state={key:0,mode:'maj',labels:false,target:null,category:'app',selected:null,view:'key',functionFilter:'all'};
+const name=(pc,q)=>N[mod(pc)]+(q==='min'?'m':q==='dim'?'°':''); const ref=(pc,q)=>mod(pc)+':'+q;
+function notes(pc,q){return QUAL[q].map(i=>N[mod(pc+i)]).join('–')}
+const scaleSteps={maj:[0,2,4,5,7,9,11],dorian:[0,2,3,5,7,9,10],phrygian:[0,1,3,5,7,8,10],lydian:[0,2,4,6,7,9,11],mixolydian:[0,2,4,5,7,9,10],min:[0,2,3,5,7,8,10],dim:[0,1,3,5,6,8,10]};
+function palette(){const set=new Set(scaleSteps[state.mode].map(x=>mod(state.key+x)));const m=new Set();for(let r=0;r<12;r++)for(const q of Object.keys(QUAL))if(QUAL[q].every(x=>set.has(mod(r+x))))m.add(ref(r,q));return m}
+function rObj(root,q,real,description,example,source){return {root:mod(root),q,real,description,example,source:source||'Context-dependent'}}
+// STAGE 1C — audited key-aware relationship engine.
+// Every relationship is attached to a prevailing key, a global target function,
+// and (where appropriate) a *possible* local tonicization of the chosen target.
+// The wheel still displays triads; sevenths and bass additions live in details.
+// Stage 2A uses target-relative spellings for applied harmony. In C major,
+// for example, Em's leading-tone triad is D♯° rather than enharmonic E♭°.
+// The fixed circle still groups pitch classes by its prevailing key.
+function spellTargetInterval(rootPc,semitones,letterSteps){
+ const base=N[mod(rootPc)],ix=LETTERS.indexOf(base[0]);
+ const letter=LETTERS[(ix+letterSteps+14)%7],pc=mod(rootPc+semitones);
+ let delta=mod(pc-NATURAL_PCS[letter]);if(delta>6)delta-=12;
+ return letter+(delta>0?'♯'.repeat(delta):delta<0?'♭'.repeat(-delta):'');
+}
+function spelledTriadFromRoot(spelling,q){
+ const pc=parsePitchClass(spelling);if(pc<0)return [];
+ return [0,1,2].map((i)=>{
+  const step=i*2,letter=LETTERS[(LETTERS.indexOf(spelling[0])+step)%7];
+  const pitch=mod(pc+QUAL[q][i]);let diff=mod(pitch-NATURAL_PCS[letter]);if(diff>6)diff-=12;
+  return letter+(diff>0?'♯'.repeat(diff):diff<0?'♭'.repeat(-diff):'');
+ });
+}
+const GLOBAL_FUNCTIONS={
+ maj:[
+  {family:'tonic',short:'tonic I'},
+  {family:'predominant',short:'predominant ii'},
+  {family:'tonic',short:'mediant iii / tonic extension'},
+  {family:'predominant',short:'predominant IV'},
+  {family:'dominant',short:'dominant V'},
+  {family:'tonic',short:'submediant vi / tonic substitute'},
+  {family:'dominant',short:'leading-tone vii° / dominant family'}
+ ],
+ min:[
+  {family:'tonic',short:'minor tonic i'},
+  {family:'predominant',short:'predominant ii°'},
+  {family:'tonic',short:'relative-major ♭III area'},
+  {family:'predominant',short:'predominant iv'},
+  {family:'modal-dominant',short:'modal v (without leading tone)'},
+  {family:'predominant',short:'♭VI / predominant color'},
+  {family:'modal-dominant',short:'modal ♭VII / subtonic'}
+ ]
+};
+// Stage 2C: derive modal SOURCE membership from the actual parallel scales.
+// A chord is marked borrowed only if its triad tones are all in at least one
+// listed parallel mode AND the triad is absent from the current seven notes.
+const PARALLEL_MODES={
+ Ionian:[0,2,4,5,7,9,11],Dorian:[0,2,3,5,7,9,10],
+ Phrygian:[0,1,3,5,7,8,10],Lydian:[0,2,4,6,7,9,11],
+ Mixolydian:[0,2,4,5,7,9,10],Aeolian:[0,2,3,5,7,8,10]
+};
+function modeTriadSources(root,q){
+ return Object.entries(PARALLEL_MODES).filter(([,steps])=>{
+  const notes=new Set(steps.map(x=>mod(state.key+x)));
+  return QUAL[q].every(x=>notes.has(mod(root+x)));
+ }).map(([mode])=>mode);
+}
+function isBorrowedTriad(root,q){return !QUAL[q].every(x=>scalePitchSet().has(mod(root+x)))}
+// MERGER PREPARATION v0.30: cache key/mode/target-specific catalogue data.
+// The active function filter is deliberately NOT part of this cache key.
+// The same relationship objects serve each category selection and popup.
+let relationshipCacheSignature=null;
+let relationshipCacheEntries=null;
+function relationships(){
+ const t=state.target;
+ const signature=state.key+'|'+state.mode+'|'+(t?ref(t.root,t.q):'none');
+ if(relationshipCacheSignature!==signature){
+  relationshipCacheEntries=finalizeRelationshipEntries(buildRelationships());
+  relationshipCacheSignature=signature;
+ }
+ return relationshipCacheEntries;
+}
+// Stage 1: isolated music-theory catalogue generator, independent of DOM updates.
+function buildRelationships(){
+ if(!state.target)return[];
+ const t=state.target,r=t.root,Q=t.q;
+ const ctx=contextAnalysis(t),ordinary=ctx.diatonic&&ctx.degreeIndex>=0;
+ const index=ordinary?ctx.degreeIndex:-1;
+ const minorMode=state.mode==='min',majorMode=state.mode==='maj';
+ const stable=(Q==='maj'||Q==='min');
+ const scale=scalePitchSet();
+ const diatonicTriads=scaleSteps[state.mode].map(d=>{
+  const root=mod(state.key+d);
+  return ['maj','min','dim'].filter(q=>QUAL[q].every(s=>scale.has(mod(root+s)))).map(q=>({root,q}));
+ }).flat();
+ const T=(d,q)=>name(mod(r+d),q);
+ const targetName=name(r,Q);
+ const dominantRoot=mod(r+7);
+ const dominantName=name(dominantRoot,'maj')+'7';
+ const entries=[];
+ const add=(cat,root,q,real,example,description,info={})=>{
+  const pick={...rObj(root,q,real,description,example,info.origin||'Key-aware relationship'),cat,
+   scope:info.scope||'global',strength:info.strength||'Core',
+   functionText:info.functionText||'',globalReason:info.globalReason||'',
+   approachFamily:info.approachFamily||'',substituteFamily:info.substituteFamily||'',spelledTriadRoot:info.spelledTriadRoot||'',
+   originKind:info.originKind||'existing',modalSources:info.modalSources||[],modalPrimary:info.modalPrimary||'',sequence:info.sequence||null};
+  const ident=ref(pick.root,pick.q)+'|'+cat+'|'+pick.real+'|'+pick.example+'|'+pick.originKind;
+  if(!entries.some(e=>e._id===ident)){pick._id=ident;entries.push(pick)}
+ };
+ const tri=(cat,root,q,description,example,info={})=>add(cat,root,q,name(root,q),example,description,info);
+ const upper=(cat,upperRoot,upperQ,bassRoot,result,description,example,info={})=>{
+  const chord=(info.spelledTriadRoot||N[mod(upperRoot)])+(upperQ==='min'?'m':upperQ==='dim'?'°':''),bass=info.bassSpelling||N[mod(bassRoot)];
+  add(cat,upperRoot,upperQ,`${chord}/${bass} = ${result}`,example,description,
+   {...info,scope:info.scope||'upper-structure'});
+ };
+ const iiRoot=mod(r+2),iiQuality=Q==='maj'?'min':'dim';
+ const iiExt=Q==='maj'?'m7':'ø7';
+  const targetGlobal=()=>index>=0?`The target is ${GLOBAL_FUNCTIONS[state.mode]?.[index]?.short||ctx.role} in the prevailing key.`:
+  'This target is outside the prevailing key; these are local, not diatonic, relationships.';
+ const localText=()=>index===0&&ctx.diatonic?'This resolves to the prevailing tonic.':
+  'This may briefly tonicize the target, but does not establish a new prevailing key.';
+
+ // A diminished triad is not a stable local tonic. Its strongest function is
+ // typically as a leading or dominant-family chord, not an arrival target.
+ if(!stable){
+  if(ordinary&&majorMode&&index===6){
+   const dominant=mod(state.key+7);
+   add('sub',dominant,'maj',`${name(dominant,'maj')}7`,`${name(dominant,'maj')}7 → ${name(state.key,'maj')}`,
+    'The prevailing V7 contains the selected vii° as its upper third, fifth, and seventh. These are different realizations of dominant-function harmony.',
+    {substituteFamily:'Dominant family',strength:'Contextual',functionText:'V7 / vii° dominant family',globalReason:'The selected vii° normally pushes toward the prevailing I.'});
+   tri('dep',state.key,'maj','The leading tone resolves up to the prevailing tonic. This is a resolution *from* vii°, not a tonicization *of* vii°.',`${targetName} → ${name(state.key,'maj')}`,{functionText:'vii° → I',globalReason:'Global dominant-to-tonic resolution.'});
+  }else if(ordinary&&minorMode&&index===1){
+   tri('sub',mod(state.key+5),'min',
+    'The natural-minor iv and ii° are both predominant chords, but the diminished fifth in ii° produces a different tension and voice leading. They are contextual functional alternatives, not identical sonorities.',
+    `${name(state.key+5,'min')} → ${name(state.key+7,'maj')}7 → ${name(state.key,'min')}`,
+    {scope:'global',substituteFamily:'Predominant-function exchange',strength:'Contextual',functionText:'iv ↔ ii° as predominant',globalReason:'The prevailing minor center remains unchanged.'});
+   // Parallel Dorian replaces natural-minor ii° with ii minor (raised 6).
+   const r2=mod(state.key+2),modeSources=modeTriadSources(r2,'min');
+   if(!isBorrowedTriad(r2,'min')||!modeSources.includes('Dorian'))throw new Error('Incorrect Dorian minor ii source');
+   const borrowing={scope:'modal',originKind:'modal-interchange',modalSources:modeSources,
+    modalPrimary:'Dorian',origin:'Borrowed from parallel Dorian',strength:'Contextual',
+    globalReason:'Parallel Dorian raises the sixth scale degree without changing the prevailing minor tonic.'};
+   add('sub',r2,'min',name(r2,'min'),`${name(r2,'min')} → ${name(state.key+7,'min')} → ${name(state.key,'min')}`,
+    'Dorian ii minor can replace natural-minor ii° as a less tense modal predominant. The change raises the sixth degree of the prevailing minor collection.',
+    {...borrowing,functionText:'Borrowed ii minor ↔ ii° (predominant)'});
+   add('prep',r2,'min',name(r2,'min'),`${name(r2,'min')} → ${name(state.key+7,'min')} → ${name(state.key,'min')}`,
+    'Borrowed Dorian ii minor prepares modal v minor. This is a modal ii–v–i, not the classical iiø7–V7–i.',
+    {...borrowing,functionText:'Dorian ii → v → i'});
+   tri('dep',mod(state.key+7),'min','The diminished ii° commonly moves into the dominant area. The minor v is modal; a raised-leading-tone V7 is a chromatic alternative.',`${targetName} → ${name(state.key+7,'min')} → ${name(state.key,'min')}`,{functionText:'ii° → v → i',globalReason:'Predominant motion within natural minor.'});
+  }
+  const upperMinor=mod(r+3);
+  upper('col',upperMinor,'min',r,`${N[r]}ø7`,
+   'The minor triad on the diminished root’s minor third adds the seventh when placed above that root.',
+   `${name(upperMinor,'min')}/${N[r]} = ${N[r]}ø7`,
+   {functionText:'Half-diminished seventh extension',globalReason:'An upper-structure sonority, not a second independent triad quality.'});
+  upper('pro',upperMinor,'min',r,`${N[r]}ø7`,
+   'This retains the diminished root while adding the seventh; it colors the sonority without implying a stable tonic.',
+   `${targetName} → ${name(upperMinor,'min')}/${N[r]} → ${targetName}`,
+   {strength:'Contextual',functionText:'Chordal extension',globalReason:'Diminished harmony is ordinarily unstable.'});
+  // Borrowed iv can precede the vii° → I resolution without tonicizing vii°.
+  if(ordinary&&majorMode&&index===6){
+   const br=mod(state.key+5),bsources=modeTriadSources(br,'min');
+   if(!isBorrowedTriad(br,'min')||!bsources.includes('Aeolian'))throw new Error('Borrowed iv must belong to parallel minor');
+   add('prep',br,'min',name(br,'min'),`${name(br,'min')} → ${targetName} → ${name(state.key,'maj')}`,
+    'Borrowed minor iv can move toward the global leading-tone chord and on to I. vii° remains a dominant-family harmony, not a local tonic.',
+    {scope:'modal',originKind:'modal-interchange',modalSources:bsources,modalPrimary:'Aeolian',origin:'Borrowed from parallel Aeolian',
+     strength:'Contextual',functionText:'iv → vii° → I',globalReason:'The global major center remains unchanged.'});
+  }
+  return entries;
+ }
+
+ // STAGE 2A: systematic approaches. Every new entry has a reason, a
+ // context (global vs possible local tonicization), a conventionality level,
+ // and a triad representation. All seventh-chord equations are pitch-checked.
+ // Functional V7/ii denotes "V of ii"; X/Y in *raw data* denotes an upper
+ // triad with a separate bass and is rendered "X with a Y bass" in the UI.
+ const isHome=ctx.diatonic&&t.root===state.key&&t.q===state.mode;
+ const appliedFunction=isHome?'V7 → I/i':`V7/${ctx.functionNumeral}`;
+ const localRole=isHome?'This is the prevailing tonic resolution, not an applied dominant.':
+  `This is a possible local tonicization of ${ctx.functionNumeral}, while the prevailing key remains fixed.`;
+ const domName=spellTargetInterval(r,7,4),dom7=domName+'7',domRoot=mod(r+7);
+ const leadRoot=mod(r+11),leadName=spellTargetInterval(r,11,6);
+ const subRoot=mod(r+1),subName=spellTargetInterval(r,1,1),sub7=subName+'7';
+ const tritoneUpperRoot=mod(r+5),tritoneUpperName=spellTargetInterval(r,5,3);
+ const localInfo=(family,source,strength='Core',functionText=appliedFunction,extra={})=>({
+   scope:'local',origin:source,approachFamily:family,strength,functionText,
+   globalReason:localRole,...extra
+ });
+ // Dominant family: V7 and the diminished triad contained in V7.
+ add('app',domRoot,'maj',dom7,`${dom7} → ${targetName}`,
+  `The local V7 resolves a fifth down to the target. ${localRole} The visible major triad is ${domName}, while the complete dominant also contains a minor seventh.`,
+  localInfo('Dominant V7','Direct dominant'));
+ upper('app',leadRoot,'dim',domRoot,dom7,
+  `The leading-tone diminished triad is the third, fifth and minor seventh of the local V7. Place it above the dominant root to realize the full dominant seventh. ${localRole}`,
+  `${leadName}°/${domName} = ${dom7} → ${targetName}`,
+  localInfo('Dominant V7','Upper-triad realization of dominant','Core',appliedFunction,{spelledTriadRoot:leadName,bassSpelling:domName}));
+ // Direct vii° is not a synonymous label for V7: the bass and context differ.
+ add('app',leadRoot,'dim',`${leadName}°`,`${leadName}° → ${targetName}`,
+  `The diminished triad built on the target's raised leading tone resolves upward by semitone. ${localRole}`,
+  localInfo('Leading-tone diminished','Direct vii° approach','Core',`vii°/${ctx.functionNumeral}`,{spelledTriadRoot:leadName}));
+ // Seventh on the local leading tone is normally ø7 before a major tonic,
+ // but °7 in harmonic minor when approaching a minor tonic.
+ const leadSeventh=leadName+(Q==='maj'?'ø7':'°7');
+ add('app',leadRoot,'dim',leadSeventh,`${leadSeventh} → ${targetName}`,
+  Q==='maj'?`The leading-tone seventh to a major target is normally half-diminished: 1–♭3–♭5–♭7 above its own root. ${localRole}`:
+    `For a minor target, the leading-tone seventh commonly uses a fully diminished seventh from harmonic minor. ${localRole}`,
+  localInfo('Leading-tone diminished',Q==='maj'?'Leading-tone half-diminished seventh':'Harmonic-minor fully diminished seventh','Core',`vii${Q==='maj'?'ø7':'°7'}/${ctx.functionNumeral}`,{spelledTriadRoot:leadName}));
+ const seventhUpper=mod(r+2),seventhUpperQ=Q==='maj'?'min':'dim',seventhUpperName=spellTargetInterval(r,2,1);
+ upper('app',seventhUpper,seventhUpperQ,leadRoot,leadSeventh,
+  `This upper triad contributes the third, fifth and seventh of the local leading-tone seventh, with its root in the bass. ${localRole}`,
+  `${seventhUpperName}${seventhUpperQ==='min'?'m':'°'}/${leadName} = ${leadSeventh} → ${targetName}`,
+  localInfo('Leading-tone diminished','Upper triad of leading-tone seventh','Core',`vii${Q==='maj'?'ø7':'°7'}/${ctx.functionNumeral}`,{spelledTriadRoot:seventhUpperName,bassSpelling:leadName}));
+ // Tritone substitute: ♭II7 uses the same 3rd/7th guide tones as V7,
+ // enharmonically. It approaches chromatically from above.
+ add('app',subRoot,'maj',sub7,`${sub7} → ${targetName}`,
+  `A tritone substitute of the local V7 approaches from a semitone above; its third and seventh exchange the dominant's guide tones. ${localRole}`,
+  localInfo('Tritone substitute','SubV7 / chromatic dominant','Contextual',`SubV7/${ctx.functionNumeral}`,{spelledTriadRoot:subName}));
+ upper('app',tritoneUpperRoot,'dim',subRoot,sub7,
+  `The diminished triad on the third of ♭II7 supplies the third, fifth and seventh; the ♭II bass completes the tritone-substitute dominant. ${localRole}`,
+  `${tritoneUpperName}°/${subName} = ${sub7} → ${targetName}`,
+  localInfo('Tritone substitute','Upper structure of SubV7','Contextual',`SubV7/${ctx.functionNumeral}`,{spelledTriadRoot:tritoneUpperName,bassSpelling:subName}));
+ // Chromatic neighbors sound different from altered dominant chords. They
+ // must not be presented as interchangeable dominant *functions*.
+ const lowerNeighborRoot=mod(r+11),lowerNeighborName=leadName;
+ add('app',subRoot,'maj',`${subName} (major triad)`,`${subName} → ${targetName}`,
+  `A major triad one semitone above the target may side-slip down chromatically. It is NOT automatically a tritone-substitute dominant: that reading requires the seventh and context.`,
+  localInfo('Chromatic neighbor','Upper chromatic side-slip','Exploratory','Upper-neighbor triad',{spelledTriadRoot:subName}));
+ add('app',lowerNeighborRoot,'maj',`${lowerNeighborName} (major triad)`,`${lowerNeighborName} → ${targetName}`,
+  `A major triad one semitone below the target may approach by parallel chromatic motion. This is a coloristic side-slip, not an ordinary V–I cadence.`,
+  localInfo('Chromatic neighbor','Lower chromatic side-slip','Exploratory','Lower-neighbor triad',{spelledTriadRoot:lowerNeighborName}));
+ // Major targets may also accept the jazz backdoor ♭VII7 → I. Its upper
+ // diminished triad is the third, fifth, flat seventh of that dominant chord.
+ if(Q==='maj'){
+  const backRoot=mod(r+10),backName=spellTargetInterval(r,10,6),back7=backName+'7';
+  const backUpperRoot=mod(r+2),backUpperName=spellTargetInterval(r,2,1);
+  add('app',backRoot,'maj',back7,`${back7} → ${targetName}`,
+   `The backdoor ♭VII7 can approach a major target through smooth voice leading. It is contextual (often jazz/modal), not the ordinary authentic dominant.`,
+   localInfo('Backdoor ♭VII7','Backdoor dominant','Contextual',`♭VII7 → ${ctx.functionNumeral}`));
+  upper('app',backUpperRoot,'dim',backRoot,back7,
+   `The diminished triad on the third of ♭VII7 supplies the third, fifth and minor seventh; the ♭VII bass completes a backdoor dominant.`,
+   `${backUpperName}°/${backName} = ${back7} → ${targetName}`,
+   localInfo('Backdoor ♭VII7','Backdoor upper structure','Contextual',`♭VII7 → ${ctx.functionNumeral}`,{spelledTriadRoot:backUpperName,bassSpelling:backName}));
+ }
+
+ // 1B.2: Predominant preparation of the LOCAL V7. For minor destinations,
+ // iiø7 is the conventional jazz / harmonic-minor setting.
+ add('prep',iiRoot,iiQuality,`${N[iiRoot]}${iiExt}`,
+  `${N[iiRoot]}${iiExt} → ${dominantName} → ${targetName}`,
+  `The local ii chord prepares the applied dominant: ${Q==='maj'?'ii7–V7–I':'iiø7–V7–i'}. ${targetGlobal()}`,
+  {scope:'local',origin:'Applied ii–V',functionText:Q==='maj'?'ii7–V7–I of target':'iiø7–V7–i of target',globalReason:localText()});
+ const upperRoot=mod(r+5),upperQ=Q==='maj'?'maj':'min';
+ upper('prep',upperRoot,upperQ,iiRoot,`${N[iiRoot]}${iiExt}`,
+  'The upper triad over the supertonic bass realizes the complete local predominant seventh, which then moves to the local V7.',
+  `${name(upperRoot,upperQ)}/${N[iiRoot]} → ${dominantName} → ${targetName}`,
+  {scope:'upper-structure',origin:'Predominant upper structure',functionText:'Upper triad of local ii7 / iiø7',globalReason:localText()});
+
+ // 1B.3: Basic color/upper structures are determined by the target quality;
+ // they are not automatically global functional substitutes.
+ if(Q==='maj'){
+  upper('col',mod(r+4),'min',r,`${N[r]}maj7`,
+   'A minor triad on the major third supplies the third, fifth and major seventh of a major-seventh harmony.',
+   `${name(r+4,'min')}/${N[r]} = ${N[r]}maj7`,
+   {origin:'Major-seventh upper structure',functionText:'Extension of target'});
+  upper('col',mod(r+7),'maj',r,`${N[r]}maj9 (third omitted)`,
+   'The fifth-related major triad gives fifth, major seventh and ninth above the target bass; the target third is omitted.',
+   `${name(r+7,'maj')}/${N[r]} → ${targetName}`,
+   {strength:'Contextual',origin:'Partial major-ninth voicing',functionText:'Color: third omitted'});
+ }else{
+  upper('col',mod(r+3),'maj',r,`${N[r]}m7`,
+   'The relative-major triad provides the minor third, fifth and minor seventh above the target bass.',
+   `${name(r+3,'maj')}/${N[r]} = ${N[r]}m7`,
+   {origin:'Minor-seventh upper structure',functionText:'Extension of target'});
+ }
+
+ // STAGE 2B — substitution catalogue. The selected target is interpreted in
+ // its prevailing key; a pitch-overlap is never automatically asserted to
+ // replace its FUNCTION. Upper structures are literal pitch-set equations,
+ // not separate tonicizations or new chord qualities on the circle.
+ const buildSubstitutes=()=>{
+  // Replace the provisional Stage 1C substitute entries while leaving all
+  // five other categories, including Stage 2A Approach, entirely intact.
+  for(let i=entries.length-1;i>=0;i--)if(entries[i].cat==='sub')entries.splice(i,1);
+  const base=(family,options={})=>({substituteFamily:family,scope:'global',strength:'Contextual',...options});
+  const functional=(root,q,description,example,info={})=>
+   tri('sub',root,q,description,example,base('Functional exchange',info));
+  const upperSub=(root,q,bass,result,description,example,info={})=>
+   upper('sub',root,q,bass,result,description,example,base('Exact upper-triad realization',
+    {scope:'upper-structure',strength:'Core',...info}));
+  const shared=(root,q,count)=>{
+   const n=name(root,q);
+   tri('sub',root,q,
+    `This triad shares ${count} of the target's three pitch classes. That supports smooth voice leading or a conditional reharmonization, but it does not establish the same harmonic function. Check the melody and especially the bass.`,
+    `${targetName} → ${n} → ${targetName}`,
+    base('Common-tone alternative',{scope:'shared-tone',strength:'Exploratory',
+     functionText:`${count} shared chord tones; not necessarily a functional substitute`,
+     globalReason:'The target keeps its prevailing-key role unless the context establishes another one.'}));
+  };
+  const key=state.key,tonic=name(key,state.mode);
+  // A chord with the original root/bass and a different upper triad produces
+  // an extended REALIZATION of that target, rather than a new triadic function.
+  if(Q==='maj' && !(ordinary&&majorMode&&index===4)){
+   const u=mod(r+4),rootLabel=N[r];
+   upperSub(u,'min',r,`${rootLabel}maj7`,
+    'The minor triad built on the target’s major third supplies 3, 5, and 7 above the target root. Together with the target bass it produces a complete major-seventh chord; the upper triad alone is not an unconditional replacement.',
+    `${name(u,'min')}/${rootLabel} = ${rootLabel}maj7 → ${targetName}`,
+    {functionText:'Major-seventh upper-structure voicing'});
+  }else if(Q==='min' && !(ordinary&&majorMode&&index===1)){
+   const u=mod(r+3),rootLabel=N[r];
+   upperSub(u,'maj',r,`${rootLabel}m7`,
+    'The major triad built on the target’s minor third supplies ♭3, 5, and ♭7 above the target root. The full bass-plus-triad sonority is a minor-seventh chord, not a new functional destination.',
+    `${name(u,'maj')}/${rootLabel} = ${rootLabel}m7 → ${targetName}`,
+    {functionText:'Minor-seventh upper-structure voicing'});
+  }
+  // Functional exchange exists only where the global context warrants it.
+  if(ordinary&&majorMode){
+   if(index===0){ // I
+    functional(key+9,'min',
+     'The global vi shares two notes with I and can occupy the tonic-prolongation area when melody and bass permit. It changes the bass and is not an exact replacement for every tonic.',
+     `${name(key,'maj')} → ${name(key+9,'min')} → ${name(key,'maj')}`,
+     {functionText:'I ↔ vi in the tonic family',globalReason:'Tonic-family substitution within the prevailing major key.'});
+   }else if(index===1||index===3){ // ii and IV: related predominant functions
+    const other=index===1?{root:mod(key+5),q:'maj'}:{root:mod(key+2),q:'min'};
+    functional(other.root,other.q,
+     'ii and IV share two chord tones and commonly occupy the same predominant region leading to V. They are functionally related but not identical under every melody or bass line.',
+     `${name(other.root,other.q)} → ${name(key+7,'maj')}7 → ${name(key,'maj')}`,
+     {functionText:'ii ↔ IV predominant-function exchange',globalReason:'This is a GLOBAL predominant relationship, not a local ii–V toward the selected target.'});
+    // Over the root of ii, IV makes ii7. Over IV, vi creates IVmaj7.
+    if(index===1){
+     const u=mod(key+5),b=mod(key+2);
+     upperSub(u,'maj',b,`${N[b]}m7`,
+      'The IV triad supplies the minor third, fifth, and minor seventh of the prevailing ii7 when played above ii in the bass.',
+      `${name(u,'maj')}/${N[b]} = ${N[b]}m7 → ${name(key+7,'maj')}7`,
+      {functionText:'IV upper structure of ii7'});
+    }
+   }else if(index===2){ // iii
+    functional(key,'maj',
+     'iii shares two tones with I and often participates in tonic prolongation, but replacing iii with I may alter the bass and overall direction of a progression.',
+     `${name(key,'maj')} → ${targetName} → ${name(key+9,'min')}`,
+     {strength:'Contextual',functionText:'iii ↔ I tonic-area association',globalReason:'The mediant’s role remains context-sensitive.'});
+   }else if(index===4){ // V / dominant family
+    const b=mod(key+11),d=mod(key+7),tgt7=N[d]+'7';
+    functional(b,'dim',
+     'Global vii° shares the guide tones of V7 and can express dominant tension without the dominant root. vii° is not the same chord as the bare V major triad.',
+     `${name(b,'dim')} → ${name(key,'maj')}`,
+     {functionText:'V7 ↔ vii° dominant family',globalReason:'The selected V leads toward the global I.'});
+    upperSub(b,'dim',d,tgt7,
+     'The vii° triad contains the third, fifth, and seventh of the global V7. Adding V in the bass produces the complete dominant seventh with exactly the same pitch classes.',
+     `${name(b,'dim')}/${N[d]} = ${tgt7} → ${name(key,'maj')}`,
+     {functionText:'Rooted realization of V7'});
+    const subRoot=mod(d+6),subName=spellTargetInterval(d,6,4);
+    add('sub',subRoot,'maj',subName+'7',`${subName}7 → ${name(key,'maj')}`,
+     'SubV7 substitutes for the global V7 when both resolve toward I. Their thirds and sevenths form the same tritone enharmonically, but they have different roots and chromatic bass movement. The bare major triad alone does not supply this equivalence.',
+     base('Tritone substitution',{scope:'global',strength:'Contextual',functionText:'SubV7/I replaces V7/I',globalReason:'The substitute replaces global dominant-seventh FUNCTION, not the major triad by itself.',spelledTriadRoot:subName}));
+    const up=mod(subRoot+4),upName=spellTargetInterval(subRoot,4,2);
+    upperSub(up,'dim',subRoot,subName+'7',
+     'The diminished triad on the third of SubV7 supplies its third, fifth, and seventh. The substitute dominant’s root in the bass completes its seventh chord.',
+     `${upName}°/${subName} = ${subName}7 → ${name(key,'maj')}`,
+     {substituteFamily:'Tritone substitution / upper structure',functionText:'SubV7 upper structure',spelledTriadRoot:upName,bassSpelling:subName});
+   }else if(index===5){ // vi
+    functional(key,'maj',
+     'I and vi can exchange tonic-area roles when the melody permits; their bass notes differ, so this is not an identical voicing.',
+     `${name(key+9,'min')} → ${name(key,'maj')} → ${name(key+9,'min')}`,
+     {functionText:'vi ↔ I tonic-family substitution',globalReason:'Global tonic prolongation, not a local tonicization of vi.'});
+   }
+  }else if(ordinary&&minorMode){
+   if(index===0){
+    functional(key+3,'maj',
+     'The relative-major ♭III shares two notes with i and can temporarily support a tonic-area passage, but it may also suggest a different tonal center. This is a contextual relation, not an equivalent minor tonic.',
+     `${tonic} → ${name(key+3,'maj')} → ${tonic}`,
+     {strength:'Contextual',functionText:'i ↔ ♭III, relative-major association'});
+   }else if(index===2){
+    functional(key,'min',
+     'The relative major and minor tonic share tones but are not interchangeable when the music establishes one as the center. The bass and cadence determine whether this resembles substitution or a shift of center.',
+     `${name(key+3,'maj')} → ${name(key,'min')}`,
+     {strength:'Contextual',functionText:'♭III ↔ i, relative relationship'});
+   }else if(index===3){
+    functional(key+2,'dim',
+     'Natural-minor ii° and iv both serve predominant roles, but their dissonance and bass motion differ. The altered V7 often follows in a harmonic-minor cadence.',
+     `${name(key+2,'dim')} → ${name(key+7,'maj')}7 → ${tonic}`,
+     {functionText:'iv ↔ ii° predominant-function exchange',globalReason:'The target is iv in the prevailing minor collection.'});
+    functional(key+8,'maj',
+     'The ♭VI chord shares two pitches with iv and may overlap with its predominant or predominant-adjacent function, depending on bass and melody.',
+     `${name(key+8,'maj')} → ${name(key+7,'maj')}7 → ${tonic}`,
+     {strength:'Contextual',functionText:'iv ↔ ♭VI predominant-area alternative'});
+   }else if(index===5){
+    functional(key+5,'min',
+     '♭VI and iv share two notes and may provide similar predominant color before the dominant, but they are not universally interchangeable.',
+     `${name(key+5,'min')} → ${name(key+7,'maj')}7 → ${tonic}`,
+     {functionText:'♭VI ↔ iv predominant-area alternative'});
+   }
+  }
+  // Secondary pitch-overlap suggestions for all stable targets. Only triads
+  // wholly in the CURRENT seven-note collection qualify. This avoids quietly
+  // presenting borrowed/modal interchange as an ordinary substitution (2C).
+  const targetSet=new Set(QUAL[Q].map(x=>mod(r+x)));
+  // A triad may have BOTH a literal upper-structure use and a looser
+  // common-tone use. Retain the latter as a separate detail interpretation.
+  // But do not rebrand established functional alternatives as mere overlaps.
+  const functionalRoots=new Set(entries.filter(e=>e.cat==='sub'&&e.substituteFamily==='Functional exchange').map(e=>ref(e.root,e.q)));
+  const candidates=diatonicTriads
+   .filter(e=>ref(e.root,e.q)!==ref(r,Q)&&!functionalRoots.has(ref(e.root,e.q)))
+   .map(e=>({...e,shared:QUAL[e.q].filter(d=>targetSet.has(mod(e.root+d))).length}))
+   .filter(e=>e.shared>=2)
+   .sort((a,b)=>b.shared-a.shared||a.root-b.root||a.q.localeCompare(b.q));
+  for(const option of candidates.slice(0,3))shared(option.root,option.q,option.shared);
+ };
+
+ // Global-key analysis is distinctive for I, ii, iii, IV, V, vi, and vii°.
+ // A chromatic target gets only the local possibilities above, not invented
+ // global tonic/predominant/dominant functions.
+ if(!ordinary){
+  buildSubstitutes();
+  if(state.mode==='dim'){
+   return entries.filter(e=>e.cat==='col'||e.cat==='sub');
+  }
+  return entries;
+ }
+ if(majorMode){
+  const K=state.key;
+  const a=(d,q)=>({root:mod(K+d),q});
+  const progression=(...ch)=>ch.map(c=>name(c.root,c.q)).join(' → ');
+  if(index===0){ // I
+   tri('sub',K+9,'min','The vi chord shares the tonic’s root and third as common tones and can fill a tonic-substitute role in a suitable melody.',progression(a(0,'maj'),a(9,'min'),a(0,'maj')),{functionText:'vi as tonic substitute',globalReason:'Tonic-family connection',strength:'Contextual'});
+   upper('sub',K+4,'min',K,`${N[K]}maj7`,'The iii minor triad becomes a tonic-major-seventh harmony over the global tonic bass.',`${name(K+4,'min')}/${N[K]} → ${name(K,'maj')}`,{functionText:'iii upper structure / tonic',globalReason:'Harmonic prolongation of I'});
+   tri('prep',K+5,'maj','The global IV is a predominant that prepares V before resolving to the prevailing I.',`${name(K+5,'maj')} → ${name(K+7,'maj')}7 → ${name(K,'maj')}`,{functionText:'IV → V7 → I',globalReason:'Global predominant, not a tonicization of another chord.'});
+   tri('app',K+5,'maj','IV may return directly to I in a plagal motion. This is a weaker approach than dominant V7.',`${name(K+5,'maj')} → ${name(K,'maj')}`,{scope:'global',strength:'Contextual',origin:'Plagal approach',functionText:'IV → I'});
+   upper('pro',K+5,'maj',K,'I with suspended fourth and sixth',
+     'A IV triad over the tonic pedal adds a temporary neighboring/suspended sonority before the tonic returns.',
+     `${name(K,'maj')} → ${name(K+5,'maj')}/${N[K]} → ${name(K,'maj')}`,{functionText:'Tonic pedal / neighboring IV',globalReason:'Prolongs I rather than tonicizing IV.'});
+   tri('dep',K+5,'maj','A typical departure from I enters predominant IV before moving to V and back to I.',`${name(K,'maj')} → ${name(K+5,'maj')} → ${name(K+7,'maj')}7 → ${name(K,'maj')}`,{functionText:'I → IV → V7 → I'});
+   tri('dep',K+9,'min','vi leads into the tonic-substitute area without implying a new tonic.',`${name(K,'maj')} → ${name(K+9,'min')} → ${name(K+2,'min')} → ${name(K+7,'maj')}7`,{functionText:'I → vi → ii → V7',strength:'Contextual'});
+  }else if(index===1){ // ii
+   tri('sub',K+5,'maj','The IV triad shares two tones with ii and may perform a similar global predominant function.',`${name(K+5,'maj')} → ${name(K+7,'maj')}7 → ${name(K,'maj')}`,{functionText:'IV substitutes for ii / predominant family',strength:'Contextual'});
+   tri('pro',K+5,'maj','ii and IV can alternate within a predominant passage; the bass and melody determine whether this is prolongation or a change of chord.',`${targetName} → ${name(K+5,'maj')} → ${targetName}`,{functionText:'Predominant-area neighbor',strength:'Contextual'});
+   tri('dep',K+7,'maj','In the prevailing C-major-type key, ii ordinarily departs toward the global dominant V before resolving to I.',`${targetName} → ${name(K+7,'maj')}7 → ${name(K,'maj')}`,{functionText:'ii → V7 → I',globalReason:'Global resolution, distinct from the applied A7 → ii.'});
+  }else if(index===2){ // iii
+   tri('sub',K,'maj','iii shares two tones with I and may support tonic prolongation, but is not an unconditional substitute.',`${name(K,'maj')} → ${targetName} → ${name(K+9,'min')}`,{strength:'Contextual',functionText:'Tonic/mediant association'});
+   tri('pro',K,'maj','The I–iii–I motion extends tonic harmony through two shared tones.',`${name(K,'maj')} → ${targetName} → ${name(K,'maj')}`,{strength:'Contextual',functionText:'Tonic extension'});
+   tri('dep',K+9,'min','iii often moves to vi in a diatonic descending-fifths progression.',`${targetName} → ${name(K+9,'min')} → ${name(K+2,'min')} → ${name(K+7,'maj')}7`,{functionText:'iii → vi → ii → V7'});
+   tri('dep',K+5,'maj','iii may move by step to IV rather than behaving as a stable tonic.',`${targetName} → ${name(K+5,'maj')} → ${name(K+7,'maj')}7`,{strength:'Contextual',functionText:'iii → IV → V7'});
+  }else if(index===3){ // IV
+   tri('sub',K+2,'min','ii and IV have overlapping predominant function in the prevailing major key.',`${name(K+2,'min')}7 → ${name(K+7,'maj')}7 → ${name(K,'maj')}`,{functionText:'ii as predominant substitute',strength:'Contextual'});
+   tri('pro',K+2,'min','The IV and ii chords can prolong the predominant region, although they are not interchangeable in every voice-leading context.',`${targetName} → ${name(K+2,'min')}7 → ${targetName}`,{strength:'Contextual',functionText:'Predominant prolongation'});
+   tri('dep',K+7,'maj','The principal global role of IV is to prepare the dominant V, which resolves to the prevailing I.',`${targetName} → ${name(K+7,'maj')}7 → ${name(K,'maj')}`,{functionText:'IV → V7 → I'});
+   tri('dep',K,'maj','The plagal IV–I motion returns directly to the prevailing tonic.',`${targetName} → ${name(K,'maj')}`,{functionText:'IV → I (plagal)'});
+  }else if(index===4){ // V
+   upper('sub',K+11,'dim',K+7,`${N[mod(K+7)]}7`,
+    'The global vii° triad is the third, fifth and seventh of V7, so it belongs to the dominant family.',
+    `${name(K+11,'dim')}/${N[mod(K+7)]} = ${N[mod(K+7)]}7 → ${name(K,'maj')}`,
+    {functionText:'vii° upper structure of V7',globalReason:'Global dominant-family relation'});
+   upper('pro',K+11,'dim',K+7,`${N[mod(K+7)]}7`,
+    'Adding the vii° upper triad to a V bass turns V into V7, increasing dominant tension without changing harmonic destination.',
+    `${targetName} → ${name(K+11,'dim')}/${N[mod(K+7)]} → ${name(K,'maj')}`,
+    {functionText:'V → V7',globalReason:'Dominant prolongation'});
+   tri('dep',K,'maj','V resolves to the prevailing I; no tonicization of a different key is required.',`${targetName}7 → ${name(K,'maj')}`,{functionText:'V7 → I'});
+   tri('dep',K+9,'min','V can resolve deceptively to vi instead of I.',`${targetName}7 → ${name(K+9,'min')}`,{strength:'Contextual',functionText:'V7 → vi (deceptive)'});
+  }else if(index===5){ // vi
+   upper('sub',K,'maj',K+9,`${N[mod(K+9)]}m7`,
+    'The global I major triad over vi’s root makes vi7; vi can also substitute for I in some tonic-prolonging contexts.',
+    `${name(K,'maj')}/${N[mod(K+9)]} → ${targetName}`,
+    {functionText:'I upper structure of vi7',globalReason:'Tonic-family link',strength:'Contextual'});
+   tri('app',K+7,'maj','The global V7 can resolve deceptively to vi instead of I. This is a global-key effect, not necessarily V7/vi.',`${name(K+7,'maj')}7 → ${targetName}`,{scope:'global',origin:'Deceptive resolution',strength:'Contextual',functionText:'V7 → vi'});
+   tri('pro',K,'maj','vi and I can alternate in a tonic-prolonging passage, but this depends on the melody and bass.',`${targetName} → ${name(K,'maj')} → ${targetName}`,{strength:'Contextual',functionText:'vi ↔ I tonic area'});
+   tri('dep',K+2,'min','vi can move to ii in a sequence of descending fifths before V and I.',`${targetName} → ${name(K+2,'min')} → ${name(K+7,'maj')}7 → ${name(K,'maj')}`,{functionText:'vi → ii → V7 → I'});
+  }
+ }else if(minorMode){
+  const K=state.key,minorTonic=name(K,'min'),minorV=name(K+7,'min'),minorIV=name(K+5,'min');
+  const a=(d,q)=>name(K+d,q);
+  if(index===0){ // i
+   upper('sub',K+3,'maj',K,`${N[K]}m7`,
+    'The relative major over the minor tonic supplies i7; it can also suggest the relative-major area without establishing modulation.',
+    `${a(3,'maj')}/${N[K]} → ${minorTonic}`,
+    {strength:'Contextual',functionText:'i / relative-major relationship'});
+   tri('pro',K+3,'maj','The relative-major chord can act as a neighboring tonic-area harmony.',`${minorTonic} → ${a(3,'maj')} → ${minorTonic}`,{strength:'Contextual',functionText:'i ↔ ♭III'});
+   tri('dep',K+5,'min','Natural-minor tonic commonly departs toward iv.',`${minorTonic} → ${minorIV} → ${minorV} → ${minorTonic}`,{functionText:'i → iv → v → i (modal)'});
+   tri('dep',K+8,'maj','♭VI provides a characteristic minor-key departure.',`${minorTonic} → ${a(8,'maj')} → ${minorIV} → ${minorTonic}`,{strength:'Contextual',functionText:'i → ♭VI → iv'});
+  }else if(index===1){ // ii°
+   tri('sub',K+5,'min','The iv chord can sometimes carry a related predominant role, though ii° and iv have different dissonance profiles.',`${minorIV} → ${a(7,'maj')}7 → ${minorTonic}`,{strength:'Contextual',functionText:'iv and ii° predominant area'});
+   tri('dep',K+7,'maj','ii° ordinarily moves into a raised-leading-tone dominant V7, which is outside natural minor.',`${targetName} → ${a(7,'maj')}7 → ${minorTonic}`,{functionText:'ii° → V7 → i',globalReason:'V7 is harmonic-minor alteration.'});
+  }else if(index===2){ // bIII
+   tri('sub',K,'min','The relative major and minor tonic may share a broad tonal area, but are not identical functions.',`${a(3,'maj')} → ${minorTonic}`,{strength:'Contextual',functionText:'Relative-major / minor-tonic relationship'});
+   tri('dep',K+10,'maj','In natural minor, ♭VII often approaches ♭III through a modal fifth relation.',`${a(3,'maj')} → ${a(10,'maj')} → ${a(3,'maj')}`,{strength:'Contextual',functionText:'♭III ↔ ♭VII'});
+  }else if(index===3){ // iv
+   tri('sub',K+2,'dim','ii° and iv can both prepare the global dominant, with distinct voice leading.',`${a(2,'dim')} → ${a(7,'maj')}7 → ${minorTonic}`,{strength:'Contextual',functionText:'Predominant family ii° ↔ iv'});
+   tri('pro',K+8,'maj','♭VI and iv can span the predominant region of natural minor.',`${minorIV} → ${a(8,'maj')} → ${minorIV}`,{strength:'Contextual',functionText:'Minor predominant area'});
+   tri('dep',K+7,'maj','iv can prepare the chromatically strengthened global V7, which then resolves to i.',`${minorIV} → ${a(7,'maj')}7 → ${minorTonic}`,{functionText:'iv → V7 → i',globalReason:'The V7 introduces the raised leading tone.'});
+  }else if(index===4){ // v
+   tri('sub',K+10,'maj','The ♭VII and v chords share two notes, but their modal functions are not identical.',`${minorV} → ${a(10,'maj')} → ${minorTonic}`,{strength:'Contextual',functionText:'Modal v / ♭VII neighboring area'});
+   tri('dep',K,'min','Natural-minor v can resolve to i without a raised leading tone; this is weaker than chromatic V7 → i.',`${minorV} → ${minorTonic}`,{functionText:'v → i (modal)'});
+  }else if(index===5){ // bVI
+   tri('sub',K+5,'min','♭VI and iv can participate in the same predominant region, though they are not interchangeable in all passages.',`${a(8,'maj')} → ${minorIV} → ${a(7,'maj')}7`,{strength:'Contextual',functionText:'♭VI / iv area'});
+   tri('dep',K+5,'min','♭VI often departs to iv, then to dominant.',`${a(8,'maj')} → ${minorIV} → ${a(7,'maj')}7 → ${minorTonic}`,{functionText:'♭VI → iv → V7 → i'});
+  }else if(index===6){ // bVII
+   tri('dep',K,'min','The subtonic ♭VII may move directly to the modal tonic i, without strong leading-tone pull.',`${a(10,'maj')} → ${minorTonic}`,{strength:'Contextual',functionText:'♭VII → i (modal)'});
+   tri('dep',K+3,'maj','♭VII often moves to ♭III, the relative-major chord.',`${a(10,'maj')} → ${a(3,'maj')}`,{functionText:'♭VII → ♭III'});
+  }
+ }
+ // STAGE 2C — key-aware modal interchange. The borrowed source is a
+ // PARALLEL mode of the prevailing tonic, NOT a new key or a mode of the
+ // selected target. These entries are kept in their existing functional
+ // categories, and can be isolated by the independent origin filter.
+ const buildModalInterchange=()=>{
+  if(!ordinary||!(majorMode||minorMode))return; // Locrian is deferred: no stable tonal center.
+  const K=state.key,home=name(K,state.mode),globalV=name(K+7,'maj')+'7';
+  const n=(offset,q)=>name(mod(K+offset),q);
+  const addBorrow=(cat,offset,q,source,functionName,description,example,strength='Contextual',options={})=>{
+   const root=mod(K+offset),modes=modeTriadSources(root,q);
+   if(!isBorrowedTriad(root,q)||!modes.includes(source))throw new Error(`Incorrect modal borrowing ${source} ${n(offset,q)} in ${home}`);
+   const info={scope:'modal',originKind:'modal-interchange',modalSources:modes,modalPrimary:source,
+    origin:'Borrowed from parallel '+source,approachFamily:'',substituteFamily:'',
+    strength,functionText:functionName,
+    globalReason:`The prevailing tonic remains unchanged. ${source} names a PARALLEL source collection; it does not prove modulation or an applied dominant.`,...options};
+   add(cat,root,q,options.real||n(offset,q),example,description,info);
+  };
+  const addBorrowUpper=(cat,offset,q,bassOffset,result,source,functionName,description,example,strength='Contextual')=>{
+   const root=mod(K+offset),modes=modeTriadSources(root,q);
+   if(!isBorrowedTriad(root,q)||!modes.includes(source))throw new Error(`Incorrect modal upper triad ${n(offset,q)} from ${source}`);
+   // Exact chord equations are also checked by the existing Stage 2A–2B testing.
+   upper(cat,root,q,K+bassOffset,result,description,example,{scope:'modal',originKind:'modal-interchange',
+    modalSources:modes,modalPrimary:source,origin:'Parallel '+source+' upper structure',
+    strength,functionText:functionName,
+    globalReason:`The upper triad is borrowed from parallel ${source}; the bass must also be considered in the FULL harmony. This does not change the prevailing key.`});
+  };
+  if(majorMode){
+   // Shared major-key resources: borrowed iv, ♭III, ♭VI, ♭VII, v, ♭II,
+   // plus Lydian II. Each has a deliberately targeted musical destination.
+   switch(index){
+    case 0: // I
+     addBorrow('app',5,'min','Aeolian','iv → I (minor-plagal)',
+      'The borrowed minor iv returns to I with its lowered third resolving toward scale degree 5. This is a minor-plagal approach, NOT an authentic dominant.',`${n(5,'min')} → ${home}`,'Core');
+     addBorrow('app',10,'maj','Mixolydian','♭VII → I (modal)',
+      'Parallel Mixolydian supplies ♭VII, which can approach I by a modal whole-step root movement. It is not V7/I.',`${n(10,'maj')} → ${home}`);
+     addBorrow('prep',1,'maj','Phrygian','Neapolitan ♭II6 → V7 → I',
+      'The parallel-Phrygian ♭II in first inversion (third in the bass) forms a Neapolitan predominant. It moves to the global V7 rather than acting as a dominant of I.',
+      `${n(1,'maj')}/${N[mod(K+5)]} → ${globalV} → ${home}`,'Core',
+      {real:`${n(1,'maj')}/${N[mod(K+5)]} (Neapolitan first inversion)`});
+     addBorrowUpper('prep',5,'min',2,`${N[mod(K+2)]}ø7`,'Aeolian','Borrowed iiø7 → V7 → I',
+      'The minor iv upper triad over scale-degree 2 forms the borrowed iiø7. Its flattened fifth comes from parallel minor, while the complete iiø7 prepares the prevailing V7.',
+      `${n(5,'min')}/${N[mod(K+2)]} = ${N[mod(K+2)]}ø7 → ${globalV} → ${home}`,'Core');
+     addBorrow('dep',8,'maj','Aeolian','I → ♭VI → V7 → I',
+      '♭VI introduces parallel-minor color; it can descend by semitone to V. That is a global-key chromatic route, not a substitute tonic.',
+      `${home} → ${n(8,'maj')} → ${globalV} → ${home}`);
+     addBorrowUpper('pro',3,'maj',0,`${N[K]}m7`,'Aeolian','Parallel-minor tonic coloration',
+      'The ♭III triad with the tonic in the bass yields i7 from parallel minor. This deliberately CHANGES tonic quality, rather than merely extending a major tonic.',
+      `${home} → ${n(3,'maj')}/${N[K]} = ${N[K]}m7 → ${home}`,'Exploratory');
+     break;
+    case 1: // ii
+     addBorrowUpper('prep',5,'min',2,`${N[mod(K+2)]}ø7`,'Aeolian','Borrowed iiø7 prepares V',
+      'Replacing major-key ii7 color with parallel-minor iiø7 adds ♭6 of the prevailing major key. It retains predominant direction toward global V7.',
+      `${n(2,'min')} → ${n(5,'min')}/${N[mod(K+2)]} = ${N[mod(K+2)]}ø7 → ${globalV} → ${home}`,'Core');
+     addBorrow('dep',5,'min','Aeolian','ii → borrowed iv → V7',
+      'The borrowed minor iv can continue the predominant region after ii and before the global dominant.',
+      `${n(2,'min')} → ${n(5,'min')} → ${globalV} → ${home}`);
+     break;
+    case 2: // iii
+     addBorrow('dep',3,'maj','Aeolian','iii → ♭III chromatic shift',
+      'The parallel-minor ♭III supplies a chromatic move away from iii, often followed by a descent to ii. This is coloristic, not functional equivalence.',
+      `${n(4,'min')} → ${n(3,'maj')} → ${n(2,'min')} → ${globalV}`,'Exploratory');
+     addBorrow('dep',5,'min','Aeolian','iii → iv → V7 → I',
+      'Borrowed iv follows the diatonic mediant as a chromatic predominant, returning to the global cadence.',
+      `${n(4,'min')} → ${n(5,'min')} → ${globalV} → ${home}`);
+     break;
+    case 3: // IV
+     addBorrow('sub',5,'min','Aeolian','Borrowed iv within the predominant family',
+      'Parallel-minor iv can replace IV in a predominant passage while chromatically lowering its third. It is a contextual functional alternative, not an identical diatonic triad.',
+      `${n(5,'min')} → ${globalV} → ${home}`);
+     addBorrow('pro',5,'min','Aeolian','IV → iv → IV: modal inflection',
+      'Changing IV major to borrowed iv minor alters its third while preserving root and fifth. This changes quality, not just chord extension.',
+      `${n(5,'maj')} → ${n(5,'min')} → ${n(5,'maj')}`,'Core');
+     addBorrow('dep',5,'min','Aeolian','IV → iv → I (minor-plagal)',
+      'The borrowed minor iv adds a strong half-step inflection before returning to the prevailing major tonic.',
+      `${n(5,'maj')} → ${n(5,'min')} → ${home}`,'Core');
+     addBorrowUpper('pro',8,'maj',5,`${N[mod(K+5)]}m7`,'Aeolian','IV to borrowed iv7 color',
+      'The parallel-minor ♭VI triad over the IV bass yields iv7. This is not a diatonic IVmaj7: its minor third and seventh are borrowed.',
+      `${n(5,'maj')} → ${n(8,'maj')}/${N[mod(K+5)]} = ${N[mod(K+5)]}m7 → ${home}`);
+     addBorrow('dep',10,'maj','Mixolydian','IV → ♭VII → I',
+      'The borrowed ♭VII links IV and I in a modal / rock-plagal progression rather than a conventional V–I cadence.',
+      `${n(5,'maj')} → ${n(10,'maj')} → ${home}`);
+     break;
+    case 4: // V
+     addBorrow('prep',1,'maj','Phrygian','Neapolitan ♭II6 prepares V',
+      'The Phrygian ♭II in first inversion is a common chromatic predominant preceding global V. It is not a tonicization of the ♭II chord.',
+      `${n(1,'maj')}/${N[mod(K+5)]} → ${globalV} → ${home}`,'Core',
+      {real:`${n(1,'maj')}/${N[mod(K+5)]} (Neapolitan first inversion)`});
+     addBorrow('app',8,'maj','Aeolian','♭VI → V chromatic root approach',
+      'Parallel-minor ♭VI can approach the dominant root from a semitone above as a chromatic predominant color; the dominant still resolves to I.',
+      `${n(8,'maj')} → ${globalV} → ${home}`);
+     addBorrow('pro',7,'min','Mixolydian','V → v → V: modal dominant color',
+      'Parallel Mixolydian v minor removes the leading tone of V major. The motion colors the dominant area but weakens authentic dominant pull.',
+      `${n(7,'maj')} → ${n(7,'min')} → ${n(7,'maj')}`);
+     addBorrowUpper('pro',10,'maj',7,`${N[mod(K+7)]}m7`,'Mixolydian','Borrowed v7 over dominant bass',
+      'The borrowed ♭VII triad above scale degree 5 creates v7, whose flattened seventh and minor third weaken the classical dominant.',
+      `${n(7,'maj')} → ${n(10,'maj')}/${N[mod(K+7)]} = ${N[mod(K+7)]}m7 → ${home}`);
+     addBorrow('app',2,'maj','Lydian','II → V: Lydian or applied harmony',
+      'The II major triad exists in parallel Lydian and can approach V. In tonal contexts this is more commonly interpreted as V/V; a modal source is not automatically the functional analysis.',
+      `${n(2,'maj')} → ${n(7,'maj')} → ${home}`);
+     break;
+    case 5: // vi
+     addBorrow('dep',5,'min','Aeolian','vi → borrowed iv → V7',
+      'The borrowed minor iv moves away from vi into a chromatic predominant before the global dominant.',
+      `${n(9,'min')} → ${n(5,'min')} → ${globalV} → ${home}`);
+     addBorrow('dep',10,'maj','Mixolydian','vi → ♭VII → I',
+      'The borrowed ♭VII provides a modal rootwise ascent into I. This is not an applied dominant to vi.',
+      `${n(9,'min')} → ${n(10,'maj')} → ${home}`);
+     break;
+    case 6: // vii°
+     addBorrow('prep',5,'min','Aeolian','Borrowed iv → vii° → I',
+      'Minor iv may move to the prevailing leading-tone chord and then I. The vii° target remains a dominant-family chord, not a stable local tonic.',
+      `${n(5,'min')} → ${n(11,'dim')} → ${home}`,'Contextual');
+     break;
+   }
+  }else if(minorMode){
+   const modalV=n(7,'min'); // The prevailing NATURAL-minor v stays minor.
+   switch(index){
+    case 0: // i
+     addBorrow('app',1,'maj','Phrygian','♭II → i (Phrygian)',
+      'The semitone-above ♭II is a characteristic Phrygian approach to the minor tonic, distinct from raised-leading-tone V7–i.',
+      `${n(1,'maj')} → ${home}`);
+     addBorrow('dep',5,'maj','Dorian','i → IV → i (Dorian)',
+      'Parallel Dorian raises scale degree 6, making IV major instead of natural-minor iv. The tonic stays minor.',
+      `${home} → ${n(5,'maj')} → ${home}`,'Core');
+     addBorrow('prep',2,'min','Dorian','Dorian ii → v → i',
+      'Parallel Dorian ii minor prepares modal v minor, retaining the natural-minor lack of a raised leading tone.',
+      `${n(2,'min')} → ${modalV} → ${home}`);
+     addBorrow('pro',0,'maj','Ionian','Parallel-major tonic inflection',
+      'An i → I → i motion borrows the MAJOR tonic quality from parallel Ionian. It changes the tonic third; it is not a seventh-chord extension.',
+      `${home} → ${n(0,'maj')} → ${home}`,'Exploratory');
+     break;
+    case 1: // ii°
+     addBorrow('dep',5,'maj','Dorian','ii° → IV → v (Dorian)',
+      'The parallel-Dorian IV major brightens the predominant region while keeping the original minor key as the prevailing center.',
+      `${n(2,'dim')} → ${n(5,'maj')} → ${modalV} → ${home}`,'Contextual');
+     break;
+    case 2: // ♭III
+     addBorrow('dep',5,'maj','Dorian','♭III → IV → ♭VII',
+      'The parallel-Dorian IV is a borrowed major IV, not the ordinary iv of natural minor.',
+      `${n(3,'maj')} → ${n(5,'maj')} → ${n(10,'maj')} → ${home}`);
+     break;
+    case 3: // iv
+     addBorrow('sub',5,'maj','Dorian','Borrowed IV within the predominant family',
+      'Parallel Dorian makes IV major instead of natural-minor iv. It may fulfill a related predominant or modal-plagal role, but alters characteristic minor-key color.',
+      `${n(5,'maj')} → ${modalV} → ${home}`);
+     addBorrow('pro',5,'maj','Dorian','iv → IV → iv: Dorian inflection',
+      'The Dorian raised sixth makes a major IV, allowing an alternating minor/major subdominant color.',
+      `${n(5,'min')} → ${n(5,'maj')} → ${n(5,'min')}`,'Core');
+     addBorrow('prep',1,'maj','Phrygian','Phrygian ♭II6 → V7 → i',
+      'The Phrygian ♭II, commonly in first inversion, supplies a Neapolitan predominant before the chromatic dominant of minor. The V7 also requires harmonic-minor raised leading tone.',
+      `${n(5,'min')} → ${n(1,'maj')}/${N[mod(K+5)]} → ${n(7,'maj')}7 → ${home}`,'Core',
+      {real:`${n(1,'maj')}/${N[mod(K+5)]} (Neapolitan first inversion)`});
+     break;
+    case 4: // v
+     addBorrow('prep',2,'min','Dorian','Dorian ii → v → i',
+      'Parallel Dorian supplies ii minor. This modal ii–v–i does not introduce a raised leading tone, so its direction is gentler than iiø7–V7–i.',
+      `${n(2,'min')} → ${n(7,'min')} → ${home}`);
+     break;
+    case 5: // ♭VI
+     addBorrow('dep',5,'maj','Dorian','♭VI → IV → ♭VII',
+      'The major IV from Dorian provides a chromatic departure from the natural-minor ♭VI before the modal ♭VII.',
+      `${n(8,'maj')} → ${n(5,'maj')} → ${n(10,'maj')} → ${home}`);
+     break;
+    case 6: // ♭VII
+     addBorrow('app',5,'maj','Dorian','IV → ♭VII (Dorian)',
+      'The borrowed Dorian IV approaches ♭VII by a fourth; it can sound like V of ♭VII, but that applied interpretation depends on the cadence.',
+      `${n(5,'maj')} → ${n(10,'maj')} → ${home}`);
+     addBorrowUpper('prep',9,'dim',5,`${N[mod(K+5)]}7`,'Dorian','Dorian IV7 prepares ♭VII',
+      'The parallel-Dorian vi° upper triad over degree 4 creates IV7, which can function as V7 of ♭VII while the prevailing key remains minor.',
+      `${n(6,'dim')}/${N[mod(K+5)]} = ${N[mod(K+5)]}7 → ${n(10,'maj')} → ${home}`);
+     break;
+   }
+  }
+ };
+ buildSubstitutes();
+ buildModalInterchange();
+ // STAGE 2D — preparations and sequences. The first chord in a route is
+ // represented by its own triad, or by an upper triad with a specified bass.
+ // Each step retains its global-key spelling; local-function labels are separate.
+ // Keep the borrowed-origin filter exclusive to validated 2C single-chord
+ // modal-interchange relationships: a whole route is not one borrowed chord.
+ const buildSequences=()=>{
+  if(!ordinary||!(majorMode||minorMode))return;
+  const key=state.key;
+  const n7=(pc,q)=>N[mod(pc)]+q;
+  const step=(pc,suffix,role)=>({pc:mod(pc),suffix,role});
+  const pathSteps=(steps)=>steps.map(s=>N[s.pc]+s.suffix).join(' → ');
+  const sequenceInfo=(family,label,steps,focusIndex=0,more={})=>({
+   scope:more.scope||(r===key&&Q===state.mode?'global':'local'),origin:label,originKind:'sequence',
+   strength:more.strength||'Contextual',functionText:more.functionText||label,
+   globalReason:more.globalReason||'The prevailing key is held fixed. An applied cadence establishes a possible temporary destination, not an automatic modulation.',
+   sequence:{family,label,steps,focusIndex,note:more.note||''}
+  });
+  const addPath=(cat,firstPc,q,real,description,steps,family,label,more={})=>{
+   const example=pathSteps(steps);
+   add(cat,firstPc,q,real,example,description,sequenceInfo(family,label,steps,more.focusIndex||0,more));
+  };
+  const addUpperPath=(cat,topPc,topQ,bassPc,result,description,steps,family,label,more={})=>{
+   upper(cat,topPc,topQ,bassPc,result,description,pathSteps(steps),{
+    ...sequenceInfo(family,label,steps,more.focusIndex||0,more),scope:'upper-structure',
+    ...(more.bassSpelling?{bassSpelling:more.bassSpelling}:{}),
+    ...(more.spelledTriadRoot?{spelledTriadRoot:more.spelledTriadRoot}:{})
+   });
+  };
+  const tPc=r,home=state.mode==='maj'?name(key,'maj'):name(key,'min');
+  const localV=mod(r+7),localII=mod(r+2),localIV=mod(r+5);
+  const localIISuffix=Q==='maj'?'m7':'ø7';
+  const localIITriadQ=Q==='maj'?'min':'dim';
+  const localIIUpperQ=Q==='maj'?'maj':'min';
+  const localIISeventh=N[localII]+localIISuffix;
+  // Replace the provisional 1B ii–V entries with fully annotated routes;
+  // non-sequence modal borrowing entries and global preparations are preserved.
+  for(let i=entries.length-1;i>=0;i--){
+   const e=entries[i];
+   if(e.cat==='prep'&&(e.origin==='Applied ii–V'||e.origin==='Predominant upper structure'))entries.splice(i,1);
+  }
+  const iiV=[step(localII,localIISuffix,Q==='maj'?'ii7 of target':'iiø7 of target'),
+             step(localV,'7','V7 of target'),step(r,Q==='maj'?'':'m','Selected target')];
+  const tonicContext=r===key&&Q===state.mode;
+  const iiVMessage=tonicContext?'This cadence prepares the prevailing tonic.':'This is a possible tonicization of the selected target, not a change to the prevailing key.';
+  addPath('prep',localII,localIITriadQ,localIISeventh,
+    `${Q==='maj'?'Local ii7':'Local iiø7'} prepares the target through V7. ${iiVMessage} The highlighted triad represents the FIRST chord of this complete route.`,
+    iiV,'ii-v',Q==='maj'?'ii7–V7–I':'iiø7–V7–i',
+    {strength:'Core',functionText:Q==='maj'?'local ii7 → V7 → I':'local iiø7 → V7 → i',
+     globalReason:iiVMessage});
+  addUpperPath('prep',localIV,localIIUpperQ,localII,localIISeventh,
+    `This upper triad over the local ii bass produces the first ii seventh chord of a ii–V to the selected target. ${iiVMessage}`,
+    iiV,'ii-v','Upper triad of local ii7 / iiø7',
+    {strength:'Core',functionText:'ii upper-structure → V7 → target',globalReason:iiVMessage});
+  // Applied dominant chains, moving by descending fifths to any stable target.
+  // The highlighted triad represents the FIRST dominant in each chain.
+  for(const count of [2,3,4]){
+   const start=mod(r+[2,9,4][count-2]);
+   const degrees=count===2?[2,7]:count===3?[9,2,7]:[4,9,2,7];
+   const domSteps=degrees.map((d,i)=>step(r+d,'7',i===degrees.length-1?'V7 of target':`Earlier applied dominant ${i+1}`));
+   domSteps.push(step(r,Q==='maj'?'':'m','Selected target'));
+   const title=count===2?'V7/V → V7 → target':count===3?'Three linked dominants':'Four linked dominants';
+   addPath('prep',start,'maj',n7(start,'7'),
+    `A chain of ${count} dominant sevenths travels around the circle by descending fifths before arriving at the target. Each dominant temporarily points to the next chord; do not interpret the entire sequence as diatonic.`,
+    domSteps,'dominant-chain',title,{strength:count===2?'Core':'Contextual',
+     functionText:count===2?'V7/V → V7 → target':`${count}-dominant circle chain`,
+     globalReason:`The target remains ${ctx.functionNumeral} of the prevailing key. This is sequential applied-dominant motion.`});
+   const topPc=mod(start+4);
+   addUpperPath('prep',topPc,'dim',start,n7(start,'7'),
+    `The diminished triad on the dominant's major third, above its root in the bass, makes the FIRST dominant seventh of this chain. The subsequent dominants resolve in descending fifths.`,
+    domSteps,'dominant-chain',`Upper triad — ${title}`,
+    {strength:count===2?'Core':'Contextual',functionText:'Diminished upper structure of chain’s first V7',
+     globalReason:`This is a complete dominant chain ending on ${ctx.functionNumeral}; the triad alone is not the dominant seventh.`});
+  }
+  if(Q==='maj'){
+   // Backdoor ii–♭VII7–I: ivm7 → ♭VII7 → major target.
+   // For target C this reads Fm7 → B♭7 → C. Ab/F literally yields Fm7.
+   const ivm=localIV,flatVII=mod(r+10),backSteps=[step(ivm,'m7','Borrowed ivm7 of target'),
+     step(flatVII,'7','Backdoor ♭VII7'),step(r,'','Selected major target')];
+   addPath('prep',ivm,'min',n7(ivm,'m7'),
+    'The local minor iv seventh precedes ♭VII7, forming a jazz backdoor cadence to the major target. This is not the conventional ii–V–I. The borrowing is relative to the TARGET; check separately whether it is borrowed from the PREVAILING key.',
+    backSteps,'backdoor','ivm7–♭VII7–I',
+    {strength:'Contextual',functionText:'Backdoor preparation of major target',
+     globalReason:'The applied backdoor motion does not by itself establish a new prevailing key.'});
+   addUpperPath('prep',mod(r+8),'maj',ivm,n7(ivm,'m7'),
+    'A major triad on the local ♭VI above the local iv bass supplies the minor third, fifth and seventh of ivm7, the FIRST chord of the backdoor progression.',
+    backSteps,'backdoor','Upper triad of ivm7',
+    {strength:'Contextual',functionText:'ivm7 upper triad → ♭VII7 → target'});
+   addUpperPath('prep',mod(r+2),'dim',flatVII,n7(flatVII,'7'),
+    'This diminished upper triad over ♭VII supplies the third, fifth and seventh of the BACKDOOR DOMINANT, the SECOND chord of the route, before resolution to the target.',
+    backSteps,'backdoor','Upper triad of backdoor ♭VII7',
+    {focusIndex:1,strength:'Contextual',functionText:'Upper triad of backdoor dominant'});
+  }
+  // A strictly diatonic descending-fifths preparation is distinct from a
+  // chromatic dominant chain. Use it for the prevailing major tonic only.
+  if(majorMode && Q==='maj' && index===0){
+   const diatonicCircle=[step(key+4,'m7','iii7'),step(key+9,'m7','vi7'),step(key+2,'m7','ii7'),step(key+7,'7','V7'),step(key,'','I')];
+   addPath('prep',key+4,'min',n7(key+4,'m7'),
+    'A diatonic circle-of-fifths preparation runs iii7–vi7–ii7–V7–I. Unlike the altered dominant chain, its first four chords remain within the prevailing major key.',
+    diatonicCircle,'circle-sequence','iii7–vi7–ii7–V7–I',
+    {strength:'Core',scope:'global',functionText:'Diatonic circle progression to I',
+     globalReason:'Global-key harmony, not a string of applied dominants.'});
+   const shortCircle=diatonicCircle.slice(1);
+   addPath('prep',key+9,'min',n7(key+9,'m7'),
+    'The shorter vi7–ii7–V7–I cycle returns to the prevailing tonic by descending fifths.',
+    shortCircle,'circle-sequence','vi7–ii7–V7–I',
+    {strength:'Core',scope:'global',functionText:'Diatonic circle progression to I'});
+   const predominant=[step(key+5,'','IV'),step(key+7,'7','V7'),step(key,'','I')];
+   addPath('prep',key+5,'maj',name(key+5,'maj'),
+    'The global IV triad occupies the predominant region, moving to V7 before the prevailing tonic. This is different from a LOCAL ii–V targeting another degree.',
+    predominant,'predominant','IV–V7–I',
+    {strength:'Core',scope:'global',functionText:'Global predominant → dominant → tonic'});
+  }
+  // Departure sequences are anchored in the selected TARGET and highlight
+  // a FOLLOWING chord; the path viewer explicitly marks that chord as step 2.
+  const firstSuffix=Q==='maj'?'':'m';
+  const anchored=(nextPc,nextQ,steps,family,label,description,extra={})=>{
+   addPath('dep',nextPc,nextQ,name(nextPc,nextQ),description,steps,family,label,
+    {scope:'global',focusIndex:1,strength:'Contextual',
+     functionText:label,globalReason:`The sequence begins with ${ctx.functionNumeral} of the prevailing key; the highlight shows the SECOND chord.`,...extra});
+  };
+  if(majorMode){
+   if(index===0){
+    const t1=[step(key,'','I'),step(key+9,'m7','vi7'),step(key+2,'m7','ii7'),step(key+7,'7','V7'),step(key,'','I')];
+    anchored(key+9,'min',t1,'turnaround','I–vi7–ii7–V7–I',
+     'A diatonic major-key turnaround. The highlighted vi triad is the SECOND harmony; its seventh-chord realization is vi7. All steps belong to the prevailing major key.',{strength:'Core'});
+    const t2=[step(key,'','I'),step(key+4,'7','V7/vi'),step(key+9,'7','V7/ii'),step(key+2,'7','V7/V'),step(key+7,'7','V7'),step(key,'','I')];
+    anchored(key+4,'maj',t2,'turnaround','Chromatic dominant turnaround',
+     'A chromatic turnaround applies dominants to successive destinations. The first dominant after the tonic is V7/vi; this adds altered notes and is not a diatonic I–vi–ii–V.',{strength:'Contextual'});
+   }else if(index===1){
+    anchored(key+7,'maj',[step(key+2,'m','ii'),step(key+7,'7','V7'),step(key,'','I')],
+     'resolution','ii–V7–I',
+     'The global predominant ii moves to the dominant and then home to I.',{strength:'Core'});
+   }else if(index===2){
+    anchored(key+9,'min',[step(key+4,'m','iii'),step(key+9,'m7','vi7'),step(key+2,'m7','ii7'),step(key+7,'7','V7'),step(key,'','I')],
+     'circle-sequence','iii–vi7–ii7–V7–I',
+     'The global mediant can begin a descending-fifths circle sequence into the tonic.',{strength:'Contextual'});
+   }else if(index===3){
+    anchored(key+7,'maj',[step(key+5,'','IV'),step(key+7,'7','V7'),step(key,'','I')],
+     'resolution','IV–V7–I',
+     'The global IV prepares V7 and the tonic; the selected circle wedge is V, the following chord.',{strength:'Core'});
+   }else if(index===4){
+    anchored(key,'maj',[step(key+7,'','V'),step(key,'','I')],
+     'resolution','V–I',
+     'The global dominant moves to the prevailing tonic.',{strength:'Core'});
+    anchored(key+9,'min',[step(key+7,'7','V7'),step(key+9,'m','vi')],
+     'resolution','V7–vi (deceptive)',
+     'The global dominant resolves deceptively to vi rather than I.',{strength:'Core'});
+   }else if(index===5){
+    anchored(key+2,'min',[step(key+9,'m','vi'),step(key+2,'m7','ii7'),step(key+7,'7','V7'),step(key,'','I')],
+     'circle-sequence','vi–ii7–V7–I',
+     'The prevailing vi starts a diatonic circle sequence resolving through ii7 and V7.',{strength:'Core'});
+   }
+  }else if(minorMode){
+   if(index===0){
+    anchored(key+5,'min',[step(key,'m','i'),step(key+5,'m','iv'),step(key+7,'7','V7 (harmonic minor)'),step(key,'m','i')],
+     'turnaround','i–iv–V7–i',
+     'The minor-key turnaround uses a raised-leading-tone V7, which is outside the natural-minor collection.',{strength:'Core'});
+    anchored(key+8,'maj',[step(key,'m','i'),step(key+8,'','♭VI'),step(key+2,'ø7','iiø7'),step(key+7,'7','V7'),step(key,'m','i')],
+     'circle-sequence','i–♭VI–iiø7–V7–i',
+     'A minor-key predominant sequence moves through ♭VI and iiø7 before an altered V7 and tonic minor.',{strength:'Contextual'});
+   }else if(index===3){
+    anchored(key+7,'maj',[step(key+5,'m','iv'),step(key+7,'7','V7'),step(key,'m','i')],
+     'resolution','iv–V7–i',
+     'The natural-minor iv moves to a harmonic-minor V7, then resolves to i.',{strength:'Core'});
+   }else if(index===4){
+    anchored(key,'min',[step(key+7,'m','v'),step(key,'m','i')],
+     'resolution','v–i (modal)',
+     'Natural-minor v can move to i without a leading-tone dominant. Its pull is weaker than V7–i.',{strength:'Contextual'});
+   }else if(index===5){
+    anchored(key+2,'dim',[step(key+8,'','♭VI'),step(key+2,'ø7','iiø7'),step(key+7,'7','V7'),step(key,'m','i')],
+     'circle-sequence','♭VI–iiø7–V7–i',
+     'The highlighted diminished triad is the iiø7 root structure, the second harmony in a minor-key progression.',{strength:'Contextual'});
+   }
+  }
+ };
+ buildSequences();
+ return entries;
+}
+
+// Stage 2 taxonomy. Only catalogue-supported interpretations are actionable;
+// a triad can legitimately match more than one family and more than one button.
+const FAMILY_CHOICES={
+ sub:[
+  {id:'functional',label:'Functional exchange',description:'Alternative harmonies that can occupy a similar tonal function, with context-dependent voice leading.'},
+  {id:'common-tone',label:'Common-tone alternatives',description:'Triads sharing important tones without necessarily sharing the same function.'},
+  {id:'dominant-family',label:'Dominant-family substitution',description:'Different expressions of dominant tension, such as V7 and its leading-tone upper structure.'},
+  {id:'tritone',label:'Tritone substitution',description:'SubV7 and V7 share guide-tone tension but approach the destination from different roots.'},
+  {id:'upper',label:'Upper-structure realization',description:'A visible upper triad plus a specified bass constructs a different, often extended, chord.'}
+ ],
+ app:[
+  {id:'direct-dominant',label:'Direct dominant',description:'V7 resolving toward the selected target; its upper triad may also be highlighted.'},
+  {id:'leading-tone',label:'Leading-tone diminished',description:'vii° and its seventh-chord forms tend upward by semitone toward the target.'},
+  {id:'tritone',label:'Tritone dominant',description:'A chromatic ♭II7 (SubV7) substitutes for the applied V7.'},
+  {id:'backdoor',label:'Backdoor approach',description:'A ♭VII-family approach: the jazz backdoor ♭VII7 and, separately, modal ♭VII major.'},
+  {id:'plagal',label:'Plagal approach',description:'IV or borrowed iv returns directly to the selected harmony.'},
+  {id:'chromatic',label:'Chromatic neighbor',description:'A chromatic side-slip or neighboring chord moves into the target.'}
+ ],
+ prep:[
+  {id:'predominant',label:'Predominant',description:'IV, ii, or equivalent harmony moves into dominant space before the destination.'},
+  {id:'local-ii-v',label:'Local ii–V',description:'The selected target is prepared by its own ii7 (or iiø7), followed by V7.'},
+  {id:'borrowed',label:'Borrowed / Neapolitan',description:'Borrowed mode harmonies and Neapolitan variants prepare the target or its dominant.'},
+  {id:'backdoor',label:'Backdoor preparation',description:'A minor-iv–♭VII7 progression prepares a major destination.'},
+  {id:'dominant-chain',label:'Dominant chains',description:'A series of dominant sevenths approaches the target by successive fifth motion.'},
+  {id:'circle-sequence',label:'Circle sequences',description:'A sequence of diatonic or chromatic chords advances through fifth relationships.'},
+  {id:'turnaround',label:'Turnarounds',description:'A cyclic progression departs from and eventually returns to its tonal center.'}
+ ],
+ pro:[
+  {id:'diatonic-neighbor',label:'Diatonic neighbors',description:'In-key neighbors temporarily embellish the selected harmony or functional region.'},
+  {id:'chromatic-neighbor',label:'Chromatic / modal neighbors',description:'A borrowed or chromatic neighbor departs and returns while maintaining harmonic focus.'},
+  {id:'pedal',label:'Pedal-point harmony',description:'An unchanged bass supports temporary upper-note or chordal motion.'},
+  {id:'functional-area',label:'Functional-family alternation',description:'Related tonic, predominant, or dominant harmonies alternate without leaving the area.'},
+  {id:'embellish',label:'Chordal embellishment',description:'A seventh, suspension, or upper structure enriches the current sonority without changing its destination.'}
+ ],
+ dep:[
+  {id:'functional-motion',label:'Direct functional movement',description:'The target moves to a new diatonic functional area.'},
+  {id:'resolution',label:'Resolutions',description:'The target resolves authentically, deceptively, modally, or toward a nearby chord.'},
+  {id:'applied-dominant',label:'Applied-dominant movement',description:'The departure enters a secondary-dominant route before its next destination.'},
+  {id:'chromatic',label:'Borrowed / chromatic departure',description:'The progression leaves through a borrowed or chromatically altered harmony.'},
+  {id:'dominant-chain',label:'Dominant chains',description:'Departures travel through successive dominant sevenths.'},
+  {id:'circle-sequence',label:'Circle sequences',description:'Departure unfolds as a longer circle-of-fifths sequence.'},
+  {id:'turnaround',label:'Turnarounds',description:'The departure is part of a cyclic progression leading back to a tonic.'}
+ ],
+ col:[
+  {id:'sevenths',label:'Seventh chords',description:'An upper triad and bass produce a major, minor, dominant, or diminished seventh.'},
+  {id:'extensions',label:'Extended harmony',description:'Upper structures add ninths, elevenths, or thirteenths.'},
+  {id:'added',label:'Added tones / sixths',description:'Added-sixth and add-note sonorities color the target without replacing its triad.'},
+  {id:'suspensions',label:'Suspensions',description:'Suspended voices temporarily replace or delay stable chord tones.'},
+  {id:'altered',label:'Altered / modal coloration',description:'Chromatic alterations or parallel-mode sonorities change the chord quality or color.'}
+ ]
+};
+const includes=(e,re)=>re.test([e.description,e.functionText,e.origin,e.globalReason,e.real,e.example,e.sequence?.label||'',e.sequence?.note||''].join(' '));
+function legacyFamilyRule(e,cat,id){
+ if(id==='all')return true;
+ const seq=e.sequence?.family||'';
+ const sub=e.substituteFamily||'';
+ const approach=e.approachFamily||'';
+ const modal=e.originKind==='modal-interchange';
+ const upper=e.scope==='upper-structure'||sub==='Exact upper-triad realization';
+ const inKey=palette().has(ref(e.root,e.q));
+ switch(cat){
+  case 'sub':
+   if(id==='functional')return /Functional exchange|Predominant-function exchange|Predominant/i.test(sub)||modal||(!sub&&!upper&&!/tritone|dominant family/i.test(e.functionText||''));
+   if(id==='common-tone')return sub==='Common-tone alternative'||e.scope==='shared-tone';
+   if(id==='dominant-family')return /Dominant family/i.test(sub)||/dominant.family/i.test(e.functionText||'')||(/V7|vii°/.test(e.functionText||'')&&upper);
+   if(id==='tritone')return /Tritone/i.test(sub)||includes(e,/SubV7|tritone substitut/i);
+   if(id==='upper')return upper||/upper.triad|upper structure/i.test(sub);
+   return false;
+  case 'app':
+   if(id==='direct-dominant')return approach==='Dominant V7'||includes(e,/global V7 can resolve deceptively|V7 → vi/i);
+   if(id==='leading-tone')return approach==='Leading-tone diminished'||(approach==='Dominant V7'&&e.q==='dim');
+   if(id==='tritone')return approach==='Tritone substitute';
+   if(id==='backdoor')return approach==='Backdoor ♭VII7'||includes(e,/backdoor|♭VII7|♭VII → I \(modal\)/);
+   if(id==='plagal')return includes(e,/plagal|IV → I|iv → I|iv → i/i);
+   if(id==='chromatic')return approach==='Chromatic neighbor'||(modal&&includes(e,/chromatic|side.slip|semitone.above|♭II → i/i));
+   return false;
+  case 'prep':
+   if(id==='predominant')return seq?seq==='predominant'||seq==='ii-v'||(seq==='resolution'&&includes(e,/predominant/i)):includes(e,/predominant|supertonic|local ii|iiø7|ii7–V7/i);
+   if(id==='local-ii-v')return seq?seq==='ii-v':includes(e,/applied ii–V|local ii|ii7–V7|iiø7–V7|iiø7–V/i);
+   if(id==='borrowed')return modal||includes(e,/Neapolitan|borrowed/i);
+   if(id==='backdoor')return seq==='backdoor'||includes(e,/backdoor/i);
+   if(id==='dominant-chain')return seq==='dominant-chain';
+   if(id==='circle-sequence')return seq==='circle-sequence';
+   if(id==='turnaround')return seq==='turnaround';
+   return false;
+  case 'pro':
+   if(id==='diatonic-neighbor')return inKey&&!modal&&includes(e,/neighbor|return|alternat|extension|prolong/i);
+   if(id==='chromatic-neighbor')return modal||includes(e,/chromatic|modal inflection|borrowed|parallel.minor/i);
+   if(id==='pedal')return includes(e,/pedal|sustain(ed)? bass/i);
+   if(id==='functional-area')return includes(e,/tonic.area|tonic (family|extension)|predominant.area|dominant (area|prolong)|functional.area|alternat/i);
+   if(id==='embellish')return upper||includes(e,/suspend|seventh|extension|embellish|color.*(tonic|sonority)/i);
+   return false;
+  case 'dep':
+   if(id==='functional-motion')return !seq&&!modal&&includes(e,/toward|moves|move|depart|leads|progression|dominant|tonic|predominant|resolution|resolv/i);
+   if(id==='resolution')return seq==='resolution'||(!seq&&includes(e,/resolve(s|d)? (deceptively|to)|deceptive resolution|leading tone resolves|V7 → vi|vii° → I/i));
+   if(id==='applied-dominant')return seq==='dominant-chain'||(!modal&&includes(e,/secondary dominant|applied dominant|applies dominants|V\/V|V7\/|dominant.chain/i));
+   if(id==='chromatic')return modal||includes(e,/chromatic|borrowed|parallel.minor/i);
+   if(id==='dominant-chain')return seq==='dominant-chain';
+   if(id==='circle-sequence')return seq==='circle-sequence'||includes(e,/descending.fifths|circle.of.fifths/i);
+   if(id==='turnaround')return seq==='turnaround';
+   return false;
+  case 'col':
+   if(id==='sevenths')return /(?:maj7|m7|ø7|°7|[^a-z]7\b)/i.test(e.real||'')&&!/(?:9|11|13)/.test(e.real||'');
+   if(id==='extensions')return /(?:maj9|m9|add9|maj11|m11|maj13|m13|9\b|11\b|13\b)/i.test(e.real||'');
+   if(id==='added')return /(?:add\s*\d+|add9|(?:maj|m)?6(?:\b|\/)|sixth)/i.test(e.real||'')||includes(e,/added (sixth|tone)/i);
+   if(id==='suspensions')return includes(e,/sus[24]|suspend|suspension/i);
+   if(id==='altered')return modal||includes(e,/altered|modal|parallel.minor|chromatic|♯11|♭9/i);
+   return false;
+ }
+ return false;
+}
+// Each catalogue item now carries its computed family IDs. This is an interim
+// migration representation: rules are evaluated once per musical context, not
+// every time a wheel wedge, category counter or popup is drawn. Stage 2 can
+// replace the isolated legacy description heuristics with explicit source tags
+// without requiring any UI changes.
+function finalizeRelationshipEntries(entries){
+ return entries.map(e=>{
+  const familyIds=(FAMILY_CHOICES[e.cat]||[])
+   .filter(choice=>legacyFamilyRule(e,e.cat,choice.id))
+   .map(choice=>choice.id);
+  return {...e, familyIds, familyGroup:e.cat};
+ });
+}
+function familyMatches(e,cat,id){
+ if(id==='all')return true;
+ return e.familyGroup===cat&&Array.isArray(e.familyIds)&&e.familyIds.includes(id);
+}
+function visibleMatch(e){return state.functionFilter==='all'||familyMatches(e,state.category,state.functionFilter)}
+function found(){return relationships().filter(e=>e.cat===state.category&&visibleMatch(e))}
+let sequenceChooserCategory=null;
+let categoryPressSuppressedUntil=0;
+function chooseCategory(id){
+ state.category=id;state.functionFilter='all';state.selected=null;render();
+}
+function chooseFamily(id){
+ if(!sequenceChooserCategory)return;
+ const cat=sequenceChooserCategory;
+ const entries=relationships().filter(e=>e.cat===cat);
+ if(id!=='all'&&!entries.some(e=>familyMatches(e,cat,id)))return;
+ state.category=cat;state.functionFilter=id;state.selected=null;
+ closeSequenceChooser(false);render();
+}
+function positionSequenceChooser(){
+ const chooser=$('sequenceChooser');
+ if(chooser.hidden)return;
+ const bottom=document.querySelector('.app-mode-nav').getBoundingClientRect().bottom;
+ chooser.style.top=Math.min(Math.max(bottom+6,0),window.innerHeight-120)+'px';
+}
+function openSequenceChooser(id){
+ if(state.category!==id)chooseCategory(id);
+ sequenceChooserCategory=id;
+ $('sequenceChooserTitle').textContent=categories.find(x=>x[0]===id)[1]+' · Families';
+ const entries=relationships().filter(e=>e.cat===id);
+ const list=$('sequenceChooserList');list.replaceChildren();
+ const options=[{id:'all',label:'All'},...(FAMILY_CHOICES[id]||[])];
+ for(const option of options){
+  const matching=entries.filter(e=>familyMatches(e,id,option.id));
+  const count=enriched(matching).size;
+  const enabled=option.id==='all'||count>0;
+  const button=document.createElement('button');button.type='button';
+  button.className='sequence-choice-item'+(option.id==='all'?' all-choice':'')+(state.functionFilter===option.id?' selected':'');
+  button.setAttribute('aria-pressed',String(state.functionFilter===option.id));
+  button.disabled=!enabled;
+  const head=document.createElement('div');head.className='sequence-choice-title';
+  const label=document.createElement('strong');label.textContent=option.label;
+  head.append(label);
+  if(option.id!=='all'){
+   const counter=document.createElement('span');counter.className='sequence-choice-count';counter.textContent=count+' triad'+(count===1?'':'s');
+   head.append(counter);
+  }
+  button.append(head);
+  if(option.id!=='all'){
+   const desc=document.createElement('div');desc.className='sequence-choice-description';desc.textContent=option.description;
+   button.append(desc);
+  }
+  if(enabled)button.addEventListener('click',()=>chooseFamily(option.id));
+  list.appendChild(button);
+ }
+ $('sequenceChooser').hidden=false;
+ $('sequenceChooser').classList.add('is-open');
+ list.scrollTop=0;
+ positionSequenceChooser();
+ $('sequenceChooserClose').focus({preventScroll:true});
+}
+function closeSequenceChooser(restoreFocus=true){
+ $('sequenceChooser').classList.remove('is-open');
+ $('sequenceChooser').hidden=true;
+ const id=sequenceChooserCategory;
+ sequenceChooserCategory=null;
+ if(restoreFocus&&id){const b=document.querySelector(`#cats button[data-category="${id}"]`);if(b)b.focus({preventScroll:true})}
+}
+function wireCategoryButton(btn,id){
+ btn.dataset.category=id;
+ let timer=null,origin=null,held=false;
+ const clear=()=>{if(timer!==null){clearTimeout(timer);timer=null}};
+ const hold=()=>{if(held)return;held=true;categoryPressSuppressedUntil=Date.now()+750;openSequenceChooser(id)};
+ btn.style.touchAction='manipulation';
+ btn.addEventListener('pointerdown',e=>{
+  if(e.pointerType==='mouse'&&e.button!==0)return;
+  held=false;origin={x:e.clientX,y:e.clientY};clear();timer=setTimeout(hold,550);
+ });
+ btn.addEventListener('pointermove',e=>{if(origin&&Math.hypot(e.clientX-origin.x,e.clientY-origin.y)>12)clear()});
+ for(const type of ['pointerup','pointercancel','pointerleave'])btn.addEventListener(type,()=>{clear();origin=null});
+ btn.addEventListener('contextmenu',e=>{e.preventDefault();clear();hold()});
+ btn.addEventListener('click',e=>{e.preventDefault();if(held||Date.now()<categoryPressSuppressedUntil)return;chooseCategory(id)});
+ btn.addEventListener('keydown',e=>{if(e.key.toLowerCase()==='l'){e.preventDefault();openSequenceChooser(id)}});
+}
+window.addEventListener('resize',positionSequenceChooser);
+window.addEventListener('orientationchange',positionSequenceChooser);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('sequenceChooser').hidden){e.preventDefault();closeSequenceChooser()}});
+$('sequenceChooserClose').addEventListener('click',()=>closeSequenceChooser());
+const SCOPE_LABELS={global:'Prevailing-key function',local:'Possible local tonicization',
+ 'upper-structure':'Upper triad + bass', 'shared-tone':'Shared tones; contextual use',modal:'Parallel-mode borrowing'};
+function realizationInfo(e){
+ // The wheel judges the *triad*; the expanded chord (often with a seventh or
+ // altered note) can have a different diatonic classification.
+ const raw=e.real||'';
+ const explicit=raw.includes('=')?raw.split('=').slice(1).join('=').trim():raw.trim();
+ const partial=/omitted|partial|suspended/.test(explicit);
+ const match=explicit.match(/^([A-G][♭♯]{0,2})(maj9|maj7|m9|m7|ø7|°7|°|m|9|7|6)?(?=$|\s|\()/);
+ const tones=[];
+ if(match&&!partial){
+  const root=parsePitchClass(match[1]);
+  if(root>=0)tones.push(...chordPitches(root,match[2]||''));
+ }
+ if(tones.length===0){
+  tones.push(...QUAL[e.q].map(interval=>mod(e.root+interval)));
+  const slash=raw.match(/\/([A-G][♭♯]{0,2})/);
+  if(slash){const bass=parsePitchClass(slash[1]);if(bass>=0)tones.push(bass)}
+ }
+ const allDiatonic=tones.every(p=>scalePitchSet().has(p));
+ return {allDiatonic,tones,cls:allDiatonic?'in-key':'out-key'};
+}
+function enriched(results){const grouped=new Map();for(const e of results){const k=ref(e.root,e.q);if(!grouped.has(k))grouped.set(k,[]);grouped.get(k).push(e)}return grouped}
+function keyLabel(){return parentMajorName()+' major · '+MODE_DESCRIPTORS[state.mode]+' ('+MODE_ORDINALS[state.mode]+'-mode)'}
+// These plain-language labels stay unambiguous even when the wheel uses Romans.
+function prevailingKeyPlain(){
+ const md=MODE_DESCRIPTORS[state.mode]||'Ionian';
+ return parentMajorName()+' major centered on '+N[state.key]+' '+md+' ('+(MODE_ORDINALS[state.mode]||1)+'-mode)';
+}
+function targetInPrevailingKey(t){const context=contextAnalysis(t);return `${name(t.root,t.q)} (${context.functionNumeral}) in ${prevailingKeyPlain()}`}
+function roman(pc,q){const parent=parentMajorPC();return ['I','♭II','II','♭III','III','IV','♯IV','V','♭VI','VI','♭VII','VII'][mod(pc-parent)]}
+// Roman mode uses the same scale-degree labels as the wheel; the quality stays
+// explicit because each inner wedge has a shared numeral and separate m / °.
+function romanSpelled(spelling){
+ const parent=parentMajorPC();
+ const targetPc=parsePitchClass(spelling),parentLetter=N[parent][0];
+ const letter=spelling[0],degree=(LETTERS.indexOf(letter)-LETTERS.indexOf(parentLetter)+7)%7;
+ const baseSteps=[0,2,4,5,7,9,11],basic=['I','II','III','IV','V','VI','VII'];
+ let diff=mod(targetPc-parent-baseSteps[degree]);if(diff>6)diff-=12;
+ if(Math.abs(diff)>2)return roman(targetPc,'maj');
+ return (diff<0?'♭'.repeat(-diff):'♯'.repeat(diff))+basic[degree];
+}
+// The wedge uses a shared upper-case scale-degree root with its separate
+// m/° geometry. The center and the guidance instead use standard Roman chord
+// quality: E minor in G major is vi, not a newly defined i or VI-m.
+function romanChordLabel(rootNumeral,suffix=''){
+ if(suffix==='m')return rootNumeral.toLowerCase();
+ if(/^m(?:7|9)$/.test(suffix))return rootNumeral.toLowerCase()+suffix.slice(1);
+ if(suffix==='°'||suffix==='°7'||suffix==='ø7')return rootNumeral.toLowerCase()+suffix;
+ return rootNumeral+suffix;
+}
+const triadDisplay=(pc,q)=>state.labels?romanChordLabel(roman(pc,q),q==='min'?'m':q==='dim'?'°':''):name(pc,q);
+const displayKey=()=>prevailingKeyPlain();
+function chordTextForDisplay(raw){
+ const value=String(raw).replace(/°°/g,'°');
+ if(!state.labels)return value;
+ // Convert actual named chord roots and slash-bass pitches but leave prose,
+ // existing Roman numerals, quality and extension suffixes unchanged.
+ return value.replace(/(^|[^A-Za-z0-9])([A-G](?:♭|♯)?)(?=(?:maj|m|°|ø|\d|\/|\s*[)=→]|$))/g,
+  (all,prefix,note)=>{
+   const root=parsePitchClass(note);
+   return prefix+(root<0?note:roman(root,'maj'));
+  });
+}
+// Numbers 1–7 use the same parent-major framework as the Roman labels.
+// Nondiatonic accidentals get a red label; in-key notes get light green.
+const PARENT_DEGREES=['1','♭2','2','♭3','3','4','♯4','5','♭6','6','♭7','7'];
+function degreeName(pc){const parent=parentMajorPC();return PARENT_DEGREES[mod(pc-parent)]}
+function degreeNotes(pc,q){
+ const scale=new Set(scaleSteps[state.mode].map(i=>mod(state.key+i)));
+ return QUAL[q].map(i=>{
+  const n=mod(pc+i),included=scale.has(n);
+  const word=included?'diatonic':'nondiatonic';
+  return `<span class="degree ${included?'in-key':'out-key'}" aria-label="${degreeName(n)} ${word}">${degreeName(n)}</span>`;
+ }).join('<span class="degree-divider">–</span>');
+}
+
+// Build color-coded guidance from the *actual pitches* in each harmony.
+// Slash notation in the underlying data is exclusively upper-triad/bass-note;
+// render it as "F with a D bass", or "IV with a 2 bass" in Roman mode.
+// This leaves theoretical function labels such as V/ii semantically distinct.
+const escapeHtml=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function scalePitchSet(){return new Set(scaleSteps[state.mode].map(i=>mod(state.key+i)))}
+function chordPitches(pc,suffix=''){
+ const s=suffix.replace(/°°/g,'°');
+ let tones;
+ if(s.startsWith('ø'))tones=[0,3,6,10];
+ else if(s.startsWith('°'))tones=s.includes('7')?[0,3,6,9]:[0,3,6];
+ else if(s.startsWith('m')&&!s.startsWith('maj'))tones=s.includes('9')?[0,3,7,10,14]:s.includes('7')?[0,3,7,10]:[0,3,7];
+ else if(s.startsWith('maj'))tones=s.includes('9')?[0,4,7,11,14]:s.includes('7')?[0,4,7,11]:[0,4,7];
+ else tones=s.includes('9')?[0,4,7,10,14]:s.includes('7')?[0,4,7,10]:s.includes('6')?[0,4,7,9]:[0,4,7];
+ return tones.map(i=>mod(pc+i));
+}
+function coloredTriad(pc,q){
+ const allowed=scalePitchSet();
+ const cls=QUAL[q].every(i=>allowed.has(mod(pc+i)))?'in-key':'out-key';
+ return `<span class="harmony ${cls}">${escapeHtml(triadDisplay(pc,q))}</span>`;
+}
+// Formula and sample progressions carry concrete chord names; assign color
+// using every note of the chord (including sevenths, extensions and basses).
+const HARMONY_TOKEN=/(^|[^A-Za-z0-9])([A-G][♭♯]{0,2})(maj(?:7|9)?|m(?:7|9)?|ø7|°(?:7)?|7|9|6)?(?:\/([A-G][♭♯]{0,2}))?(?=$|[^A-Za-z0-9])/g;
+function renderHarmonyLine(raw){
+ let str=String(raw).replace(/°°/g,'°');
+ let html='',prev=0;
+ HARMONY_TOKEN.lastIndex=0;
+ for(const match of str.matchAll(HARMONY_TOKEN)){
+  const [whole,prefix,pitch,suffix='',bass='']=match;
+  const chordStart=match.index+prefix.length;
+  const chordEnd=match.index+whole.length;
+  html+=escapeHtml(str.slice(prev,chordStart));
+  const root=parsePitchClass(pitch),bassPc=bass?parsePitchClass(bass):-1;
+  if(root<0){html+=escapeHtml(str.slice(chordStart,chordEnd));prev=chordEnd;continue}
+  const tones=chordPitches(root,suffix);
+  if(bassPc>=0)tones.push(bassPc);
+  const inKey=tones.every(pc=>scalePitchSet().has(pc));
+  const cl=inKey?'in-key':'out-key';
+  const label=state.labels?romanChordLabel(romanSpelled(pitch),suffix):pitch+suffix;
+  html+=`<span class="harmony ${cl}">${escapeHtml(label)}</span>`;
+  if(bassPc>=0){
+   const bassInKey=scalePitchSet().has(bassPc);
+   const bassLabel=state.labels?degreeName(bassPc):bass;
+   html+=` with a <span class="bass-tone ${bassInKey?'in-key':'out-key'}">${escapeHtml(bassLabel)}</span> bass`;
+  }
+  prev=chordEnd;
+ }
+ return html+escapeHtml(str.slice(prev));
+}
+// In the explanatory prose, Roman functions are local to the selected target
+// (ii–V–I of the target), whereas concrete formulas above use the selected
+// key's Roman numbers. Color the functional harmonies from their *pitches*,
+// without confusing those roles with the current key's Roman numbering.
+const LOCAL_ROMAN_STEPS={I:0,II:2,III:4,IV:5,V:7,VI:9,VII:11};
+const GUIDANCE_TOKENS=/(scale degree\s+)([1-7])|(^|[^A-Za-z0-9♭♯])([♭♯]?)([IVXivx]+)(ø7|°7|m7|7|m|°)?(?=$|[^A-Za-z0-9])/g;
+function renderExplanation(raw,targetRoot){
+ const text=String(raw);
+ let html='',prev=0;
+ for(const match of text.matchAll(GUIDANCE_TOKENS)){
+  if(match[1]){
+   html+=escapeHtml(text.slice(prev,match.index))+escapeHtml(match[1]);
+   const step=Number(match[2]);
+   const diatonic=scalePitchSet().has(mod(targetRoot+[0,0,2,4,5,7,9,11][step]));
+   html+=`<span class="bass-tone ${diatonic?'in-key':'out-key'}">${step}</span>`;
+  }else{
+   const before=match[3]||'',acc=match[4]||'',romanWord=match[5]||'',ending=match[6]||'';
+   const idx=match.index+before.length;
+   html+=escapeHtml(text.slice(prev,idx));
+   const degree=LOCAL_ROMAN_STEPS[romanWord.toUpperCase()];
+   if(degree===undefined){html+=escapeHtml(acc+romanWord+ending)}
+   else{
+    const root=mod(targetRoot+degree+(acc==='♭'?-1:acc==='♯'?1:0));
+    let quality=ending;
+    if(!quality && romanWord===romanWord.toLowerCase())quality='m';
+    else if(quality==='7' && romanWord===romanWord.toLowerCase())quality='m7';
+    const inKey=chordPitches(root,quality).every(n=>scalePitchSet().has(n));
+    html+=`<span class="harmony ${inKey?'in-key':'out-key'}">${escapeHtml(acc+romanWord+ending)}</span>`;
+   }
+  }
+  prev=match.index+match[0].length;
+ }
+ return html+escapeHtml(text.slice(prev));
+}
+
+
+// STAGE 1C: validated key-aware functional layer, separated from chord spellings.
+const CONTEXT_ROLES={
+ maj:[
+  ['I','Tonic','The home harmony of the prevailing major key.'],
+  ['ii','Predominant','Normally moves toward V; can also prolong predominant harmony.'],
+  ['iii','Mediant / tonic extension','Often shares tonic tones; its precise role depends on surrounding chords.'],
+  ['IV','Predominant / plagal','Commonly prepares V, or returns to I in a plagal motion.'],
+  ['V','Dominant','Normally directs resolution toward I.'],
+  ['vi','Submediant / tonic substitute','Can substitute for tonic or follow V deceptively.'],
+  ['vii°','Leading-tone / dominant','An unstable diminished triad that commonly resolves to I.']
+ ],
+ min:[
+  ['i','Tonic','The home harmony of the natural-minor collection.'],
+  ['ii°','Predominant','A diminished supertonic; iiø7 often leads to the altered dominant V7.'],
+  ['♭III','Relative-major / mediant','May suggest the relative-major area; not always a tonic substitute.'],
+  ['iv','Predominant','Commonly prepares the dominant or moves back toward i.'],
+  ['v','Modal dominant','A minor v lacks the raised leading tone; V7 usually comes from harmonic minor.'],
+  ['♭VI','Submediant / color','Often supports predominant movement or tonic expansion.'],
+  ['♭VII','Subtonic / modal motion','Can move to ♭III or i; it is not a leading-tone dominant.']
+ ],
+ dim:[
+  ['i°','Unstable Locrian center','This is a diminished modal center, not a stable major/minor tonic.'],
+  ['♭II','Locrian scale degree 2','A characteristic neighboring major triad; standard tonal functions are not presumed.'],
+  ['♭iii','Locrian scale degree 3','A diatonic minor triad; its role depends on the actual progression.'],
+  ['iv','Locrian scale degree 4','A diatonic minor triad; its role depends on the actual progression.'],
+  ['♭V','Locrian scale degree 5','A diatonic major triad; conventional V–I function does not apply automatically.'],
+  ['♭VI','Locrian scale degree 6','A diatonic major triad; its role depends on the actual progression.'],
+  ['♭vii','Locrian scale degree 7','A diatonic minor triad; its role depends on the actual progression.']
+ ]
+};
+const CHROMATIC_SCALE_DEGREES=['I','♭II','II','♭III','III','IV','♯IV','V','♭VI','VI','♭VII','VII'];
+function parentRomanFunction(root,q){
+ // Functional labels use the prevailing collection's parent major, except
+ // when a substitution detail specifically describes a different local role.
+ const base=CHROMATIC_SCALE_DEGREES[mod(root-parentMajorPC())];
+ return q==='maj'?base:q==='min'?base.toLowerCase():base.toLowerCase()+'°';
+}
+function localFunctionNumeral(root,q){return parentRomanFunction(root,q)}
+function contextAnalysis(t){
+ const offset=mod(t.root-state.key),degreeIndex=scaleSteps[state.mode].indexOf(offset);
+ const diatonic=palette().has(ref(t.root,t.q));
+ const ordinary=diatonic&&degreeIndex>=0;
+ const functionNumeral=ordinary?parentRomanFunction(t.root,t.q):localFunctionNumeral(t.root,t.q);
+ const role=ordinary?(CONTEXT_ROLES[state.mode]?.[degreeIndex]?.[1]||((t.root===state.key)?'Modal center':'Diatonic modal harmony')):
+  degreeIndex>=0?'Altered triad quality (outside collection)':'Chromatic chord (outside collection)';
+ const explanation=ordinary?(CONTEXT_ROLES[state.mode]?.[degreeIndex]?.[2]||'The chord belongs to the parent-major collection; its function depends on the prevailing modal center and progression.'):
+  degreeIndex>=0?'This root is a scale degree of the prevailing collection, but its chord quality is not diatonic. A borrowed or chromatic role requires progression context.':
+  'This root is outside the prevailing seven-note collection. Its function must be established by the surrounding harmony.';
+ return {target:t,diatonic,degreeIndex,functionNumeral,role,explanation};
+}
+function contextKeyName(){
+ if(!state.labels)return prevailingKeyPlain();
+ return state.mode==='maj'?'I · major center':state.mode==='min'?'i · natural-minor center':'i° · Locrian center';
+}
+function contextLocal(c){
+ const t=c.target;
+ if(t.q==='dim'){
+  // Diminished chords are generally leading / connecting sonorities,
+  // rather than stable local tonics.
+  if(state.mode==='maj'&&c.diatonic&&c.degreeIndex===6){
+   const tonic={root:state.key,q:'maj'};
+   return `<div class="context-focus">${state.labels?'vii° → I':renderHarmonyLine(name(t.root,t.q)+' → '+name(tonic.root,tonic.q))}</div><div class="context-hint">Leading-tone resolution within the prevailing key. A diminished target is not treated as a conventional local tonic.</div>`;
+  }
+  return `<div class="context-focus">No conventional local I / i</div><div class="context-hint">Diminished triads are unstable. A local tonicization is not inferred from selecting one.</div>`;
+ }
+ const dom=mod(t.root+7),domName=N[dom]+'7',targetName=name(t.root,t.q);
+ const isHome=c.diatonic&&t.root===state.key&&t.q===state.mode&&state.mode!=='dim';
+ const localNumeral=t.q==='maj'?'I':'i';
+ const targetFunctional=c.functionNumeral;
+ const functionMotion=isHome&&state.mode==='maj'?`V7 → ${targetFunctional}`:
+  c.diatonic?`V7/${targetFunctional} → ${targetFunctional}`:`V7 → ${localNumeral} (chromatic destination)`;
+ const globalLabel=state.labels?functionMotion:renderHarmonyLine(domName+' → '+targetName);
+ const detail=isHome?'A dominant resolution to the prevailing tonic; this is not a key change.':
+  c.diatonic?`A possible tonicization of ${targetFunctional} while the prevailing key remains fixed; the local dominant points to ${targetFunctional}.`:
+  `A possible local resolution to this chromatic target, not proof of modulation. Locally this is V7 → ${localNumeral}.`;
+ const examples=state.labels?`<div class="context-hint">${renderHarmonyLine(domName+' → '+targetName)} in the prevailing key’s numerals.</div>`:
+  `<div class="context-hint">${escapeHtml(functionMotion)} in functional numerals.</div>`;
+ return `<div class="context-focus">${globalLabel}</div>${examples}<div class="context-hint">${detail}</div>`;
+}
+function paintContext(){
+ const defaultQuality=state.mode==='min'||state.mode==='dorian'||state.mode==='phrygian'?'min':state.mode==='dim'?'dim':'maj';
+ const t=state.view==='explore'?state.target:{root:state.key,q:defaultQuality};
+ const c=contextAnalysis(t);
+ const localText=state.view==='explore'?`<div class="context-row"><span class="context-label">Possible local interpretation</span>${contextLocal(c)}</div>`:'';
+ $('context').innerHTML=`<h2>Harmonic context</h2>
+  <div class="context-row"><span class="context-label">Prevailing key</span>
+   <div class="context-focus">${escapeHtml(prevailingKeyPlain())}</div></div>
+  <div class="context-row"><span class="context-label">${state.view==='explore'?'Selected target':'Current center'} · global function</span>
+   <div class="context-focus">${coloredTriad(t.root,t.q)} ${triadDisplay(t.root,t.q)===c.functionNumeral?'':`<span class="context-roman">(${escapeHtml(c.functionNumeral)})</span>`} — ${escapeHtml(c.role)}</div>
+   <div class="context-hint">${escapeHtml(annotateModes(c.explanation))}</div></div>
+  ${localText}`;
+}
+let eventSuppressUntil=0;
+function exitExplore(){closeSequenceChooser(false);state.view='key';state.target=null;state.selected=null;state.functionFilter='all';render()}
+function isCurrentTarget(triad){return state.view==='explore'&&!!state.target&&ref(triad.root,triad.q)===ref(state.target.root,state.target.q)}
+function isOrangeTargetRegion(triad){
+ if(isCurrentTarget(triad))return true;
+ // The minor target deliberately colors the entire inner wedge. Its upper
+ // half is independently tappable as °, but a long press there still lands
+ // on the visually amber minor target unless ° is itself a highlighted result.
+ return state.view==='explore'&&!!state.target&&state.target.q==='min'&&
+  triad.root===state.target.root&&triad.q==='dim'&&
+  !enriched(found()).has(ref(triad.root,'dim'));
+}
+function handleLongPress(triad){if(isOrangeTargetRegion(triad)){exitExplore()}else{selectTarget(triad)}}
+function wire(el,triad){let timer=null,start=null,held=false;const clear=()=>{if(timer!==null){clearTimeout(timer);timer=null}};const commit=()=>{if(held)return;held=true;eventSuppressUntil=Date.now()+700;handleLongPress(triad)};
+ el.addEventListener('pointerdown',e=>{if(e.button!==0&&e.pointerType==='mouse')return;held=false;start={x:e.clientX,y:e.clientY};clear();timer=setTimeout(commit,520)});
+ el.addEventListener('pointermove',e=>{if(start&&Math.hypot(e.clientX-start.x,e.clientY-start.y)>12)clear()});
+ for(const type of ['pointerup','pointercancel','pointerleave'])el.addEventListener(type,()=>{clear();start=null});
+ el.addEventListener('contextmenu',e=>{e.preventDefault();clear();commit()});
+ el.addEventListener('click',e=>{e.preventDefault();if(held||Date.now()<eventSuppressUntil)return;tap(triad)});
+ el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();tap(triad)}if(e.key==='l'||e.key==='L'){e.preventDefault();handleLongPress(triad)}});
+}
+function tap(triad){
+ if(state.view==='key'){
+  state.key=triad.root;state.mode=triad.q;state.functionFilter='all';state.selected=null;
+  if(window.circleApplyTriadContext)window.circleApplyTriadContext(triad.root,triad.q);
+  render();return;
+ }
+ // Tapping an unhighlighted triad toggles letter/degree labels. The target is
+ // amber rather than inactive and has its own long-press-to-exit behavior.
+ if(isCurrentTarget(triad))return;
+ const options=enriched(found()).get(ref(triad.root,triad.q));
+ if(options&&options.length){state.selected={triad,options,index:0};render();return;}
+ state.labels=!state.labels;render();
+}
+function selectTarget(triad){state.target={...triad};state.view='explore';state.category='sub';state.functionFilter='all';state.selected=null;render()}
+// Circle 1.129 palette: dark fill + light text of the same color family.
+const TRIAD_PALETTE={
+ neutral:{fill:'#24282c',text:'#aeb4b9',stroke:'#454b51'},
+ green:{fill:'#153d29',text:'#65e69b',stroke:'#2b7d50'},
+ red:{fill:'#492020',text:'#ff7777',stroke:'#8d3939'},
+ target:{fill:'#67532a',text:'#ffe39e',stroke:'#f4cf80'},
+ selectedGreen:{fill:'#20573c',text:'#c1f7db',stroke:'#e4f6ed'},
+ selectedRed:{fill:'#682a2a',text:'#ffb0b0',stroke:'#ffe0e0'},
+ selectedTarget:{fill:'#79632e',text:'#ffe9b4',stroke:'#fff2ce'}
+};
+function appearance(root,q,pal,res){
+ const key=ref(root,q),inKey=pal.has(key),active=state.view==='key'?inKey:res.has(key);
+ const isTarget=state.target&&state.view==='explore'&&key===ref(state.target.root,state.target.q);
+ const selected=state.selected&&ref(state.selected.triad.root,state.selected.triad.q)===key;
+ let type=!active?'neutral':(inKey?'green':'red');
+ if(isTarget)type='target';
+ if(selected)type=type==='target'?'selectedTarget':inKey?'selectedGreen':'selectedRed';
+ return {...TRIAD_PALETTE[type],active:active||!!isTarget||!!selected,selected:!!selected,isTarget:!!isTarget};
+}
+function paint(){if(window.circleAppMode==='triad')drawCircleWheel();}
+function update(){
+ const isExplore=state.view==='explore';
+ $('categoryArea').classList.toggle('visible',isExplore);
+ if(!isExplore){
+  $('detail').hidden=true;
+  $('detail').innerHTML='';
+  return;
+ }
+ const target=state.target,all=relationships(),shown=found(),pal=palette();
+ const targetLabel=triadDisplay(target.root,target.q);
+ $('categoryTitle').innerHTML='Relationship function for '+coloredTriad(target.root,target.q);
+ $('cats').innerHTML='';
+ for(const [id,label] of categories){
+  const filterThisCategory=id===state.category;
+  const count=enriched(all.filter(e=>e.cat===id&&(!filterThisCategory||familyMatches(e,id,state.functionFilter)))).size;
+  const btn=document.createElement('button');btn.type='button';
+  btn.className=state.category===id?'active':'';
+  btn.setAttribute('aria-label',label+'. Long press for subcategories.');
+  const selectedFamily=filterThisCategory&&state.functionFilter!=='all'
+   ?FAMILY_CHOICES[id].find(x=>x.id===state.functionFilter):null;
+  const primary=document.createElement('span');primary.className='category-main';primary.textContent=label+' · '+count;btn.appendChild(primary);
+  if(selectedFamily){const sub=document.createElement('span');sub.className='category-sub';sub.textContent=selectedFamily.label;btn.appendChild(sub)}
+  wireCategoryButton(btn,id);
+  $('cats').appendChild(btn);
+ }
+ $('categoryHelp').textContent=`${shown.length} ${categories.find(x=>x[0]===state.category)[1].toLowerCase()} interpretations · ${enriched(shown).size} triads`;
+ if(!state.selected){
+  const functionName=categories.find(x=>x[0]===state.category)[1].toLowerCase();
+  if(shown.length){
+   $('detail').hidden=true;
+   $('detail').innerHTML='';
+  }else{
+   const location=escapeHtml(targetInPrevailingKey(target));
+   let constraint='across all catalogued harmonies';
+   if(state.functionFilter!=='all'){
+    const familyLabel=FAMILY_CHOICES[state.category].find(x=>x.id===state.functionFilter)?.label||state.functionFilter;
+    constraint+=` and filtered to ${escapeHtml(familyLabel)}`;
+   }
+   $('detail').hidden=false;
+   $('detail').innerHTML=`<h2>${escapeHtml(functionName)}: no catalogued matches</h2><div class="category-empty"><p><strong>${location}</strong> · ${constraint}.</p></div>`;
+  }
+  return;
+ }
+ const e=state.selected.options[state.selected.index],details=$('detail');
+ details.hidden=false;
+ details.innerHTML='';
+ const h=document.createElement('h3');
+ const localSpelling=e.spelledTriadRoot;
+ const differingSpelling=localSpelling&&parsePitchClass(localSpelling)===e.root&&localSpelling!==N[e.root];
+ const label=!localSpelling?coloredTriad(e.root,e.q):`<span class="harmony ${pal.has(ref(e.root,e.q))?'in-key':'out-key'}">${escapeHtml((state.labels?romanChordLabel(romanSpelled(localSpelling),e.q==='min'?'m':e.q==='dim'?'°':''):localSpelling+(e.q==='min'?'m':e.q==='dim'?'°':'')))}</span>`;
+ h.innerHTML=label+' → '+coloredTriad(target.root,target.q);details.appendChild(h);
+ if(differingSpelling){const same=document.createElement('div');same.className='context-hint';same.textContent=state.labels?`The wheel uses ${triadDisplay(e.root,e.q)} for this pitch class; the local approach is spelled ${romanSpelled(localSpelling)+(e.q==='min'?'m':e.q==='dim'?'°':'')} relative to the parent key.`:`The circle's ${name(e.root,e.q)} wedge is enharmonically the same triad as ${localSpelling+(e.q==='min'?'m':e.q==='dim'?'°':'')}; the local resolution determines the spelling.`;details.appendChild(same)}
+ const p=document.createElement('div');p.className='small';
+ const chosenFamily=state.functionFilter==='all'?null:FAMILY_CHOICES[state.category].find(x=>x.id===state.functionFilter);
+ p.innerHTML=`<span class="chip">${categories.find(x=>x[0]===state.category)[1]}</span>${chosenFamily?`<span class="chip">${escapeHtml(chosenFamily.label)}</span>`:''}${e.originKind==='modal-interchange'?'<span class="chip">Modal interchange</span>':(state.category==='sub'?e.substituteFamily:e.approachFamily)?`<span class="chip">${escapeHtml(state.category==='sub'?e.substituteFamily:e.approachFamily)}</span>`:''}${e.sequence?`<span class="chip">${escapeHtml(e.sequence.label)}</span>`:''}<span class="chip">${pal.has(ref(e.root,e.q))?'Diatonic in current key':'Nondiatonic in current key'}</span>`;
+ details.appendChild(p);
+ if(chosenFamily){const rationale=document.createElement('div');rationale.className='category-filter-rationale';rationale.textContent=(e.functionText||e.sequence?.label||e.substituteFamily||e.approachFamily||chosenFamily.description);details.appendChild(rationale)}
+ const contextRole=contextAnalysis(target);
+ if(e.originKind==='modal-interchange'){
+  const origin=document.createElement('div');origin.className='modal-source';
+  const keyRoot=state.labels?'I (prevailing tonic)':N[state.key];
+  const sourceShown=e.modalPrimary;
+  const sourceExtra=sourceShown!==e.modalPrimary?`<div>Primary catalogue interpretation: ${escapeHtml(numberedMode(e.modalPrimary))}.</div>`:'';
+  origin.innerHTML=`<strong>Borrowed from parallel ${escapeHtml(keyRoot)} ${escapeHtml(numberedMode(sourceShown))}</strong>${sourceExtra}<div>Other possible sources: ${escapeHtml(e.modalSources.filter(m=>m!==sourceShown).map(numberedMode).join(', ')||'none in the current catalogue')}.</div><div>Different from the prevailing key: ${QUAL[e.q].map(d=>mod(e.root+d)).filter(pc=>!scalePitchSet().has(pc)).map(pc=>`<span class="degree out-key">${escapeHtml(state.labels?degreeName(pc):N[pc])}</span>`).join(' · ')}.</div>`;
+  details.appendChild(origin);
+ }
+ const roleNote=document.createElement('div');roleNote.className='context-hint';
+ roleNote.innerHTML='Global target: <strong>'+escapeHtml(contextRole.functionNumeral)+'</strong> ('+escapeHtml(contextRole.role)+'). <strong>'+escapeHtml(annotateModes(e.functionText||'Contextual relationship'))+'</strong>.';
+ details.appendChild(roleNote);
+ const scopeRow=document.createElement('div');scopeRow.className='relationship-meta';
+ const scopeTag=e.scope==='local'?SCOPE_LABELS.local:SCOPE_LABELS[e.scope]||'Contextual harmony';
+ scopeRow.innerHTML=`<span class="chip">${escapeHtml(scopeTag)}</span><span class="chip">${escapeHtml(e.strength||'Core')} example</span>${e.source?`<div class="context-hint">${escapeHtml(annotateModes(e.source))}</div>`:''}`;
+ details.appendChild(scopeRow);
+ const formula=document.createElement('div');formula.className='formula';formula.innerHTML=renderHarmonyLine(e.real);details.appendChild(formula);
+ const realization=realizationInfo(e),triadInKey=pal.has(ref(e.root,e.q));
+ const comparison=document.createElement('div');comparison.className='harmony-comparison';
+ comparison.innerHTML=`<span class="harmony ${triadInKey?'in-key':'out-key'}">Visible triad: ${triadInKey?'diatonic':'nondiatonic'}</span> · <span class="harmony ${realization.cls}">Realized harmony: ${realization.allDiatonic?'diatonic':'nondiatonic'}</span>`;
+ details.appendChild(comparison);
+ if(e.globalReason){const reason=document.createElement('p');reason.className='context-hint';reason.textContent=annotateModes(e.globalReason);details.appendChild(reason)}
+ const n=document.createElement('p');
+ if(state.labels){
+  n.innerHTML='<strong>Triad degrees:</strong> '+degreeNotes(e.root,e.q);
+ }else {
+  const scale=scalePitchSet();
+  const spelled=localSpelling?spelledTriadFromRoot(localSpelling,e.q):null;
+  n.innerHTML='<strong>Triad notes:</strong> '+QUAL[e.q].map((offset,i)=>{
+   const pc=mod(e.root+offset);
+   return `<span class="degree ${scale.has(pc)?'in-key':'out-key'}">${escapeHtml(spelled?.[i]||N[pc])}</span>`;
+  }).join('<span class="degree-divider">–</span>');
+ }
+ details.appendChild(n);
+ const exp=document.createElement('p');exp.innerHTML=renderExplanation(annotateModes(e.description),e.originKind==='modal-interchange'?state.key:target.root);details.appendChild(exp);
+ if(e.sequence){
+  const route=document.createElement('div');route.className='sequence-box';
+  const hd=document.createElement('div');hd.className='sequence-heading';
+  hd.textContent=e.sequence.label;route.appendChild(hd);
+  const pathEl=document.createElement('div');pathEl.className='sequence-path';
+  e.sequence.steps.forEach((s,i)=>{
+   if(i){const arrow=document.createElement('span');arrow.className='seq-arrow';arrow.textContent='→';pathEl.appendChild(arrow)}
+   const cell=document.createElement('div');cell.className='seq-step'+(i===e.sequence.focusIndex?' seq-anchor':'');
+   cell.innerHTML=`<div class="seq-number">${i===e.sequence.focusIndex?'Selected · ':''}${i+1} of ${e.sequence.steps.length}</div><div class="seq-chord">${renderHarmonyLine(N[s.pc]+s.suffix)}</div><div class="seq-role">${renderExplanation(s.role,target.root)}</div>`;
+   pathEl.appendChild(cell);
+  });
+  route.appendChild(pathEl);
+  const foot=document.createElement('div');foot.className='sequence-caption';
+  foot.textContent=e.sequence.note||'';
+  if(foot.textContent)route.appendChild(foot);details.appendChild(route);
+ }
+ const example=document.createElement('p');example.innerHTML='<strong>Example progression:</strong> ';
+ const progression=document.createElement('span');progression.innerHTML=renderHarmonyLine(e.example);example.appendChild(progression);details.appendChild(example);
+ if(state.selected.options.length>1){
+  const cycle=document.createElement('button');cycle.textContent=`Other interpretation (${state.selected.index+1}/${state.selected.options.length}) ↻`;
+  cycle.onclick=()=>{state.selected.index=(state.selected.index+1)%state.selected.options.length;update()};details.appendChild(cycle);
+ }
+}
+function render(){
+ refreshKeySpellings();paint();update();paintContext();
+ const isExplore=state.view==='explore';
+ const showingDetail=isExplore&&!$('detail').hidden;
+ // Only one information panel occupies the region between the wheel and
+ // the anchored six-function controls. Key View keeps its existing panel.
+ $('context').hidden=showingDetail;
+ const workspace=document.querySelector('.workspace');
+ workspace.classList.toggle('explore-view',isExplore);
+ workspace.classList.toggle('key-view',!isExplore);
+ if(showingDetail)$('detail').scrollTop=0;
+}
+// The Triad engine uses Circle's single shared SVG drawing function.
+window.TriadBridge={
+ isRoman:()=>state.labels,
+ wheelRootLabel:pc=>state.labels?roman(pc,'maj'):N[mod(pc)],
+ styleFor:(pc,q)=>{
+  const a=appearance(pc,q,palette(),state.view==='explore'?enriched(found()):new Map());
+  return {...a,sw:a.isTarget||a.selected?3:1.25,visible:a.active};
+ },
+ centerText:()=>{
+  const t=state.view==='explore'?state.target:{root:state.key,q:state.mode==='min'||state.mode==='dorian'||state.mode==='phrygian'?'min':state.mode==='dim'?'dim':'maj'};
+  return {name:triadDisplay(t.root,t.q),target:state.view==='explore'};
+ },
+ wire,
+ syncContext:(centerPc,mode)=>{
+  const mapped={ionian:'maj',dorian:'dorian',phrygian:'phrygian',lydian:'lydian',mixolydian:'mixolydian',aeolian:'min',locrian:'dim'}[mode]||'maj';
+  if(state.key!==centerPc||state.mode!==mapped){
+    state.key=centerPc;state.mode=mapped;state.selected=null;
+    refreshKeySpellings();
+  }
+ },
+ renderUI:()=>render(),
+ getState:()=>({key:state.key,mode:state.mode,view:state.view,target:state.target,category:state.category,filter:state.functionFilter})
+};
+render();
+// Some iPhone in-app HTML previews restore the previous live DOM/JS state
+// (including an open chooser) when reopening a file. Re-enter in Key View.
+window.addEventListener('pageshow',event=>{
+ if(event.persisted){
+  closeSequenceChooser(false);
+  state.view='key';state.target=null;state.selected=null;
+  state.category='app';state.functionFilter='all';
+  render();
+ }else{
+  // A fresh document always begins with the chooser closed.
+  closeSequenceChooser(false);
+ }
+});
+window.addEventListener('pagehide',()=>closeSequenceChooser(false));
+// A tap outside the full-height menu can always dismiss it on mobile.
+document.addEventListener('pointerdown',event=>{
+ const chooser=$('sequenceChooser');
+ if(!chooser.hidden && !chooser.contains(event.target)) closeSequenceChooser(false);
+},true);
+})();
+
 </script>
 
   <div id="choiceOverlay" class="choice-overlay" aria-hidden="true">
