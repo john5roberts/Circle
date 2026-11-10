@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Circle v1.134 — Three Views + Triad Integration</title>
+  <title>Circle v1.136 — Compact Scale Panel</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -1734,6 +1734,23 @@
       min-height:7px;
       background:#596168;
     }
+    /* v1.135: the generic progression's cycle seam uses the song's section marker. */
+    .progression-return-marker {
+      flex:0 0 42px;
+      width:42px;
+      min-width:42px;
+    }
+    .progression-section-marker.progression-return-marker span {
+      text-transform:none;
+      font-size:9px;
+      letter-spacing:0;
+      max-width:42px;
+      overflow:visible;
+      text-overflow:clip;
+    }
+    .progression-strip.loop-rail .progression-section-marker {
+      flex-shrink:0;
+    }
     .progression-section-marker span {
       display:block;
       max-width:28px;
@@ -2016,12 +2033,41 @@ body.triad-view #triadWorkspace{display:block;}
 @media(min-width:760px){#triadWorkspace{max-width:650px;margin:9px auto 0;}#triadWorkspace #context,#triadWorkspace #detail{height:230px!important;max-height:230px!important;min-height:230px!important;}}
 @media(max-width:380px){.app-mode-nav{gap:4px}.app-mode-nav .app-mode-button{font-size:12px}}
 
+
+/* v1.136: Scale retains its existing progression-chord controllers, but the
+   results frame uses only the visible space beneath them on any screen.
+   The list scrolls independently; no scales or explanations are discarded. */
+body.scale-explorer-open:not(.triad-view) #scaleExplorerPanel {
+    display:flex;
+    flex-direction:column;
+    min-height:0;
+    overflow:hidden;
+  }
+  body.scale-explorer-open:not(.triad-view) .scale-explorer-header,
+  body.scale-explorer-open:not(.triad-view) .scale-explorer-footnote {
+    flex:0 0 auto;
+  }
+  body.scale-explorer-open:not(.triad-view) .scale-explorer-selected {
+    flex:0 1 auto;
+    max-height:82px;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  body.scale-explorer-open:not(.triad-view) .scale-explorer-results {
+    flex:1 1 auto;
+    min-height:0;
+    max-height:none;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+  }
+
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="panel">
-      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.134 · unified wheel"></svg>
+      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.136 · unified wheel"></svg>
       <nav class="app-mode-nav" role="group" aria-label="Circle operating mode">
         <button type="button" id="scaleExplorerToggle" class="app-mode-button" data-view="scale" aria-label="Scale mode" aria-pressed="false" aria-controls="scaleExplorerPanel">Scale</button>
         <button type="button" id="triadModeButton" class="app-mode-button" data-view="triad" aria-label="Triad theory mode" aria-pressed="false" aria-controls="triadWorkspace">Triad</button>
@@ -2431,7 +2477,7 @@ body.triad-view #triadWorkspace{display:block;}
       </div>
       </div>
       </div>
-      <div class="file-id">Circle v1.134 — Triad Integration</div>
+      <div class="file-id">Circle v1.136 — Compact Scale Panel</div>
     </div>
   </div>
   <script>
@@ -4387,6 +4433,7 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       var triad = progressionTriadDraftForDegree(degree);
       beatEditorState = {
         index:index + 1,
+        displayCycle:beatEditorState.displayCycle || 0,
         draft:beats,
         originalDegree:degree,
         degreeDraft:degree,
@@ -4409,6 +4456,7 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       var triad = progressionTriadDraftForDegree(degree);
       beatEditorState = {
         index:index,
+        displayCycle:chip && chip.dataset && chip.dataset.loopSlot ? +chip.dataset.loopSlot : 0,
         draft:count,
         originalDegree:degree,
         degreeDraft:degree,
@@ -4917,12 +4965,43 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       box.appendChild(foot);
       return box;
     }
+
+    // v1.136: Fit the Scale frame to the available *visible* viewport.
+    // Using the measured top edge avoids assuming an iPhone screen height,
+    // a fixed wheel size, or a particular number of selected chord chips.
+    function fitScaleExplorerViewport(){
+      var panel=document.getElementById('scaleExplorerPanel');
+      if(!panel)return;
+      if(!scaleExplorerOpen || document.body.classList.contains('triad-view')){
+        panel.style.height='';
+        return;
+      }
+      var viewport=window.visualViewport;
+      var visibleBottom=viewport
+        ? viewport.offsetTop+viewport.height
+        : window.innerHeight;
+      var top=panel.getBoundingClientRect().top;
+      // Reserve space for the home indicator / browser's lower edge.
+      var remaining=Math.max(0, Math.floor(visibleBottom-top-17));
+      panel.style.height=remaining+'px';
+    }
+    function scheduleScaleExplorerFit(){
+      window.requestAnimationFrame(fitScaleExplorerViewport);
+    }
+    window.addEventListener('resize',scheduleScaleExplorerFit,{passive:true});
+    window.addEventListener('orientationchange',scheduleScaleExplorerFit,{passive:true});
+    window.addEventListener('pageshow',scheduleScaleExplorerFit);
+    if(window.visualViewport){
+      window.visualViewport.addEventListener('resize',scheduleScaleExplorerFit,{passive:true});
+    }
+
     function renderScaleExplorer() {
       var panel=document.getElementById("scaleExplorerPanel");
       if (!panel) return;
       var visible=scaleExplorerOpen;
       document.body.classList.toggle("scale-explorer-open",visible);
       panel.setAttribute("aria-hidden",visible?"false":"true");
+      scheduleScaleExplorerFit();
       var btn=document.getElementById("scaleExplorerToggle");
       if (btn) {
         btn.setAttribute("aria-pressed",visible?"true":"false");
@@ -5321,11 +5400,49 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       return Math.max(0, Math.min(maxScroll, desired));
     }
 
-    function updateProgressionStripViewport(host, prog, activeIndex, cueIndex, cueLit, savedScrollLeft, sameSelection) {
+    // v1.135: A generic progression has ONE editable source. The visible rail
+    // renders successive views of that source, never independent copied chords.
+    // Songs and Scale Explorer retain their original single-pass strips.
+    function genericLoopRailEnabled(prog) {
+      return !!(prog && !prog.isSong && !scaleExplorerOpen &&
+        window.circleAppMode !== "triad" && prog.degrees && prog.degrees.length);
+    }
+
+    function genericLoopRailSignature(prog, selectionKey) {
+      return [selectionKey, selectedMajor, currentTimeSignature,
+        chordLetterView ? "letters" : "roman",
+        modeReferenceView ? "parent" : "modal",
+        prog.degrees.join("~"), prog.beats.join("~")].join("||");
+    }
+
+    function paintGenericLoopPlayback(host, activeVisual, cueVisual, cueLit) {
+      var chips = host.querySelectorAll(".prog-chip");
+      for (var k=0; k<chips.length; k++) {
+        var chip=chips[k];
+        var isActive = progressionPlaying && k === activeVisual;
+        var isCue = progressionPlaying && cueLit === true && k === cueVisual && !isActive;
+        chip.classList.toggle("active", isActive);
+        chip.classList.toggle("hold-target", isActive);
+        chip.classList.toggle("next-cue", isCue);
+        if (progressionPlaying) {
+          if (isActive) {
+            chip.setAttribute("role","button");
+            chip.setAttribute("aria-label",harmonyHoldActive ? "Release chord hold" : "Hold current chord");
+          } else {
+            chip.removeAttribute("role");
+            chip.removeAttribute("aria-label");
+          }
+        }
+      }
+    }
+
+    function updateProgressionStripViewport(host, prog, activeIndex, cueIndex, cueLit, savedScrollLeft, sameSelection, options) {
       if (!host) return;
+      options = options || {};
       var shell = host.closest ? host.closest(".progression-strip-shell") : null;
-      var isLong = !!(prog && prog.degrees && prog.degrees.length > 4);
+      var isLong = !!(options.loopRail || (prog && prog.degrees && prog.degrees.length > 4));
       host.classList.toggle("long-strip", isLong);
+      host.classList.toggle("loop-rail", !!options.loopRail);
       if (shell) shell.classList.toggle("following", isLong && progressionPlaying);
 
       if (!isLong) {
@@ -5333,22 +5450,37 @@ function fetchAndDecodePercussionSample(ctx, urls) {
         return;
       }
 
-      // Let layout settle so offsetLeft/scrollWidth reflect the fixed four-slot
-      // geometry before restoring or following the timeline.
+      // The DOM can be reused on each beat. When its four-cycle window moves
+      // forward, scrollLeft is rebased against the same ABSOLUTE cycle, so no
+      // visible chord jumps when the final beat passes the return marker.
       requestAnimationFrame(function(){
+        if (!host.isConnected) return;
         var maxScroll = Math.max(0, host.scrollWidth - host.clientWidth);
-
         if (!progressionPlaying) {
-          host.scrollLeft = sameSelection ? Math.min(savedScrollLeft || 0, maxScroll) : 0;
+          host.scrollLeft = sameSelection ? Math.min(options.restoredScrollLeft || 0, maxScroll) : 0;
           return;
         }
 
+        if (options.loopRail) {
+          var targetIndex = (options.activeVisual === null || options.activeVisual === undefined)
+            ? 0 : options.activeVisual;
+          var approaching = cueLit === true && options.cueVisual !== null &&
+            options.cueVisual !== undefined && options.cueVisual !== options.activeVisual;
+          if (approaching) targetIndex = options.cueVisual;
+          var desired = progressionStripTargetLeft(host,targetIndex);
+          // The first displayed chord has no left-hand predecessor; otherwise
+          // always approach the next chord from the RIGHT, including loop wrap.
+          if (approaching && typeof host.scrollTo === "function") {
+            host.scrollTo({left:desired, behavior:"smooth"});
+          } else {
+            host.scrollLeft = desired;
+          }
+          return;
+        }
+
+        // Unmodified song behavior: playback follows the original timeline.
         var targetIndex = (activeIndex === null || activeIndex === undefined) ? 0 : activeIndex;
         var smoothApproach = false;
-
-        // On the final beat, move the NEXT chord toward the stationary playhead
-        // while the current chord remains the active/highlighted harmony. At
-        // the actual beat boundary only the highlight/audio state changes.
         if (cueLit === true && cueIndex !== null && cueIndex !== undefined && cueIndex !== activeIndex) {
           var isLoopWrap = activeIndex === prog.degrees.length - 1 && cueIndex === 0;
           if (!isLoopWrap) {
@@ -5356,19 +5488,16 @@ function fetchAndDecodePercussionSample(ctx, urls) {
             smoothApproach = true;
           }
         }
-
-        var targetLeft = progressionStripTargetLeft(host, targetIndex);
+        var targetLeft = progressionStripTargetLeft(host,targetIndex);
         if (smoothApproach && typeof host.scrollTo === "function") {
           host.scrollTo({left:targetLeft, behavior:"smooth"});
         } else {
-          // Loop-back deliberately snaps rather than sweeping backward through
-          // the whole form, and ordinary beat updates hold a stable position.
           host.scrollLeft = targetLeft;
         }
       });
     }
 
-    function renderProgressionStrip(activeIndex, cueIndex, cueLit) {
+    function renderProgressionStrip(activeIndex, cueIndex, cueLit, phrasePass) {
       var host = document.getElementById("progressionStrip");
       if (!host) return;
       var savedScrollLeft = host.scrollLeft || 0;
@@ -5377,134 +5506,211 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       progressionStripSelectionKey = selectionKey;
       var prog = getSelectedProgression();
       var mode = progressionModeForDegrees(prog.degrees);
+      var loopRail = genericLoopRailEnabled(prog);
+      var cycle = progressionPlaying && Number.isFinite(phrasePass)
+        ? Math.max(0,Math.floor(phrasePass)) : 0;
+      // Keep the current cycle in view, with the NEXT cycle already present.
+      // A four-cycle window provides enough room to shift the window seamlessly.
+      var cycleStart = loopRail && progressionPlaying ? Math.max(0,cycle-1) : 0;
+      var copies = loopRail ? (progressionPlaying ? 4 : 2) : 1;
+      var cycleSlot = cycle-cycleStart;
+      var activeVisual = loopRail && activeIndex !== null && activeIndex !== undefined
+        ? cycleSlot*prog.degrees.length + activeIndex : null;
+      var cueVisual = null;
+      if (loopRail && cueIndex !== null && cueIndex !== undefined &&
+          activeIndex !== null && activeIndex !== undefined) {
+        // The cue for index 0 belongs to the FOLLOWING copy, not the
+        // first chord at the far-left of the existing strip.
+        var cueCycle = cycle + (cueIndex <= activeIndex ? 1 : 0);
+        cueVisual = (cueCycle-cycleStart)*prog.degrees.length + cueIndex;
+      }
+      var signature = loopRail ? genericLoopRailSignature(prog,selectionKey) : "";
+      var sameRail = loopRail && host.dataset.loopSignature === signature;
+      var sameWindow = sameRail && +host.dataset.loopCycleStart === cycleStart &&
+        +host.dataset.loopCopies === copies;
+
+      // During playback the musical data never changes. Repaint only the
+      // active/cued copies; don't destroy the scrolling DOM on every beat.
+      if (progressionPlaying && sameWindow &&
+          host.querySelectorAll(".prog-chip").length === copies*prog.degrees.length) {
+        paintGenericLoopPlayback(host,activeVisual,cueVisual,cueLit);
+        updateProgressionStripViewport(host,prog,activeIndex,cueIndex,cueLit,
+          savedScrollLeft,sameSelection,{loopRail:true,activeVisual:activeVisual,cueVisual:cueVisual});
+        return;
+      }
+
+      // When the repeated window advances, locate the first chord of the new
+      // leading cycle BEFORE and AFTER the redraw. Compensate scrollLeft by
+      // the change in that anchor's offset, with no user-visible rewind.
+      var oldAnchor = sameRail ? host.querySelector('.prog-chip[data-loop-cycle="'+cycleStart+'"][data-step-index="0"]') : null;
+      var oldAnchorLeft = oldAnchor ? oldAnchor.offsetLeft : null;
+
       host.innerHTML = "";
       host.classList.remove("blank-view");
-      // Edit mode must remain horizontally scrollable even though the enlarged
-      // long-strip viewport normally passes pointer events through its empty area.
       host.classList.toggle("editing-session", !!beatEditorState && !prog.isSong && !scaleExplorerOpen);
+      host.classList.toggle("loop-rail",loopRail);
       document.body.classList.remove("independent-clean");
       host.onclick = null;
       host.removeAttribute("role");
       host.removeAttribute("aria-label");
-      // The Scale button lives above this strip, so progression chords remain visible.
-      if (scaleExplorerOpen) { beatEditorState=null; }
+      if (scaleExplorerOpen) beatEditorState=null;
 
-      for (var i=0; i<prog.degrees.length; i++) {
-        var d = prog.degrees[i];
-        var songStep = (prog.isSong && prog.steps) ? prog.steps[i] : null;
+      for (var slot=0; slot<copies; slot++) {
+        var absCycle=cycleStart+slot;
+        for (var i=0; i<prog.degrees.length; i++) {
+          var d = prog.degrees[i];
+          var songStep = (prog.isSong && prog.steps) ? prog.steps[i] : null;
 
-        if (songStep && songStep.sectionBefore) {
+          if (songStep && songStep.sectionBefore) {
+            var songMarker=document.createElement("div");
+            songMarker.className="progression-section-marker";
+            var songMarkerText=document.createElement("span");
+            songMarkerText.textContent=songSectionDisplayName(songStep.sectionBefore);
+            songMarker.appendChild(songMarkerText);
+            host.appendChild(songMarker);
+          }
+
+          var chip = document.createElement("div");
+          chip.className = "prog-chip " + (progressionStepIsDiatonic(prog,i,mode) ? "in-key" : "out-key");
+          if (loopRail) {
+            chip.dataset.stepIndex=String(i);
+            chip.dataset.loopCycle=String(absCycle);
+            chip.dataset.loopSlot=String(slot);
+          }
+          if(songStep && songStep.info && songStep.info.midiNotes && songStep.info.midiNotes.length>5) {
+            chip.className += " song-wide";
+          }
+
+          // One source index serves every visual repetition; editing any copy
+          // updates the session draft and therefore ALL subsequent copies.
+          if (!progressionPlaying) {
+            chip.className += " view-toggle";
+            chip.setAttribute("role", "button");
+            if (scaleExplorerOpen) {
+              (function(chord){
+                chip.className += " scale-selectable";
+                if (chord && scaleExplorerHasChord(chord)) chip.className += " scale-selected";
+                chip.setAttribute("aria-label","Toggle scale filter: "+(chordLetterView?chord.letter:chord.roman));
+                chip.addEventListener("click",function(ev){ev.stopPropagation();scaleExplorerToggleChord(chord);});
+              })(scaleExplorerProgressionChord(prog,i,mode));
+            } else {
+              chip.setAttribute("aria-label",chordLetterView?"Show Roman numerals":"Show chord names");
+              bindProgressionBeatLongPress(chip,i);
+              chip.addEventListener("click",function(ev){
+                if(ev.currentTarget._suppressNextClick) {
+                  ev.currentTarget._suppressNextClick=false;
+                  ev.stopPropagation();
+                  return;
+                }
+                ev.stopPropagation();
+                beatEditorState=null;
+                toggleChordLetterView();
+              });
+            }
+          } else if (loopRail) {
+            // Attach once to every copy: the currently sounding copy alone is
+            // actionable. Repaint uses live class state, never stale indices.
+            chip.addEventListener("click",function(ev){
+              if (!this.classList.contains("active")) return;
+              ev.stopPropagation();
+              toggleHarmonyHoldForCurrentChord();
+            });
+          }
+
+          if (!loopRail) {
+            // Preserve song/Scale highlight behavior as it was in v1.134.
+            if (activeIndex !== null && activeIndex !== undefined && i === activeIndex) {
+              chip.className += " active";
+              if (progressionPlaying) {
+                chip.className += " hold-target";
+                chip.setAttribute("role", "button");
+                chip.setAttribute("aria-label", harmonyHoldActive ? "Release chord hold" : "Hold current chord");
+                (function(index){
+                  chip.addEventListener("click", function(){
+                    if (index === activeIndex) toggleHarmonyHoldForCurrentChord();
+                  });
+                })(i);
+              }
+            }
+            if (cueLit === true && cueIndex !== null && cueIndex !== undefined &&
+                cueIndex !== activeIndex && i === cueIndex) {
+              chip.className += " next-cue";
+            }
+          }
+
+          var quality=document.createElement("div");
+          quality.className="chord-quality";
+          quality.textContent=songStep ? songQualityLabel(songStep) :
+            ((function(info){return info && info.extensionLabel ? info.extensionLabel : "";})(chordInfoForDegree(selectedMajor,d)));
+          chip.appendChild(quality);
+
+          var roman=document.createElement("div");
+          roman.textContent = songStep
+            ? songMiddleLabel(songStep, chordLetterView)
+            : ((chordLetterView)
+                ? chordNameForDegree(d)
+                : (modeReferenceView
+                    ? romanLabelForChordRelativeToParent(d, mode)
+                    : normalizedDegreeLabel(d)));
+          chip.appendChild(roman);
+
+          var triadIntervals = songStep ? songIntervalDisplay(songStep) : triadIntervalDisplayForDegree(d,mode);
+          if (triadIntervals.length) {
+            var intervalRow = document.createElement("div");
+            intervalRow.className = "triad-intervals";
+            triadIntervals.forEach(function(item, idx){
+              var interval = document.createElement("span");
+              interval.className = "triad-interval " + (item.diatonic ? "diatonic" : "nondiatonic");
+              interval.textContent = item.label;
+              intervalRow.appendChild(interval);
+              if (idx < triadIntervals.length - 1) {
+                var spacer = document.createElement("span");
+                spacer.className = "triad-interval-space";
+                spacer.textContent = " ";
+                intervalRow.appendChild(spacer);
+              }
+            });
+            chip.appendChild(intervalRow);
+          }
+          if (!prog.isSong && !scaleExplorerOpen &&
+              (!loopRail || !beatEditorState || slot === (beatEditorState.displayCycle || 0))) {
+            attachChordEditor(chip, i);
+            attachBeatEditor(chip, i);
+          }
+          host.appendChild(chip);
+        }
+
+        // A song-style vertical return line separates the repetitions but
+        // contributes ZERO beats to the master progression or audio schedule.
+        if (loopRail && slot < copies - 1) {
           var marker=document.createElement("div");
-          marker.className="progression-section-marker";
+          marker.className="progression-section-marker progression-return-marker";
+          marker.setAttribute("aria-label","return to start of progression");
           var markerText=document.createElement("span");
-          markerText.textContent=songSectionDisplayName(songStep.sectionBefore);
+          markerText.textContent="return";
           marker.appendChild(markerText);
           host.appendChild(marker);
         }
-
-        var chip = document.createElement("div");
-        chip.className = "prog-chip " + (progressionStepIsDiatonic(prog,i,mode) ? "in-key" : "out-key");
-        if(songStep && songStep.info && songStep.info.midiNotes && songStep.info.midiNotes.length>5) {
-          chip.className += " song-wide";
-        }
-
-        // Normal: tap any chord to toggle Roman / letter names.
-        // Scale: tap individual progression chords to add/remove their tones.
-        if (!progressionPlaying) {
-          chip.className += " view-toggle";
-          chip.setAttribute("role", "button");
-          if (scaleExplorerOpen) {
-            (function(chord){
-              chip.className += " scale-selectable";
-              if (chord && scaleExplorerHasChord(chord)) chip.className += " scale-selected";
-              chip.setAttribute("aria-label","Toggle scale filter: "+(chordLetterView?chord.letter:chord.roman));
-              chip.addEventListener("click",function(ev){ev.stopPropagation();scaleExplorerToggleChord(chord);});
-            })(scaleExplorerProgressionChord(prog,i,mode));
-          } else {
-            chip.setAttribute("aria-label",chordLetterView?"Show Roman numerals":"Show chord names");
-            bindProgressionBeatLongPress(chip,i);
-            chip.addEventListener("click",function(ev){
-              if(ev.currentTarget._suppressNextClick) {
-                ev.currentTarget._suppressNextClick=false;
-                ev.stopPropagation();
-                return;
-              }
-              ev.stopPropagation();
-              beatEditorState=null;
-              toggleChordLetterView();
-            });
-          }
-        }
-
-        // Current chord remains steadily highlighted.
-        if (activeIndex !== null && activeIndex !== undefined && i === activeIndex) {
-          chip.className += " active";
-          if (progressionPlaying) {
-            chip.className += " hold-target";
-            chip.setAttribute("role", "button");
-            chip.setAttribute("aria-label", harmonyHoldActive ? "Release chord hold" : "Hold current chord");
-            (function(index){
-              chip.addEventListener("click", function(){
-                if (index === activeIndex) toggleHarmonyHoldForCurrentChord();
-              });
-            })(i);
-          }
-        }
-
-        // The upcoming chord gets the old off→on cue instead.
-        // On the penultimate beat cueLit is false; on the final beat it is true.
-        if (cueLit === true &&
-            cueIndex !== null &&
-            cueIndex !== undefined &&
-            cueIndex !== activeIndex &&
-            i === cueIndex) {
-          chip.className += " next-cue";
-        }
-
-        var quality=document.createElement("div");
-        quality.className="chord-quality";
-        quality.textContent=songStep ? songQualityLabel(songStep) :
-          ((function(info){return info && info.extensionLabel ? info.extensionLabel : "";})(chordInfoForDegree(selectedMajor,d)));
-        chip.appendChild(quality);
-
-        var roman=document.createElement("div");
-        roman.textContent = songStep
-          ? songMiddleLabel(songStep, chordLetterView)
-          : ((chordLetterView)
-              ? chordNameForDegree(d)
-              : (modeReferenceView
-                  ? romanLabelForChordRelativeToParent(d, mode)
-                  : normalizedDegreeLabel(d)));
-        chip.appendChild(roman);
-
-        var triadIntervals = songStep ? songIntervalDisplay(songStep) : triadIntervalDisplayForDegree(d,mode);
-        if (triadIntervals.length) {
-          var intervalRow = document.createElement("div");
-          intervalRow.className = "triad-intervals";
-
-          triadIntervals.forEach(function(item, idx){
-            var interval = document.createElement("span");
-            interval.className = "triad-interval " + (item.diatonic ? "diatonic" : "nondiatonic");
-            interval.textContent = item.label;
-            intervalRow.appendChild(interval);
-
-            if (idx < triadIntervals.length - 1) {
-              var spacer = document.createElement("span");
-              spacer.className = "triad-interval-space";
-              spacer.textContent = " ";
-              intervalRow.appendChild(spacer);
-            }
-          });
-
-          chip.appendChild(intervalRow);
-        }
-        if (!prog.isSong && !scaleExplorerOpen) { attachChordEditor(chip, i); attachBeatEditor(chip, i); }
-        host.appendChild(chip);
       }
 
-      updateProgressionStripViewport(
-        host, prog, activeIndex, cueIndex, cueLit, savedScrollLeft, sameSelection
-      );
+      // Mark the window so the next audio beat can reuse these DOM nodes.
+      host.dataset.loopSignature=signature;
+      host.dataset.loopCycleStart=String(cycleStart);
+      host.dataset.loopCopies=String(copies);
+      if (loopRail) {
+        var newAnchor=host.querySelector('.prog-chip[data-loop-cycle="'+cycleStart+'"][data-step-index="0"]');
+        var rebased=oldAnchorLeft !== null && newAnchor
+          ? savedScrollLeft - (oldAnchorLeft-newAnchor.offsetLeft) : savedScrollLeft;
+        host.scrollLeft=(progressionPlaying && sameRail) ? Math.max(0,rebased) :
+          (sameSelection && !progressionPlaying ? savedScrollLeft : 0);
+        paintGenericLoopPlayback(host,activeVisual,cueVisual,cueLit);
+      }
+
+      updateProgressionStripViewport(host,prog,activeIndex,cueIndex,cueLit,
+        savedScrollLeft,sameSelection,{
+          loopRail:loopRail,activeVisual:activeVisual,cueVisual:cueVisual,
+          restoredScrollLeft:host.scrollLeft
+        });
     }
 
     function progressionChordClasses() {
@@ -7758,7 +7964,9 @@ function renderBrowserGrid() {
         position.beatInChord,
         cueIndex === null ? -1 : cueIndex,
         cueLit ? 1 : 0,
-        position.degree
+        position.degree,
+        // Only generic loops advance the virtual rail at each repetition.
+        !prog.isSong ? position.phrasePass : 0
       ].join("|");
 
       if (stateKey === transportVisualStateKey) return;
@@ -7777,7 +7985,7 @@ function renderBrowserGrid() {
       );
 
       render(selectedMajor);
-      renderProgressionStrip(position.chordIndex, cueIndex, cueLit);
+      renderProgressionStrip(position.chordIndex, cueIndex, cueLit, position.phrasePass);
     }
 
     function runTransportVisualFollower() {
