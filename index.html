@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Circle v1.136 — Compact Scale Panel</title>
+  <title>Circle v1.138 — Touch Drag Restored</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -181,6 +181,11 @@
       flex:0 0 calc((100% - 15px) / 4);
       min-width:0;
     }
+    /* v1.138: Restore direct finger dragging of long progression strips.
+       Touches on chord tiles must allow native horizontal panning. The
+       transparent editor clearance remains click-through, so the mode
+       buttons above the rail retain their normal tap targets. */
+    .progression-strip.long-strip .prog-chip { touch-action:pan-x; }
     .progression-playhead {
       display:none;
       position:absolute;
@@ -2067,7 +2072,7 @@ body.scale-explorer-open:not(.triad-view) #scaleExplorerPanel {
 <body>
   <div class="wrap">
     <div class="panel">
-      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.136 · unified wheel"></svg>
+      <svg id="wheel" viewBox="0 0 430 430" aria-label="Circle v1.138 · unified wheel"></svg>
       <nav class="app-mode-nav" role="group" aria-label="Circle operating mode">
         <button type="button" id="scaleExplorerToggle" class="app-mode-button" data-view="scale" aria-label="Scale mode" aria-pressed="false" aria-controls="scaleExplorerPanel">Scale</button>
         <button type="button" id="triadModeButton" class="app-mode-button" data-view="triad" aria-label="Triad theory mode" aria-pressed="false" aria-controls="triadWorkspace">Triad</button>
@@ -2477,7 +2482,7 @@ body.scale-explorer-open:not(.triad-view) #scaleExplorerPanel {
       </div>
       </div>
       </div>
-      <div class="file-id">Circle v1.136 — Compact Scale Panel</div>
+      <div class="file-id">Circle v1.138 — Touch Drag Restored</div>
     </div>
   </div>
   <script>
@@ -5597,6 +5602,14 @@ function fetchAndDecodePercussionSample(ctx, urls) {
               chip.setAttribute("aria-label",chordLetterView?"Show Roman numerals":"Show chord names");
               bindProgressionBeatLongPress(chip,i);
               chip.addEventListener("click",function(ev){
+                // A touch long-press rebuilds the strip to show its editor.
+                // The subsequent synthetic click can hit the NEW chord tile;
+                // don't let that immediately close the editor just opened.
+                if (beatEditorState && ev.currentTarget.dataset.stepIndex !== undefined &&
+                    beatEditorState.index === +ev.currentTarget.dataset.stepIndex) {
+                  ev.stopPropagation();
+                  return;
+                }
                 if(ev.currentTarget._suppressNextClick) {
                   ev.currentTarget._suppressNextClick=false;
                   ev.stopPropagation();
