@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Circle v1.139 — Progression Swipe Fix</title>
+  <title>Circle v1.140 — Roman Quality Consistency</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -2484,7 +2484,7 @@ body.scale-explorer-open:not(.triad-view) #scaleExplorerPanel {
       </div>
       </div>
       </div>
-      <div class="file-id">Circle v1.139 — Progression Swipe Fix</div>
+      <div class="file-id">Circle v1.140 — Roman Quality Consistency</div>
     </div>
   </div>
   <script>
@@ -3621,6 +3621,26 @@ function fetchAndDecodePercussionSample(ctx, urls) {
     }
 
 
+    // v1.140: A notation-view toggle must never change the displayed triad quality.
+    // The traditional (mode-name) view prints saved progression tokens, while
+    // the numbered-mode view derives the Roman root from the realized chord.
+    // Older flat-prefixed extended tokens (e.g., bVII7) can realize as minor
+    // even though their saved token uses upper-case numerals. Preserve the
+    // current notes and seventh/extension suffix, but use the *actual* chord
+    // quality to determine the Roman numeral case in both displays.
+    function qualityAwareProgressionRomanLabel(degreeCode) {
+      var label = normalizedDegreeLabel(degreeCode);
+      var info = chordInfoForDegree(selectedMajor, degreeCode);
+      if (!info || !info.quality) return label;
+      // Applied functions such as V/ii carry their own functional spelling.
+      // The helper only adjusts straightforward chord-root numerals.
+      if (label.indexOf('/') !== -1) return label;
+      return label.replace(/^([♭♯]*)([ivIV]+)(?=$|[^ivIV])/,function(_,acc,root){
+        var minorThird=(info.quality==='minor'||info.quality==='dim');
+        return acc+(minorThird?root.toLowerCase():root.toUpperCase());
+      });
+    }
+
     function circlePitchNameFromHarte(name) {
       if (!name) return "";
       return String(name).replace(/-/g,"b");
@@ -4360,9 +4380,11 @@ function fetchAndDecodePercussionSample(ctx, urls) {
       var code = progressionTriadDegreeCode(rootOffset, quality);
       if (chordLetterView) return chordNameForDegree(code);
       var mode = progressionModeForSelection();
-      return modeReferenceView
+      // Ionian and 1-Mode have the same parent-major reference; switching
+      // their name must not alter the chord's Roman label or extension.
+      return modeReferenceView && mode!=='ionian'
         ? romanLabelForChordRelativeToParent(code, mode)
-        : normalizedDegreeLabel(code);
+        : qualityAwareProgressionRomanLabel(code);
     }
 
     function syncProgressionChordDraftFromRootQuality() {
@@ -5664,9 +5686,9 @@ function fetchAndDecodePercussionSample(ctx, urls) {
             ? songMiddleLabel(songStep, chordLetterView)
             : ((chordLetterView)
                 ? chordNameForDegree(d)
-                : (modeReferenceView
+                : (modeReferenceView && mode!=='ionian'
                     ? romanLabelForChordRelativeToParent(d, mode)
-                    : normalizedDegreeLabel(d)));
+                    : qualityAwareProgressionRomanLabel(d)));
           chip.appendChild(roman);
 
           var triadIntervals = songStep ? songIntervalDisplay(songStep) : triadIntervalDisplayForDegree(d,mode);
